@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planner · Busick Family</title>
+  <meta name="description" content="Family calendar, tasks, chores and rewards for the Busick household."/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <link rel="stylesheet" href="productivity.css"/>
+  <link rel="icon" type="image/png" href="icons/icon-192.png"/>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#1C1917"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Busick Family"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+</head>
+<body>
+
+<div id="app">
+  <div class="shell">
+
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">📅</div>
+        <div class="brand-copy">
+          <h1>Family Planner</h1>
+          <p>Calendar, tasks &amp; chores</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="btn-nav" href="index.html">🏡 Home</a>
+        <a class="btn-nav" href="recipes.html">🍽️ Meals</a>
+        <a class="btn-nav active" href="productivity.html">📅 Planner</a>
+        <a class="btn-nav" href="kids.html">👧 Kids</a>
+        <div class="account-menu" id="account-menu">
+          <button type="button" class="account-trigger" onclick="toggleAccountMenu(event)" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
+            <img id="user-photo" class="user-avatar" src="" alt=""/>
+            <span id="user-name" class="user-name"></span>
+            <span class="account-caret">▾</span>
+          </button>
+          <div class="account-dropdown" role="menu">
+            <button type="button" class="account-item danger" role="menuitem" onclick="signOut()">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="mobile-page-title"><span class="mpt-icon">📅</span> Planner</div>
+    <div class="page-notice" id="page-notice" aria-live="polite"></div>
+
+    <div class="setup-prompt" id="setup-prompt" style="display:none">
+      <span style="font-size:1.4rem">👥</span>
+      <div class="setup-prompt-text">
+        Add your family members first
+        <span>Go to Family Settings to add names — they'll appear in all task and chore dropdowns.</span>
+      </div>
+      <button class="btn-primary btn-sm" onclick="openSettingsPanel()">Go to Settings</button>
+    </div>
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="today"    onclick="switchTab('today',this)">   <span class="tab-icon">🌅</span>Today</button>
+      <button class="tab-btn"        data-tab="calendar" onclick="switchTab('calendar',this)"><span class="tab-icon">📅</span>Calendar</button>
+      <button class="tab-btn"        data-tab="todo"     onclick="switchTab('todo',this)">    <span class="tab-icon">✅</span>To-Do</button>
+      <button class="tab-btn"        data-tab="chores"   onclick="switchTab('chores',this)">  <span class="tab-icon">🧹</span>Chores</button>
+    </nav>
+
+    <!-- ══ TODAY TAB ══ -->
+    <div id="tab-today" class="tab-content active">
+      <div class="panel">
+        <div class="panel-title">
+          <span id="today-panel-title">Today's Focus</span>
+          <button class="btn-primary btn-sm legacy-add" onclick="openEventModal()">＋ Event</button>
+        </div>
+        <div class="today-section-label" id="events-section-label" style="display:none">📅 Today's Events</div>
+        <div id="today-events-feed"></div>
+        <div class="today-section-label" id="focus-section-label" style="display:none">🎯 Tasks &amp; Chores</div>
+        <div id="today-feed">
+          <div class="skeleton" style="height:40px;border-radius:8px;margin-bottom:0.35rem"></div>
+          <div class="skeleton" style="height:40px;border-radius:8px;margin-bottom:0.35rem"></div>
+          <div class="skeleton" style="height:40px;border-radius:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CALENDAR TAB ══ -->
+    <div id="tab-calendar" class="tab-content">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.45rem;">
+        <p style="font-size:0.8rem;color:var(--text-muted)">Your embedded family Google Calendar. Add events here to track them on the Today tab too.</p>
+        <button class="btn-primary btn-sm legacy-add" onclick="openEventModal()">＋ Add to Today view</button>
+      </div>
+      <!-- Desktop: full month view -->
+      <div class="cal-iframe-wrap cal-desktop-only">
+        <iframe
+          src="https://calendar.google.com/calendar/embed?src=family01860224846748827125%40group.calendar.google.com&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff"
+          frameborder="0" scrolling="no" title="Busick Family Calendar">
+        </iframe>
+      </div>
+      <!-- Mobile: weekly view -->
+      <div class="cal-iframe-wrap cal-mobile-only">
+        <iframe
+          src="https://calendar.google.com/calendar/embed?src=family01860224846748827125%40group.calendar.google.com&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff&mode=WEEK"
+          frameborder="0" scrolling="no" title="Busick Family Calendar Weekly">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- ══ TO-DO TAB ══ -->
+    <div id="tab-todo" class="tab-content">
+      <div class="add-row legacy-add">
+        <input class="form-input" id="todo-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTodo()"/>
+        <select class="form-select" id="todo-assignee"></select>
+        <input type="date" class="form-input date-input" id="todo-due" title="Show on date (optional)"/>
+        <button class="btn-primary" onclick="addTodo()">＋ Add</button>
+      </div>
+      <div class="todo-toolbar-inline">
+        <button class="btn-secondary btn-sm" onclick="openTodoListModal()">＋ List</button>
+      </div>
+      <div class="filter-bar" id="todo-filter-bar">
+        <button class="filter-chip active" onclick="setTodoFilter('active',this)">Active</button>
+        <button class="filter-chip" onclick="setTodoFilter('done',this)">Done</button>
+      </div>
+
+      <div class="todo-section-label">📝 Your To-Do</div>
+      <div class="todo-list-board" id="todo-list-panel">
+        <div class="empty-msg">No tasks yet — add one above!</div>
+      </div>
+
+      <div class="todo-section-label todo-section-label-kids">👧 Kids' To-Do</div>
+      <div class="kid-stack-grid" id="kid-stack-panel">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- ══ CHORES TAB ══ -->
+    <div id="tab-chores" class="tab-content">
+      <div class="section-toolbar">
+        <button class="btn-primary legacy-add" onclick="openChoreModal()">＋ Add Chore</button>
+        <select class="filter-select" id="chore-filter-assignee" onchange="setChoreAssigneeFilter(this.value)"></select>
+      </div>
+      <div id="chore-list-container">
+        <div class="empty-msg">No chores yet — add one above!</div>
+      </div>
+      <div class="danger-zone" style="margin-top:1.25rem">
+        <div class="danger-title">⚠️ Reset Week</div>
+        <div class="danger-desc">Clears all chore checkmarks so you can start a fresh week. This cannot be undone.</div>
+        <button class="btn-danger btn-sm" onclick="showResetConfirm()">↺ Reset This Week's Chores</button>
+        <div class="inline-confirm" id="reset-confirm" style="margin-top:0.6rem">
+          <span class="inline-confirm-label">Reset all chore checkmarks?</span>
+          <button class="inline-confirm-yes" onclick="resetWeeklyChores()">Yes, reset</button>
+          <button class="inline-confirm-no" onclick="hideResetConfirm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS PANEL (modal, opened from account menu) ══ -->
+    <div class="modal-overlay" id="settings-panel">
+      <div class="modal" style="max-width:600px" role="dialog" aria-modal="true" aria-labelledby="settings-panel-title">
+        <div class="modal-header">
+          <h2 class="modal-title" id="settings-panel-title">⚙️ Family Settings</h2>
+          <button class="btn-close" onclick="closeSettingsPanel()" aria-label="Close">✕</button>
+        </div>
+
+        <!-- Family Members -->
+        <div class="panel-title" style="font-size:0.82rem;margin-bottom:0.6rem">👥 Family Members</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.65rem">Names used for task, chore, and event assignments.</p>
+        <div class="member-list" id="member-list"></div>
+        <div class="member-add-row" style="margin-bottom:1.25rem">
+          <input class="form-input" id="member-input" placeholder="Name…" style="max-width:210px" onkeydown="if(event.key==='Enter')addMember()"/>
+          <button class="btn-primary" onclick="addMember()">＋ Add</button>
+        </div>
+
+        <!-- Rewards Catalog -->
+        <div class="panel-title" style="font-size:0.82rem;margin-bottom:0.6rem">🎁 Rewards Catalog</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.65rem">Kids can see these rewards and request to redeem them with their points.</p>
+        <div id="rewards-catalog-list" style="margin-bottom:0.65rem;display:flex;flex-direction:column;gap:0.3rem">
+          <div class="empty-msg" style="padding:0.5rem 0">No rewards yet.</div>
+        </div>
+        <div style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:1.25rem">
+          <input class="form-input" id="reward-name-input" placeholder="Reward name…" style="flex:1;min-width:140px" onkeydown="if(event.key==='Enter')addReward()"/>
+          <input class="form-input" id="reward-cost-input" type="number" min="1" placeholder="Points" style="max-width:90px" onkeydown="if(event.key==='Enter')addReward()"/>
+          <button class="btn-primary" onclick="addReward()">＋ Add</button>
+        </div>
+
+        <!-- Pending Redemptions -->
+        <div class="panel-title" style="font-size:0.82rem;margin-bottom:0.6rem">📬 Pending Redemptions</div>
+        <div id="pending-redemptions-list">
+          <div class="empty-msg" style="padding:0.5rem 0">No pending requests.</div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeSettingsPanel()">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD EVENT MODAL -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+    <div class="modal-header">
+      <h2 class="modal-title" id="event-modal-title">Add Event</h2>
+      <button class="btn-close" onclick="closeEventModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Event Title *</label>
+      <input class="form-input" id="ev-title" placeholder="e.g. Soccer practice"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input type="date" class="form-input" id="ev-date"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Time</label>
+        <input type="time" class="form-input" id="ev-time"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Location</label>
+      <input class="form-input" id="ev-location" placeholder="Optional"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Who's Involved</label>
+      <div class="event-member-checkboxes" id="ev-members"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Color</label>
+      <div class="color-picker" id="ev-color-picker"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="ev-notes" placeholder="Optional notes…" style="min-height:56px"></textarea>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:0.55rem;padding:0.55rem;background:var(--blue-light);border-radius:7px;border:1px solid #bfdbfe;">
+      <input type="checkbox" id="ev-sync-gcal" checked style="width:15px;height:15px;cursor:pointer;flex-shrink:0;"/>
+      <label for="ev-sync-gcal" style="font-size:0.82rem;font-weight:700;color:#1e40af;cursor:pointer;">Add to Google Calendar</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger btn-sm" id="ev-delete-btn" style="display:none;margin-right:auto" onclick="deleteEvent()">Delete</button>
+      <button class="btn-secondary" onclick="closeEventModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT CHORE MODAL -->
+<div class="modal-overlay" id="chore-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="chore-modal-title">
+    <div class="modal-header">
+      <h2 class="modal-title" id="chore-modal-title">Add Chore</h2>
+      <button class="btn-close" onclick="closeChoreModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Chore Name *</label>
+      <input class="form-input" id="c-name" placeholder="e.g. Take out trash"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Assigned To</label>
+        <select class="form-select" id="c-assignee"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Day of Week</label>
+        <select class="form-select" id="c-day">
+          <option>Sunday</option><option>Monday</option><option>Tuesday</option>
+          <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Points</label>
+      <input type="number" class="form-input" id="c-points" min="0" max="999" placeholder="0" style="max-width:120px"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger btn-sm" id="chore-delete-btn" style="display:none;margin-right:auto" onclick="deleteChore()">Delete</button>
+      <button class="btn-secondary" onclick="closeChoreModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveChore()">Save Chore</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ADD MODAL -->
+<div class="modal-overlay" id="quick-add-modal">
+  <div class="modal" style="max-width:420px" role="dialog" aria-modal="true" aria-labelledby="quick-add-title">
+    <div class="modal-header">
+      <h2 class="modal-title" id="quick-add-title">Add</h2>
+      <button class="btn-close" onclick="closeQuickAddModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="quick-add-actions">
+      <button class="quick-add-action" onclick="quickAddSelect('event')">📅 Event</button>
+      <button class="quick-add-action" onclick="quickAddSelect('todo')">✅ Task</button>
+      <button class="quick-add-action" onclick="quickAddSelect('chore')">🧹 Chore</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-overlay" id="todo-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="todo-modal-title">
+    <div class="modal-header">
+      <h2 class="modal-title" id="todo-modal-title">Add Task</h2>
+      <button class="btn-close" onclick="closeTodoModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Task *</label>
+      <input class="form-input" id="todo-m-text" placeholder="What needs to get done?"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">List</label>
+        <select class="form-select" id="todo-m-list"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assigned To</label>
+        <select class="form-select" id="todo-m-assignee"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Show On</label>
+        <input type="date" class="form-input" id="todo-m-due"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Points</label>
+        <input type="number" class="form-input" id="todo-m-points" min="0" max="999" placeholder="0"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger btn-sm" id="todo-delete-btn" style="display:none;margin-right:auto" onclick="deleteTodoFromModal()">Delete</button>
+      <button class="btn-secondary" onclick="closeTodoModal()">Cancel</button>
+      <button class="btn-primary" id="todo-save-btn" onclick="saveTodoFromModal()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TODO LIST MODAL -->
+<div class="modal-overlay" id="todo-list-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="todo-list-modal-title">
+    <div class="modal-header">
+      <h2 class="modal-title" id="todo-list-modal-title">New Task List</h2>
+      <button class="btn-close" onclick="closeTodoListModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">List Name *</label>
+      <input class="form-input" id="todo-list-name" placeholder="e.g. House Projects"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeTodoListModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveTodoList()">Create List</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab-add" id="planner-fab" onclick="openQuickAddModal()" aria-label="Add">＋</button>
+
+<nav class="mobile-bottom-nav" id="mobile-nav">
+  <a href="index.html"><span class="nav-icon">🏡</span>Home</a>
+  <a href="recipes.html"><span class="nav-icon">🍽️</span>Meals</a>
+  <a href="productivity.html" class="active"><span class="nav-icon">📅</span>Planner</a>
+  <a href="kids.html"><span class="nav-icon">👧</span>Kids</a>
+</nav>
+
+<script type="module" src="productivity.js"></script>
+<script>if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js"); }</script>
+</body>
+</html>

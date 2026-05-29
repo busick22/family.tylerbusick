@@ -1,0 +1,126 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ─────────────────────────────────────────────────────────────
+    // Family access list.
+    //
+    // `familyEmails`  — full read/write access to family data.
+    // `parentEmails`  — additionally can manage admin-only collections
+    //                   (recipes, meals, rewards catalog).
+    //
+    // Today the kids share a parent's signed-in account on the family
+    // tablet, so `familyEmails` and `parentEmails` are identical. When
+    // each kid eventually gets their own Google account, add them to
+    // `familyEmails` only — the parent/family split will then start
+    // doing real work without any other rule changes.
+    // ─────────────────────────────────────────────────────────────
+    function familyEmails() {
+      return [
+        "busick22@gmail.com"
+      ];
+    }
+
+    function parentEmails() {
+      return [
+        "busick22@gmail.com"
+      ];
+    }
+
+    function isSignedIn() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true;
+    }
+
+    function isFamily() {
+      return isSignedIn()
+        && request.auth.token.email in familyEmails();
+    }
+
+    function isParent() {
+      return isSignedIn()
+        && request.auth.token.email in parentEmails();
+    }
+
+    match /settings/members {
+      allow read: if isFamily();
+      allow write: if isParent();
+    }
+
+    match /settings/{turnDoc} {
+      allow read: if isFamily();
+      allow write: if isFamily() && turnDoc in ["movieTurn", "dogFeedTurn"];
+    }
+
+    match /grocery/current {
+      allow read, write: if isFamily();
+    }
+
+    match /todos/{todoId} {
+      allow read, write: if isFamily();
+    }
+
+    match /todoLists/{listId} {
+      allow read, write: if isFamily();
+    }
+
+    match /chores/{choreId} {
+      allow read, write: if isFamily();
+    }
+
+    match /events/{eventId} {
+      allow read, write: if isFamily();
+    }
+
+    match /kidPoints/{kidName} {
+      allow read, write: if isFamily();
+    }
+
+    match /recipes/{recipeId} {
+      allow read: if isFamily();
+      allow write: if isParent();
+    }
+
+    match /meals/{mealDate} {
+      allow read: if isFamily();
+      allow write: if isParent();
+    }
+
+    match /aisles/{aisleId} {
+      allow read, write: if isFamily();
+    }
+
+    match /rewards/{rewardId} {
+      allow read: if isFamily();
+      allow write: if isParent();
+    }
+
+    // Client-side error log written by window.onerror.
+    // Family can create; only parents can read/clear.
+    match /errors/{errorId} {
+      allow create: if isFamily();
+      allow read, delete: if isParent();
+      allow update: if false;
+    }
+
+    // Per-kid screen-time budget and active session state.
+    // Family read/write — kids start/stop their own timer, parents tweak
+    // the budget. Field-level constraints aren't enforced server-side;
+    // the trust model is the shared family account.
+    match /screenTime/{kidName} {
+      allow read, write: if isFamily();
+    }
+
+    // Kids' requests for more screen time, surfaced in the parent panel.
+    // Family create/read/update/delete — parents resolve them; the writes
+    // happen from the same family account today.
+    match /screenTimeRequests/{requestId} {
+      allow read, write: if isFamily();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

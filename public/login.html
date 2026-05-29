@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In · Busick Family</title>
+  <meta name="description" content="Sign in to the Busick Family hub."/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <link rel="icon" type="image/png" href="icons/icon-192.png"/>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#1C1917"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Busick Family"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #1C1917;
+      min-height: 100vh; display: flex;
+      align-items: center; justify-content: center;
+      padding: 2rem;
+      position: relative; overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 25% 20%, rgba(194,100,42,0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(194,100,42,0.08) 0%, transparent 45%);
+    }
+    .login-wrap {
+      width: 100%; max-width: 360px;
+      display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+      position: relative; z-index: 1;
+    }
+    .login-card {
+      width: 100%;
+      background: rgba(255,255,255,0.97); border-radius: 20px;
+      padding: 2.5rem 2rem 2rem; border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
+      text-align: center;
+      animation: cardIn 0.4s cubic-bezier(0.2,0,0,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .login-logo {
+      font-size: 2.75rem; margin-bottom: 0.75rem; display: block;
+      animation: logoIn 0.5s cubic-bezier(0.2,0,0,1) 0.1s both;
+    }
+    @keyframes logoIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .login-title {
+      font-family: 'Syne', sans-serif; font-size: 1.75rem;
+      font-weight: 800; color: var(--text); margin-bottom: 0.3rem;
+      letter-spacing: -0.035em;
+    }
+    .login-subtitle {
+      color: var(--text-muted); margin-bottom: 2rem;
+      font-size: 0.875rem; line-height: 1.55;
+    }
+    .btn-google {
+      display: flex; width: 100%; justify-content: center;
+      align-items: center; gap: 0.7rem; padding: 0.8rem 1.25rem;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--text); cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.9rem;
+      transition: all 0.15s; box-shadow: var(--shadow-sm);
+    }
+    .btn-google:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .btn-google:active { transform: scale(0.99); }
+    .btn-google:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .error-msg {
+      font-size: 0.82rem; color: var(--error-text);
+      background: var(--error-bg); border: 1px solid var(--error-border);
+      border-radius: var(--radius-sm); padding: 0.65rem 1rem;
+      display: none; width: 100%; text-align: center; margin-top: 0.75rem;
+    }
+    .error-msg.show { display: block; }
+    .login-footer {
+      font-size: 0.73rem; color: rgba(255,255,255,0.3); text-align: center;
+    }
+
+    /* Not-authorized state */
+    .denied-block { display: none; }
+    .denied-block.show { display: block; }
+    .denied-emoji { font-size: 2.2rem; margin-bottom: 0.6rem; display: block; }
+    .denied-title {
+      font-family: 'Syne', sans-serif; font-size: 1.3rem;
+      font-weight: 800; color: var(--text); margin-bottom: 0.45rem;
+      letter-spacing: -0.025em;
+    }
+    .denied-msg {
+      color: var(--text-muted); font-size: 0.875rem; line-height: 1.55;
+      margin-bottom: 1.25rem;
+    }
+    .denied-email {
+      display: inline-block;
+      font-family: monospace; font-size: 0.82rem;
+      background: var(--muted-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 0.18rem 0.5rem;
+      color: var(--text); margin-top: 0.2rem;
+    }
+    .btn-secondary-full {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.4rem; width: 100%;
+      padding: 0.7rem 1.1rem;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--text-muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.86rem;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-secondary-full:hover { border-color: var(--text-muted); color: var(--text); background: var(--muted-bg); }
+  </style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+
+    <!-- Sign-in state -->
+    <div id="signin-block">
+      <span class="login-logo">🏡</span>
+      <h1 class="login-title">Busick Family</h1>
+      <p class="login-subtitle">Dinners, calendar, routines —<br>one place for the whole family.</p>
+      <button class="btn-google" id="signin-btn" onclick="handleSignIn()">
+        <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span id="signin-btn-label">Continue with Google</span>
+      </button>
+      <div class="error-msg" id="error-msg">Sign-in failed. Please try again.</div>
+    </div>
+
+    <!-- Not-authorized state -->
+    <div class="denied-block" id="denied-block">
+      <span class="denied-emoji">🔒</span>
+      <h2 class="denied-title">Not on the family list</h2>
+      <p class="denied-msg">
+        You signed in successfully, but this account isn't authorized for the Busick Family hub.
+        <br><br>
+        <span class="denied-email" id="denied-email"></span>
+      </p>
+      <button class="btn-secondary-full" onclick="handleSwitchAccount()">Sign in with a different account</button>
+    </div>
+
+  </div>
+  <p class="login-footer">Only Busick family members can sign in.</p>
+</div>
+
+<script type="module">
+  import { signInWithGoogle, watchAuthState, signOut as runSignOut, auth } from "./shared-firebase.js";
+
+  // Mirror of the family allowlist in firestore.rules. Used purely for UX —
+  // even if someone tampers with this list, Firestore rules deny their reads.
+  const FAMILY_EMAILS = ["busick22@gmail.com"];
+
+  const signinBlock = document.getElementById("signin-block");
+  const deniedBlock = document.getElementById("denied-block");
+  const errEl = document.getElementById("error-msg");
+  const signinBtn = document.getElementById("signin-btn");
+  const signinBtnLabel = document.getElementById("signin-btn-label");
+
+  function getReturnUrl() {
+    const params = new URLSearchParams(location.search);
+    const ret = params.get("return");
+    // Reject absolute / cross-origin redirects.
+    if (ret && /^[a-zA-Z0-9_\-]+\.html(\?.*)?$/.test(ret)) return ret;
+    return "index.html";
+  }
+
+  function isAuthorized(user) {
+    if (!user?.email || user.emailVerified !== true) return false;
+    return FAMILY_EMAILS.includes(user.email.toLowerCase());
+  }
+
+  function showDenied(email) {
+    signinBlock.style.display = "none";
+    deniedBlock.classList.add("show");
+    document.getElementById("denied-email").textContent = email || "(no email on file)";
+  }
+
+  function resetToSignin() {
+    deniedBlock.classList.remove("show");
+    signinBlock.style.display = "";
+    errEl.classList.remove("show");
+    signinBtn.disabled = false;
+    signinBtnLabel.textContent = "Continue with Google";
+  }
+
+  watchAuthState(user => {
+    if (!user) { resetToSignin(); return; }
+    if (isAuthorized(user)) {
+      window.location.replace(getReturnUrl());
+    } else {
+      showDenied(user.email);
+    }
+  });
+
+  window.handleSignIn = async () => {
+    errEl.classList.remove("show");
+    signinBtn.disabled = true;
+    signinBtnLabel.textContent = "Signing in…";
+    try {
+      await signInWithGoogle();
+      // watchAuthState handles routing
+    } catch (e) {
+      console.error(e);
+      // Treat user-cancelled popups quietly.
+      const code = e?.code || "";
+      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+        errEl.classList.add("show");
+      }
+      signinBtn.disabled = false;
+      signinBtnLabel.textContent = "Continue with Google";
+    }
+  };
+
+  window.handleSwitchAccount = async () => {
+    try { await runSignOut(); } catch (e) { console.error(e); }
+    resetToSignin();
+  };
+</script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");</script>
+</body>
+</html>

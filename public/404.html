@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Page Not Found · Busick Family</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="shared.css"/>
+  <link rel="icon" type="image/png" href="icons/icon-192.png"/>
+  <meta name="theme-color" content="#1C1917"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #1C1917;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+      position: relative; overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 25% 20%, rgba(194,100,42,0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(194,100,42,0.08) 0%, transparent 45%);
+    }
+    .nf-card {
+      width: 100%; max-width: 420px;
+      background: rgba(255,255,255,0.97);
+      border-radius: 20px;
+      padding: 2.5rem 2rem 2rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative; z-index: 1;
+    }
+    .nf-emoji { font-size: 2.75rem; margin-bottom: 0.75rem; display: block; }
+    .nf-code {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--accent); margin-bottom: 0.4rem;
+    }
+    .nf-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.65rem; font-weight: 800;
+      color: var(--text); margin-bottom: 0.5rem;
+      letter-spacing: -0.035em;
+    }
+    .nf-msg {
+      color: var(--text-muted); font-size: 0.9rem;
+      line-height: 1.55; margin-bottom: 1.75rem;
+    }
+    .nf-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 0.45rem; width: 100%;
+      padding: 0.78rem 1.25rem;
+      border-radius: var(--radius);
+      background: var(--accent); color: white;
+      border: none; cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.9rem;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .nf-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .nf-footer {
+      margin-top: 2rem;
+      font-size: 0.73rem;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="nf-card">
+      <span class="nf-emoji">🧭</span>
+      <div class="nf-code">404</div>
+      <h1 class="nf-title">Page not found</h1>
+      <p class="nf-msg">The page you were looking for isn't here. It may have moved or never existed.</p>
+      <a class="nf-btn" href="index.html">🏡 Take me home</a>
+    </div>
+    <p class="nf-footer">Busick Family Hub</p>
+  </div>
+</body>
+</html>
