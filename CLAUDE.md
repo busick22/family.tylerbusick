@@ -122,6 +122,17 @@ kid-facing app:
 
 ## Current focus
 
+- **2026-07-12 — DEPLOYED (owner-directed). The React rebuild is now LIVE**
+  at https://busick-recipes.web.app (hosting-only deploy; Firestore rules
+  and Auth untouched). This is the first production cutover from the old
+  static site to the React app — the family tablet will pick it up on next
+  load (may need the PWA closed/reopened once or twice for the service
+  worker to update). **Still needs owner QA on a real device:** Google
+  sign-in + real family data, which couldn't be exercised in the sandbox.
+  (Same session also deployed the sibling apps: Accomplish hosting-only at
+  tyler-busick-22.web.app, and Budget's first-ever deploy — site + Firestore
+  rules — at busick-budget.web.app after linking its `.firebaserc`.)
+
 - **2026-07-12 — Renamed to "Family" + new app icon (owner-directed, live
   session). Front end only — no Firestore/Auth/Functions changes.** Two
   owner requests handled together:
