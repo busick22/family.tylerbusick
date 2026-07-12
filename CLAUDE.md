@@ -120,6 +120,89 @@ kid-facing app:
 
 ## Current focus
 
+- **2026-07-12 — React + Vite rebuild: all four pages now ported (scheduled
+  task, autonomous run). Dashboard, Meals, and Planner were finished in
+  earlier runs this same day; this run ported the last page, Kids
+  (profiles, points/rewards, screen time), which was the biggest of the
+  four (old `kids.js` was 1,527 lines). Front end only — no Firestore
+  schema or Auth changes; same collections, same data shapes as the old
+  static site. Lint and `npm run build` both pass. Verified in-browser
+  (Chrome preview, light + dark, desktop + mobile) via the same kind of
+  temporary auth stub used for earlier pages — real Firestore reads
+  return `permission-denied` in that sandboxed browser (no real Google
+  token), so every list renders its empty state rather than real family
+  data, but that's enough to confirm every screen renders, every tab and
+  modal opens/closes, and nothing crashes. **Real data + real Google
+  sign-in still needs a check by the owner** via `npm run dev` locally or
+  once deployed — same caveat as the Dashboard/Meals/Planner ports.
+
+  **Kids page — what's there** (`src/features/kids/`): a "who are you?"
+  selector (tap a kid's name, or a Parent tab with 4 admin tiles) leads
+  into a per-kid dashboard with Today/Points/History tabs, ported 1:1 from
+  the old `kids.html`/`kids.js`/`kids.css`:
+  - **Today:** the screen-time countdown timer (start/pause, live
+    countdown, auto-stop at zero, "ask for more time"), today's chores +
+    tasks (with a day filter once a kid has chores on multiple days),
+    "Everyone Extras" (collapsible, for tasks anyone can do), an all-done
+    celebration state, tonight's dinner banner, and the movie-night/
+    dog-feeding "whose turn" banner — all reusing the same
+    Chores/Todos/Meals/Turns Firestore contexts Meals and Planner already
+    built.
+  - **Points:** running total, the rewards catalog (view-only for kids —
+    the old app never had a kid-facing "redeem" button either, so that's
+    preserved as-is, not a regression), and redemption history.
+  - **History:** last two weeks of completed chores/tasks with points
+    earned, missed chores a kid can still knock out, and a peek at next
+    week.
+  - **Parent tab** (4 tiles → modals): Members (add/remove family names),
+    Screen Time (per-kid +5/+10/−10/−15 min, reset, daily budget), Points
+    (per-kid balances + reset, point-value editors for tasks/chores, the
+    rewards catalog), and Pending (reward-redemption + screen-time
+    requests waiting on a parent).
+  - New contexts: `ScreenTimeContext` (screen-time budgets/sessions +
+    "more time" requests — was already built by a previous run but not
+    yet wired into `main.jsx`; wired in now) and a few new methods added
+    to the existing `KidPointsContext` (`awardPoints`, `revokePoints`,
+    `deleteHistoryEntry`, `resetKids` — also pre-built, now used).
+
+  **Judgment call — simplified the per-kid completion animation.** The
+  old app had three fully bespoke, hand-coded particle-physics animations
+  for checking off a chore/task: Minecraft blocks breaking apart for
+  Liam, flower petals scattering for Livi, a TIE fighter flying past for
+  Spencer (~150 lines of one-off JS+CSS per kid). I replaced this with
+  one shared "themed particle pop" component (`KidItemRow.jsx`) that
+  bursts a few emoji from each kid's theme (⛏️🟩💎 / 🌸🐞🌺 / ⭐🚀✨) in
+  their accent color when a row is checked off. Kids still each feel
+  distinct (color, emoji, tab labels, empty-state messages, all still
+  ported verbatim from `KID` in the old `kids.js`), but the celebration
+  itself is one simpler, reusable mechanism instead of three bespoke
+  physics engines. If you want the exact old animations back, they're in
+  git history at `cae5a72:public/kids.js` (search `animateLiviRow`,
+  `animateSpencerRow`, `animateLiamTaskMine`).
+
+  **Questions for Tyler** (best judgment made in each case):
+  - Row actions changed from the old app's tap-and-hold "⋮" popup menu
+    (edit/delete) to tap-the-row-to-edit + a small "✕ → Really?" delete
+    button, matching how Planner's task/chore rows already work. Same
+    capabilities, more consistent with the rest of the app, but a
+    different tap pattern than the old Kids page specifically.
+  - The day-filter chips and a few admin chips use the shared `.chip`
+    component's default (page/global accent) rather than each kid's own
+    color — a small, easy-to-tune visual inconsistency, not a functional
+    one (`src/features/kids/kids.css`, search `.chip[data-active`).
+  - No kid-facing "redeem a reward" button (see Points above) — carried
+    over from the old app rather than added as a new feature, per this
+    run's "don't add new major features" scope. Worth asking whether
+    that's an intentional gap or something to build next.
+
+  **Not done this run** (unchanged from earlier notes): no dedicated
+  Settings page, no error-log viewer for parents, PWA icons still reuse
+  the old `icon-192`/`icon-512` PNGs.
+
+  **Next:** with all four pages ported, the rebuild's remaining work is
+  polish, not porting — a UI/UX/security pass across the whole app (per
+  the scheduled-task instructions), plus the still-open items above.
+
 - **2026-07-12 — React + Vite rebuild started (scheduled task, autonomous
   run). Phase 1 (foundation) complete: scaffold, design system, sign-in,
   app shell, Dashboard fully ported. Meals/Planner/Kids are placeholders.

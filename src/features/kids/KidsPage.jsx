@@ -1,15 +1,26 @@
-import ComingSoon from '../../components/ComingSoon.jsx'
+// Kids — port of the old kids.html/js. A "who are you?" selector (plus a
+// Parent tab with admin controls) leads into a per-kid dashboard with
+// Today/Points/History tabs. The active kid lives in the URL (?kid=Liam)
+// so switching kids or refreshing the tablet remembers where you were,
+// same as the old app.
+
+import { useSearchParams } from 'react-router-dom'
+import { KIDS } from '../../lib/family.js'
+import KidSelector from './KidSelector.jsx'
+import KidDashboard from './KidDashboard.jsx'
+import './kids.css'
 
 export default function KidsPage() {
-  return (
-    <div className="page page-enter" data-page="kids">
-      <header className="page-head">
-        <h1 className="page-title">Kids</h1>
-      </header>
-      <ComingSoon>
-        Kid profiles, points, rewards, and screen time are being rebuilt — this page is next in
-        line.
-      </ComingSoon>
-    </div>
-  )
+  const [searchParams, setSearchParams] = useSearchParams()
+  const kidParam = searchParams.get('kid')
+  const activeKid = KIDS.includes(kidParam) ? kidParam : null
+
+  function selectKid(name) {
+    setSearchParams(KIDS.includes(name) ? { kid: name } : {})
+  }
+
+  if (activeKid) {
+    return <KidDashboard kid={activeKid} onSwitchKid={() => selectKid(null)} />
+  }
+  return <KidSelector onSelectKid={selectKid} />
 }

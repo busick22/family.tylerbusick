@@ -18,6 +18,7 @@ import { ChoresProvider } from './state/ChoresContext.jsx'
 import { EventsProvider } from './state/EventsContext.jsx'
 import { RewardsProvider } from './state/RewardsContext.jsx'
 import { KidPointsProvider } from './state/KidPointsContext.jsx'
+import { ScreenTimeProvider } from './state/ScreenTimeContext.jsx'
 import { GroceryProvider } from './state/GroceryContext.jsx'
 import { TurnsProvider } from './state/TurnsContext.jsx'
 import { installErrorReporter } from './lib/errorReporter.js'
@@ -40,9 +41,11 @@ createRoot(document.getElementById('root')).render(
                           <GroceryProvider>
                             <RewardsProvider>
                               <KidPointsProvider>
-                                <TurnsProvider>
-                                  <App />
-                                </TurnsProvider>
+                                <ScreenTimeProvider>
+                                  <TurnsProvider>
+                                    <App />
+                                  </TurnsProvider>
+                                </ScreenTimeProvider>
                               </KidPointsProvider>
                             </RewardsProvider>
                           </GroceryProvider>
