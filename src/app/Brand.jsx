@@ -1,4 +1,4 @@
-// The Busick Family mark: a simple friendly house.
+// The Family mark: a simple friendly house.
 
 export function BrandMark({ size = 28 }) {
   return (
@@ -32,7 +32,7 @@ export function BrandWordmark() {
         letterSpacing: '0.01em',
       }}
     >
-      Busick Family
+      Family
     </span>
   )
 }

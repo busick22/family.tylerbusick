@@ -3,12 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Busick Family Hub — meals, planner, kids, and routines for the family tablet.",
+  "description": "Family Hub — meals, planner, kids, and routines for the family tablet.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "firebase": "^11.1.0",
@@ -24,6 +25,7 @@
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "globals": "^15.14.0",
+    "sharp": "^0.33.5",
     "vite": "^6.0.7",
     "vite-plugin-pwa": "^0.21.1"
   }

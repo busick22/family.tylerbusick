@@ -16,10 +16,10 @@ export default function CalendarTab({ onAddEvent }) {
         </button>
       </div>
       <div className="card cal-iframe-wrap cal-desktop-only">
-        <iframe src={GCAL_EMBED_SRC} title="Busick Family Calendar" />
+        <iframe src={GCAL_EMBED_SRC} title="Family Calendar" />
       </div>
       <div className="card cal-iframe-wrap cal-mobile-only">
-        <iframe src={GCAL_EMBED_SRC_WEEK} title="Busick Family Calendar Weekly" />
+        <iframe src={GCAL_EMBED_SRC_WEEK} title="Family Calendar Weekly" />
       </div>
     </div>
   )

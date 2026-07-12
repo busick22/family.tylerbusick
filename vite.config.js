@@ -30,8 +30,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico'],
       manifest: {
-        name: 'Busick Family',
-        short_name: 'Busick',
+        name: 'Family',
+        short_name: 'Family',
         description: 'Family planning, meals, tasks & chores.',
         theme_color: '#FBF6F1',
         background_color: '#FBF6F1',
@@ -40,9 +40,9 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

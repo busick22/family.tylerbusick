@@ -1,8 +1,10 @@
-# Busick Family Hub
+# Family Hub
 
 A private family dashboard that pulls meals, planning, kids' tasks, routines,
 and shared info into one site. Runs on a kitchen tablet — big touch targets,
-playful and bright.
+playful and bright. **The app is named simply "Family"** (renamed from
+"Busick Family" on 2026-07-12 so it matches the sibling apps and carries no
+last name if it ever goes public — see Current focus).
 
 - **Stack:** React 18 + Vite, React Router, Firebase, `lucide-react` icons.
   Installable PWA (`vite-plugin-pwa`). Mirrors the sibling apps' structure
@@ -119,6 +121,65 @@ kid-facing app:
   model genuinely changes — it's shared, tested against real family data.
 
 ## Current focus
+
+- **2026-07-12 — Renamed to "Family" + new app icon (owner-directed, live
+  session). Front end only — no Firestore/Auth/Functions changes.** Two
+  owner requests handled together:
+  - **Rename "Busick Family" → "Family"** everywhere user-facing, so the
+    app matches the sibling apps' one-word names and carries no last name
+    if it ever goes public: the sign-in heading, the sidebar wordmark
+    (`src/app/Brand.jsx`), the browser tab `<title>` + `apple-mobile-web-
+    app-title` + meta description (`index.html`), the PWA manifest
+    `name`/`short_name` (`vite.config.js`), `package.json` description, the
+    two Google-calendar iframe titles (`CalendarTab.jsx`), and the two CSS
+    file-header comments. Verified in-browser: sign-in now reads "Family",
+    tab title is "Family".
+  - **New app icon** — a friendly house that matches the app's warm palette
+    AND structurally matches the two sibling apps' icons (rounded-square
+    badge + gradient glyph). Set up the same icon pipeline Accomplish/Budget
+    use: a source `public/favicon.svg` + `scripts/generate-icons.mjs` +
+    `npm run icons` (added `sharp` as a dev dependency) → generates
+    `pwa-192x192.png`, `pwa-512x512.png`, `apple-touch-icon.png`.
+    `index.html` + the manifest now point at these (old `icons/icon-192`/
+    `icon-512` PNGs no longer referenced — left in `public/icons/` for now,
+    safe to delete later). This resolves the long-standing "PWA icons still
+    reuse the old PNGs" follow-up.
+  - **Sibling icons refreshed too** (owner asked for a consistent set — done
+    as their own commits in their own repos, since Accomplish/Budget are
+    separate git repos): **Accomplish** icon is now a bold check mark (was a
+    circle+underline that read like a search glyph); **Budget** icon is now
+    a clear dollar sign (was a budget-gauge ring). Same badge style/gradients
+    as before, just clearer glyphs. Regenerated each app's PNGs via its own
+    `npm run icons`. Note: Budget's `$` needed the gradient switched to
+    `gradientUnits="userSpaceOnUse"` — a plain vertical `<line>` has a
+    zero-width bounding box, so the default object-bbox gradient painted
+    nothing and the bar vanished (icon read as just "S" until fixed).
+
+  **Owner's answers to the previously-logged "Questions for Tyler"** (so the
+  next run doesn't re-ask — all confirmed "keep as-is" except the icons):
+  1. Kids row actions (tap-to-edit + "✕ → Really?" instead of the old ⋮
+     menu) — **keep the new pattern.**
+  2. Day-filter / admin chips using the shared accent instead of each kid's
+     color — **leave as-is.**
+  3. No kid-facing "redeem a reward" button — **intentional gap, keep it.**
+  4. Simplified shared completion animation (vs. the three bespoke
+     per-kid physics animations) — **keep the simpler shared version.**
+  5. Light-default theme + bigger touch targets/radii — **fine as-is.**
+  6. No dedicated Settings page — **fine as-is.**
+  7. PWA icons — **owner wanted fresh icons; done (see above).**
+
+  **Questions for Tyler (new):**
+  - **The Firebase project id `busick-recipes` is baked into the shipped
+    `src/firebase.js` config and can't be renamed** without creating a brand-
+    new Firebase project and migrating all family data — out of scope and
+    risky, so left untouched. It's the one place the "Busick" name still
+    appears in shipped code. Also left as-is for the same
+    migration-compatibility reason: the three `busick-family.*` localStorage
+    keys in `src/features/planner/plannerUtils.js` (internal device-pref
+    keys, never shown to any user; they intentionally match the old static
+    app so the tablet's saved view/collapse state carries over). If a truly
+    public, no-surname deployment ever matters, both are follow-ups to weigh
+    then — flagging, not acting.
 
 - **2026-07-12 — React + Vite rebuild: all four pages now ported (scheduled
   task, autonomous run). Dashboard, Meals, and Planner were finished in

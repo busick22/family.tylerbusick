@@ -27,7 +27,7 @@ export default function SignInPage() {
       <div className="signin-card page-enter">
         <div className="signin-brand">
           <BrandMark size={48} />
-          <h1>Busick Family</h1>
+          <h1>Family</h1>
           <p>Today at a glance.</p>
         </div>
 
