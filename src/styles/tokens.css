@@ -1,0 +1,133 @@
+/* ---------------------------------------------------------------------------
+   Busick Family design tokens.
+
+   Every color, size, and timing the app uses is named here once. Components
+   never hard-code hex values — they reference these variables. Same bones as
+   the sibling apps (Accomplish = cyan, Budget = green): same font pairing,
+   radius/motion scale, and component classes in base.css. Family's own
+   twist:
+     - LIGHT theme by default (not dark) — this runs on a kitchen tablet and
+       should read bright and cheerful, not like a nighttime dashboard.
+     - Bigger type, bigger touch targets, bigger radii everywhere — kids tap
+       this, so nothing should be fiddly.
+     - Four playful per-tab accents instead of a single brand color.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* Type — same pairing as Accomplish/Budget for cross-app consistency. */
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale — a notch larger than the sibling apps at every step; this
+     is read from arm's length on a counter-mounted tablet. */
+  --text-xs: 0.8rem;
+  --text-sm: 0.92rem;
+  --text-md: 1.02rem;
+  --text-lg: 1.22rem;
+  --text-xl: 1.6rem;
+  --text-2xl: 2.1rem;
+
+  /* Shape — rounder than the sibling apps; softer, friendlier. */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-full: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --speed-fast: 140ms;
+  --speed-med: 240ms;
+  --speed-slow: 420ms;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --sidebar-rail: 72px;
+  --dock-height: 68px;
+  --dock-inset: max(env(safe-area-inset-bottom, 0px), 14px);
+  --page-pad: clamp(18px, 3vw, 36px);
+
+  /* Minimum touch target — every tappable control should clear this. */
+  --tap: 48px;
+
+  /* Area accents — Home / Meals / Planner / Kids each get their own signal
+     color, shared between both themes so a page's identity doesn't shift
+     when you flip the theme. */
+  --accent-home: #e8733f;
+  --accent-meals: #d6524a;
+  --accent-planner: #4c7ef3;
+  --accent-kids: #9b5de5;
+}
+
+/* --- Light (default) -------------------------------------------------------- */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #fbf6f1;
+  --bg-deep: #f3ece3;
+  --surface: #ffffff;
+  --surface-2: #fbf6f1;
+  --surface-3: #f3e9de;
+
+  --border: rgba(90, 62, 38, 0.12);
+  --border-strong: rgba(90, 62, 38, 0.22);
+
+  --text: #241a12;
+  --text-mid: #7a6a5c;
+  --text-dim: #a5978a;
+
+  --accent: #e8733f;
+  --accent-strong: #d05f2d;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(232, 115, 63, 0.12);
+  --accent-glow: rgba(232, 115, 63, 0.22);
+
+  --danger: #d6524a;
+  --danger-soft: rgba(214, 82, 74, 0.1);
+  --ok: #3d9a5c;
+
+  --shadow-1: 0 1px 2px rgba(60, 40, 20, 0.06);
+  --shadow-2: 0 10px 28px rgba(60, 40, 20, 0.1);
+  --shadow-pop: 0 18px 48px rgba(60, 40, 20, 0.16);
+
+  --backdrop: rgba(40, 26, 14, 0.4);
+
+  --grid-line: rgba(90, 62, 38, 0.035);
+}
+
+/* --- Dark ----------------------------------------------------------------- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #17130f;
+  --bg-deep: #0f0c09;
+  --surface: #211a14;
+  --surface-2: #2a2119;
+  --surface-3: #34291f;
+
+  --border: rgba(232, 200, 170, 0.14);
+  --border-strong: rgba(232, 200, 170, 0.24);
+
+  --text: #f5ece2;
+  --text-mid: #b4a190;
+  --text-dim: #7d6f61;
+
+  --accent: #f0895a;
+  --accent-strong: #f5a37c;
+  --on-accent: #221207;
+  --accent-soft: rgba(240, 137, 90, 0.16);
+  --accent-glow: rgba(240, 137, 90, 0.26);
+
+  --danger: #e37d76;
+  --danger-soft: rgba(227, 125, 118, 0.16);
+  --ok: #5cb97e;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 18px 48px rgba(0, 0, 0, 0.55);
+
+  --backdrop: rgba(8, 6, 4, 0.62);
+
+  --grid-line: rgba(232, 200, 170, 0.05);
+}

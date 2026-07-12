@@ -2,10 +2,11 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "static",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "/Users/tbusick/Desktop/Websites/Busick Family Hub/public", "-p", "8765", "-c-1"],
-      "port": 8765
+      "name": "family-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5175,
+      "autoPort": true
     }
   ]
 }
