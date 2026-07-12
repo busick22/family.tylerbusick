@@ -31,6 +31,18 @@ export const KID_DEFAULT_STATUS = { Liam: 'Age 10', Livi: 'Age 8', Spencer: 'Age
 // Emoji avatar shown on the home kid cards (was hard-coded in index.html).
 export const KID_EMOJI = { Liam: '🧑‍🦰', Livi: '👩‍🦰', Spencer: '👦🏼' }
 
+// "Kids" is the assignee value meaning "any kid" — used by the planner's
+// kid-task stacks alongside the three individual kids.
+export const ANY_KID_ASSIGNEE = 'Kids'
+export const KID_STACK_ASSIGNEES = [...KIDS, ANY_KID_ASSIGNEE]
+export const KID_STACK_EMOJI = { ...KID_EMOJI, Kids: '👪' }
+export const KID_STACK_LABEL = { Liam: 'Liam', Livi: 'Livi', Spencer: 'Spencer', Kids: 'Any kid' }
+
+// Tasks assigned to a kid stack stay off the parent task board.
+export function isKidStackAssignee(name) {
+  return KID_STACK_ASSIGNEES.includes(normalizeMemberName(name))
+}
+
 export const MEMBER_COLORS = [
   '#4a7c59', '#3a6ea5', '#c9622f', '#7c4fa0',
   '#b5732a', '#2a7c7c', '#a04f4f',

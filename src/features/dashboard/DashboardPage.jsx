@@ -17,9 +17,9 @@ import './dashboard.css'
 
 export default function DashboardPage() {
   const { meals } = useMeals()
-  const todos = useTodos()
-  const chores = useChores()
-  const events = useEvents()
+  const { todos } = useTodos()
+  const { chores } = useChores()
+  const { events } = useEvents()
   const grocery = useGrocery()
   const turns = useTurns()
   const [notice, showNotice] = useNotice()

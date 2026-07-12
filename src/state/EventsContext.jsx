@@ -1,11 +1,16 @@
-// The `events` collection — the family calendar.
+// The `events` collection — the family calendar. Shape: { title, date
+// ('YYYY-MM-DD'), time ('HH:MM'|null), location, notes, color, who[],
+// gcalEventId (set when synced to Google Calendar), createdAt }.
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { collection, onSnapshot } from 'firebase/firestore'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp,
+} from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { normalizeMemberList } from '../lib/family.js'
 
-const EventsContext = createContext([])
+const EventsContext = createContext(null)
 
 export function EventsProvider({ children }) {
   const { user } = useAuth()
@@ -18,12 +23,41 @@ export function EventsProvider({ children }) {
     }
     return onSnapshot(
       collection(db, 'events'),
-      (snap) => setEvents(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (snap) =>
+        setEvents(
+          snap.docs.map((d) => {
+            const data = { id: d.id, ...d.data() }
+            return { ...data, who: normalizeMemberList(data.who) }
+          }),
+        ),
       (err) => console.error('Events listener failed:', err),
     )
   }, [user])
 
-  return <EventsContext.Provider value={events}>{children}</EventsContext.Provider>
+  const value = useMemo(
+    () => ({
+      events,
+
+      async addEvent(data) {
+        const ref = await addDoc(collection(db, 'events'), {
+          ...data,
+          createdAt: serverTimestamp(),
+        })
+        return ref.id
+      },
+
+      async updateEvent(id, data) {
+        await updateDoc(doc(db, 'events', id), data)
+      },
+
+      async deleteEvent(id) {
+        await deleteDoc(doc(db, 'events', id))
+      },
+    }),
+    [events],
+  )
+
+  return <EventsContext.Provider value={value}>{children}</EventsContext.Provider>
 }
 
 export function useEvents() {

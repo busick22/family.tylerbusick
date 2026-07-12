@@ -1,12 +1,16 @@
 // The `chores` collection — recurring, day-of-week assigned duties.
+// Shape: { name, assignee, day ('Sunday'...), points, done, completedAt,
+// completedBy }.
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { collection, onSnapshot } from 'firebase/firestore'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp,
+} from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
 import { normalizeAssignment } from '../lib/family.js'
 
-const ChoresContext = createContext([])
+const ChoresContext = createContext(null)
 
 export function ChoresProvider({ children }) {
   const { user } = useAuth()
@@ -24,7 +28,49 @@ export function ChoresProvider({ children }) {
     )
   }, [user])
 
-  return <ChoresContext.Provider value={chores}>{children}</ChoresContext.Provider>
+  const value = useMemo(
+    () => ({
+      chores,
+
+      async addChore(data) {
+        await addDoc(collection(db, 'chores'), {
+          ...data,
+          done: false,
+          completedAt: null,
+          completedBy: '',
+        })
+      },
+
+      async updateChore(id, data) {
+        await updateDoc(doc(db, 'chores', id), data)
+      },
+
+      async toggleChore(id, done) {
+        const who = done ? user?.displayName?.split(' ')[0] || '' : ''
+        await updateDoc(doc(db, 'chores', id), {
+          done,
+          completedAt: done ? serverTimestamp() : null,
+          completedBy: who,
+        })
+      },
+
+      async deleteChore(id) {
+        await deleteDoc(doc(db, 'chores', id))
+      },
+
+      // Sunday-morning ritual: uncheck everything for a fresh week.
+      async resetWeek() {
+        await Promise.all(
+          chores.map((c) =>
+            updateDoc(doc(db, 'chores', c.id), { done: false, completedAt: null, completedBy: '' }),
+          ),
+        )
+      },
+    }),
+    [chores, user],
+  )
+
+  return <ChoresContext.Provider value={value}>{children}</ChoresContext.Provider>
 }
 
 export function useChores() {
