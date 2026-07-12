@@ -29,7 +29,7 @@
         <div class="brand-mark">📅</div>
         <div class="brand-copy">
           <h1>Family Planner</h1>
-          <p>Calendar, tasks &amp; chores</p>
+          <p>Calendar, tasks &amp; routines</p>
         </div>
       </div>
       <div class="header-actions">
@@ -65,7 +65,7 @@
     <nav class="tab-nav">
       <button class="tab-btn active" data-tab="today"    onclick="switchTab('today',this)">   <span class="tab-icon">🌅</span>Today</button>
       <button class="tab-btn"        data-tab="calendar" onclick="switchTab('calendar',this)"><span class="tab-icon">📅</span>Calendar</button>
-      <button class="tab-btn"        data-tab="todo"     onclick="switchTab('todo',this)">    <span class="tab-icon">✅</span>To-Do</button>
+      <button class="tab-btn"        data-tab="todo"     onclick="switchTab('todo',this)">    <span class="tab-icon">✅</span>Tasks</button>
       <button class="tab-btn"        data-tab="chores"   onclick="switchTab('chores',this)">  <span class="tab-icon">🧹</span>Chores</button>
     </nav>
 
@@ -111,26 +111,45 @@
 
     <!-- ══ TO-DO TAB ══ -->
     <div id="tab-todo" class="tab-content">
+      <div class="planner-explainer">
+        <div>
+          <div class="planner-explainer-title">Tasks are for one-time things.</div>
+          <p class="planner-explainer-copy">Use tasks for errands, reminders, and project items. If something repeats every week, keep it in Chores instead.</p>
+        </div>
+        <div class="planner-chip-row">
+          <span class="planner-chip">One-time items</span>
+          <span class="planner-chip">Optional date</span>
+          <span class="planner-chip">Can live in lists</span>
+        </div>
+      </div>
       <div class="add-row legacy-add">
         <input class="form-input" id="todo-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTodo()"/>
         <select class="form-select" id="todo-assignee"></select>
         <input type="date" class="form-input date-input" id="todo-due" title="Show on date (optional)"/>
         <button class="btn-primary" onclick="addTodo()">＋ Add</button>
       </div>
-      <div class="todo-toolbar-inline">
-        <button class="btn-secondary btn-sm" onclick="openTodoListModal()">＋ List</button>
+      <div class="todo-toolbar-inline todo-toolbar">
+        <button class="btn-primary btn-sm" onclick="openTodoModal()">＋ Task</button>
+        <button class="btn-secondary btn-sm" onclick="openTodoListModal()">＋ New list</button>
+        <div class="segmented-control" id="todo-view-toggle" aria-label="Task view">
+          <button class="seg-btn active" data-task-view="family" onclick="setTodoView('family',this)">Family Lists</button>
+          <button class="seg-btn" data-task-view="kids" onclick="setTodoView('kids',this)">Kids</button>
+          <button class="seg-btn" data-task-view="all" onclick="setTodoView('all',this)">Everything</button>
+        </div>
+        <select class="filter-select" id="todo-filter-assignee" onchange="setTodoAssigneeFilter(this.value)"></select>
       </div>
+      <div class="planner-summary-bar" id="todo-summary-bar"></div>
       <div class="filter-bar" id="todo-filter-bar">
         <button class="filter-chip active" onclick="setTodoFilter('active',this)">Active</button>
         <button class="filter-chip" onclick="setTodoFilter('done',this)">Done</button>
       </div>
 
-      <div class="todo-section-label">📝 Your To-Do</div>
+      <div class="todo-section-label" id="todo-family-label">📝 Family Task Lists</div>
       <div class="todo-list-board" id="todo-list-panel">
-        <div class="empty-msg">No tasks yet — add one above!</div>
+        <div class="empty-msg">No tasks yet — use the buttons above to add one.</div>
       </div>
 
-      <div class="todo-section-label todo-section-label-kids">👧 Kids' To-Do</div>
+      <div class="todo-section-label todo-section-label-kids" id="todo-kids-label">👧 Kids' Tasks</div>
       <div class="kid-stack-grid" id="kid-stack-panel">
         <!-- rendered by JS -->
       </div>
@@ -138,12 +157,24 @@
 
     <!-- ══ CHORES TAB ══ -->
     <div id="tab-chores" class="tab-content">
+      <div class="planner-explainer">
+        <div>
+          <div class="planner-explainer-title">Chores are the repeating weekly routines.</div>
+          <p class="planner-explainer-copy">Use chores for the things that come back every week. If it only needs to happen once, keep it in Tasks so it doesn’t clutter the weekly routine list.</p>
+        </div>
+        <div class="planner-chip-row">
+          <span class="planner-chip">Repeats weekly</span>
+          <span class="planner-chip">Grouped by day</span>
+          <span class="planner-chip">Great for points</span>
+        </div>
+      </div>
       <div class="section-toolbar">
-        <button class="btn-primary legacy-add" onclick="openChoreModal()">＋ Add Chore</button>
+        <button class="btn-primary btn-sm" onclick="openChoreModal()">＋ Chore</button>
         <select class="filter-select" id="chore-filter-assignee" onchange="setChoreAssigneeFilter(this.value)"></select>
       </div>
+      <div class="planner-summary-bar" id="chore-summary-bar"></div>
       <div id="chore-list-container">
-        <div class="empty-msg">No chores yet — add one above!</div>
+        <div class="empty-msg">No chores yet — use the button above to add one.</div>
       </div>
       <div class="danger-zone" style="margin-top:1.25rem">
         <div class="danger-title">⚠️ Reset Week</div>

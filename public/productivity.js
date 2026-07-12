@@ -17,6 +17,7 @@ installErrorReporter(db, addDoc, collection, serverTimestamp);
 const EVENT_COLORS = ["#2563eb", "#7c3aed", "#ea580c", "#16a34a", "#db2777", "#0891b2", "#d97706"];
 const DEFAULT_TODO_LIST_ID = "general";
 const TODO_COLLAPSE_STORAGE_KEY = "busick-family.todo-collapsed";
+const TODO_VIEW_STORAGE_KEY = "busick-family.todo-view";
 const LAST_ASSIGNEE_STORAGE_KEY = "busick-family.last-assignee";
 
 // "Kids" is the assignee value meaning "any kid" — used by the 4th stack
@@ -46,6 +47,17 @@ function saveLastAssignee(name) {
 }
 let lastAssignee = loadLastAssignee();
 
+function loadTodoView() {
+  try {
+    const value = localStorage.getItem(TODO_VIEW_STORAGE_KEY);
+    return ["family", "kids", "all"].includes(value) ? value : "family";
+  } catch { return "family"; }
+}
+function saveTodoView(view) {
+  try { localStorage.setItem(TODO_VIEW_STORAGE_KEY, view); }
+  catch {}
+}
+
 // Google Calendar API
 const GCAL_CLIENT_ID = "960392900060-gb81dv1v2rff65fmf0r46r6vfdgjsl0q.apps.googleusercontent.com";
 const GCAL_CALENDAR_ID = "family01860224846748827125@group.calendar.google.com";
@@ -55,7 +67,7 @@ let tokenClient = null;
 
 let members = [], todos = [], chores = [], events = [], todoLists = [];
 let rewards = [], kidPointsData = {};
-let todoFilter = "active", todoAssigneeFilter = "", choreAssigneeFilter = "";
+let todoFilter = "active", todoAssigneeFilter = "", choreAssigneeFilter = "", todoView = loadTodoView();
 let editingTodoId = null, editingChoreId = null, editingEventId = null;
 let selectedEventColor = EVENT_COLORS[0];
 let listening = [], activeModalId = null;
@@ -751,9 +763,45 @@ function sortedTasksForList(visible, listId) {
   });
 }
 
+function renderTodoSummary() {
+  const bar = document.getElementById("todo-summary-bar");
+  if (!bar) return;
+  const visible = getVisibleTodos();
+  const activeCount = visible.filter(t => !t.done).length;
+  const datedCount = visible.filter(t => !!t.dueDate).length;
+  const kidCount = visible.filter(t => isKidStackAssignee(t.assignee)).length;
+  const filterCopy = todoAssigneeFilter ? `Filtered to ${todoAssigneeFilter}` : "All assignees";
+  bar.innerHTML = [
+    `<span class="planner-summary-pill"><strong>${activeCount}</strong> ${activeCount === 1 ? "active task" : "active tasks"}</span>`,
+    `<span class="planner-summary-pill"><strong>${datedCount}</strong> scheduled</span>`,
+    `<span class="planner-summary-pill"><strong>${kidCount}</strong> for kids</span>`,
+    `<span class="planner-summary-pill muted">${esc(filterCopy)}</span>`,
+  ].join("");
+}
+
+function syncTodoViewControls() {
+  const showFamily = todoView !== "kids";
+  const showKids = todoView !== "family";
+  const familyLabel = document.getElementById("todo-family-label");
+  const familyPanel = document.getElementById("todo-list-panel");
+  const kidsLabel = document.getElementById("todo-kids-label");
+  const kidsPanel = document.getElementById("kid-stack-panel");
+
+  if (familyLabel) familyLabel.style.display = showFamily ? "inline-block" : "none";
+  if (familyPanel) familyPanel.style.display = showFamily ? "grid" : "none";
+  if (kidsLabel) kidsLabel.style.display = showKids ? "inline-block" : "none";
+  if (kidsPanel) kidsPanel.style.display = showKids ? "grid" : "none";
+
+  document.querySelectorAll("#todo-view-toggle .seg-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.taskView === todoView);
+  });
+}
+
 function renderTodoList() {
   const panel = document.getElementById("todo-list-panel");
   const lists = normalizedTodoLists();
+  renderTodoSummary();
+  syncTodoViewControls();
   // Parent board excludes anything assigned to a kid stack — those render
   // in their own section below via renderKidStacks().
   const visible = getParentBoardTodos();
@@ -906,6 +954,13 @@ function toggleKidStackCollapsed(stackKey) {
   renderKidStacks();
 }
 
+function setTodoView(view) {
+  if (!["family", "kids", "all"].includes(view)) return;
+  todoView = view;
+  saveTodoView(view);
+  renderTodoList();
+}
+
 async function addTodo() {
   const input = document.getElementById("todo-input");
   const text = input.value.trim();
@@ -945,8 +1000,27 @@ function setTodoFilter(filter, btn) {
 function setTodoAssigneeFilter(v) { todoAssigneeFilter = normalizeMemberName(v); renderTodoList(); }
 
 /* ── CHORES ── */
+function renderChoreSummary() {
+  const bar = document.getElementById("chore-summary-bar");
+  if (!bar) return;
+  const todayIndex = new Date().getDay();
+  const todayName = DAYS[todayIndex];
+  const visible = chores.filter(c => !choreAssigneeFilter || c.assignee === choreAssigneeFilter);
+  const todayCount = visible.filter(c => c.day === todayName).length;
+  const openCount = visible.filter(c => !c.done && (c.day === todayName || isOverdueChore(c, todayIndex))).length;
+  const overdueCount = visible.filter(c => isOverdueChore(c, todayIndex)).length;
+  const filterCopy = choreAssigneeFilter ? `Filtered to ${choreAssigneeFilter}` : "Whole family";
+  bar.innerHTML = [
+    `<span class="planner-summary-pill"><strong>${todayCount}</strong> due today</span>`,
+    `<span class="planner-summary-pill"><strong>${openCount}</strong> still open</span>`,
+    `<span class="planner-summary-pill"><strong>${overdueCount}</strong> overdue</span>`,
+    `<span class="planner-summary-pill muted">${esc(filterCopy)}</span>`,
+  ].join("");
+}
+
 function renderChoreList() {
   const container = document.getElementById("chore-list-container");
+  renderChoreSummary();
   const visible = chores.filter(c => !choreAssigneeFilter || c.assignee === choreAssigneeFilter);
   if (!visible.length) { container.innerHTML = '<div class="empty-msg">No chores match this filter.</div>'; return; }
 
@@ -1152,8 +1226,7 @@ function renderAssigneeDropdowns() {
     el.value = cur || (id === "todo-assignee" ? lastAssignee : "");
   });
   const fopts = '<option value="">All people</option>' + members.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("") + kidOption;
-  // todo-filter-assignee was removed from the DOM; chore-filter-assignee remains.
-  ["chore-filter-assignee"].forEach(id => {
+  ["todo-filter-assignee", "chore-filter-assignee"].forEach(id => {
     const el = document.getElementById(id); if (!el) return;
     const cur = normalizeMemberName(el.value); el.innerHTML = fopts; el.value = cur;
   });
@@ -1200,6 +1273,7 @@ window.showResetConfirm = showResetConfirm;
 window.hideResetConfirm = hideResetConfirm;
 window.addReward = addReward;
 window.addTodo = addTodo;
+window.setTodoView = setTodoView;
 window.setTodoFilter = setTodoFilter;
 window.setTodoAssigneeFilter = setTodoAssigneeFilter;
 window.addMember = addMember;
