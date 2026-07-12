@@ -16,7 +16,7 @@ import { DAYS, KIDS, KID_DEFAULT_STATUS, KID_EMOJI, todayStr, greeting, formatTi
 import './dashboard.css'
 
 export default function DashboardPage() {
-  const meals = useMeals()
+  const { meals } = useMeals()
   const todos = useTodos()
   const chores = useChores()
   const events = useEvents()

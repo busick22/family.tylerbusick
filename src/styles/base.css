@@ -419,6 +419,120 @@ a {
   animation: rise-in var(--speed-slow) var(--ease-out);
 }
 
+/* --- Segmented tabs (page sections) -------------------------------------------------- */
+
+.seg-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  flex: none;
+  align-self: flex-start;
+}
+
+.seg-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: calc(var(--tap) - 8px);
+  padding: 8px 20px;
+  border-radius: var(--radius-full);
+  color: var(--text-mid);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    background var(--speed-fast) var(--ease-out),
+    color var(--speed-fast) var(--ease-out);
+}
+.seg-tab:hover { color: var(--text); }
+.seg-tab[data-active='true'] {
+  background: var(--page-accent, var(--accent));
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .seg-tabs {
+    align-self: stretch;
+  }
+  .seg-tab {
+    flex: 1;
+    padding: 8px 10px;
+  }
+}
+
+/* --- Floating action button ----------------------------------------------------------- */
+
+.fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-full);
+  background: var(--page-accent, var(--accent));
+  color: #fff;
+  box-shadow: var(--shadow-2);
+  transition: transform var(--speed-fast) var(--ease-out), box-shadow var(--speed-fast) var(--ease-out);
+}
+.fab:hover { transform: scale(1.05); box-shadow: var(--shadow-pop); }
+.fab:active { transform: scale(0.96); }
+.fab svg { width: 26px; height: 26px; }
+
+@media (max-width: 800px) {
+  /* Sit above the floating dock. */
+  .fab {
+    bottom: calc(var(--dock-inset) + var(--dock-height) + 14px);
+    right: 16px;
+  }
+}
+
+/* --- Modal footer actions --------------------------------------------------------------- */
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.modal-actions-gap {
+  flex: 1;
+}
+
+/* --- Small form helpers -------------------------------------------------------------------- */
+
+.form-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.check-row input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
 /* --- Toast notice ------------------------------------------------------------------- */
 
 .page-notice {

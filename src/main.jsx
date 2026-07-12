@@ -5,6 +5,8 @@ import App from './App.jsx'
 import { AuthProvider } from './state/AuthContext.jsx'
 import { SettingsProvider } from './state/SettingsContext.jsx'
 import { MembersProvider } from './state/MembersContext.jsx'
+import { RecipesProvider } from './state/RecipesContext.jsx'
+import { AislesProvider } from './state/AislesContext.jsx'
 import { MealsProvider } from './state/MealsContext.jsx'
 import { TodosProvider } from './state/TodosContext.jsx'
 import { ChoresProvider } from './state/ChoresContext.jsx'
@@ -23,19 +25,23 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <SettingsProvider>
           <MembersProvider>
-            <MealsProvider>
-              <TodosProvider>
-                <ChoresProvider>
-                  <EventsProvider>
-                    <GroceryProvider>
-                      <TurnsProvider>
-                        <App />
-                      </TurnsProvider>
-                    </GroceryProvider>
-                  </EventsProvider>
-                </ChoresProvider>
-              </TodosProvider>
-            </MealsProvider>
+            <RecipesProvider>
+              <AislesProvider>
+                <MealsProvider>
+                  <TodosProvider>
+                    <ChoresProvider>
+                      <EventsProvider>
+                        <GroceryProvider>
+                          <TurnsProvider>
+                            <App />
+                          </TurnsProvider>
+                        </GroceryProvider>
+                      </EventsProvider>
+                    </ChoresProvider>
+                  </TodosProvider>
+                </MealsProvider>
+              </AislesProvider>
+            </RecipesProvider>
           </MembersProvider>
         </SettingsProvider>
       </AuthProvider>
