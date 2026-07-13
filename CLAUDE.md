@@ -122,6 +122,79 @@ kid-facing app:
 
 ## Current focus
 
+- **2026-07-12 — UI/UX polish pass (scheduled task, autonomous run), local
+  commit only (not deployed).** The app was already fully rebuilt and live
+  (see the DEPLOYED entry below — this run happened after that deploy).
+  Found a chunk of uncommitted polish work already sitting in the working
+  tree from an interrupted earlier session; reviewed it, verified it in
+  the browser (Chrome preview, light + dark stub, desktop + mobile
+  viewports via the same temporary auth-stub technique used by earlier
+  runs — added then fully removed, `grep -rn PREVIEW_STUB src/` is
+  clean), fixed a bug it introduced, then committed it. Front end only —
+  no Firestore schema or Auth changes.
+
+  **What was in the uncommitted work (front end only):**
+  - **Planner's Calendar tab rebuilt as a native month-grid view**
+    (`CalendarTab.jsx`), replacing the embedded Google Calendar iframe.
+    The iframe was Google's white-background embed that didn't adapt to
+    dark mode or narrow screens well. The new grid reads from the same
+    `EventsContext` Meals/Today already use, tapping a day opens the
+    existing event modal (prefilled with that date), and event chips
+    tap through to edit. The event modal's "Also add to the family
+    Google Calendar" push-to-Google option is untouched — this only
+    replaced the *viewing* surface, not the Google Calendar integration
+    itself (`src/lib/gcal.js`).
+  - **Screen-time bonus-time bug fix** (`ScreenTimeContext.jsx`,
+    `screenTime.js`): the parent "+5/+10 min" buttons used to subtract
+    from `usedMsToday`, which got silently clamped at 0 — so if a kid
+    hadn't used much time yet, granting more time could do nothing.
+    Bonus minutes are now tracked as their own same-day field
+    (`bonusMsToday`/`bonusDate`) added on top of the daily budget, so a
+    grant always works and a daily reset no longer wipes it out.
+  - **Recipes tag filter** (`RecipesTab.jsx`) changed from a wrapping
+    row of chip buttons to a `<select>` dropdown — the chips wrapped
+    awkwardly with more than a few tags on narrow screens.
+  - Mobile fixes: dashboard kid cards now sit in a real grid instead of
+    `flex-wrap` (which let them overlap at some widths), the mobile
+    bottom dock's sizing was tightened, and `overflow-x: hidden` was
+    added in a few spots to stop content from ever pushing the page
+    wider than the viewport.
+  - Removed `src/components/ComingSoon.jsx` — dead code left over from
+    before Meals/Planner/Kids were ported off the placeholder.
+
+  **Bug I found and fixed while verifying that work:** the new native
+  calendars used a "bleed past the page padding to the screen edge" trick
+  on mobile (negative margins). But their scroll-container ancestor
+  (`.page-scroll`, shared by Planner/Meals) needs `overflow-x: hidden` for
+  unrelated reasons (stopping other content from widening the page), and
+  CSS won't let one axis truly bleed (`visible`) while the other scrolls
+  (`auto`) on the same box — the browser silently upgrades the "visible"
+  axis to `auto`, which still clips. The bleed rule was cutting ~18px off
+  the right edge of both calendars (the Saturday column and the "Event"/
+  add button were partly hidden on a real phone-width viewport). Fixed by
+  dropping the edge-to-edge bleed and keeping both calendars inset within
+  the normal page padding on mobile instead — simpler, and sidesteps the
+  CSS limitation entirely. Re-verified clean at 375px and desktop widths
+  after the fix.
+
+  **Security pass:** `firestore.rules` reviewed — still a sound
+  email-allowlist model with a default-deny catch-all, unchanged this
+  run. No hardcoded secrets in `src/` (the Firebase `apiKey` in
+  `src/firebase.js` is the public web config key, not a secret — the
+  real access boundary is Firestore rules). `npm audit` reports 0
+  vulnerabilities.
+
+  **Not deployed** — local commit only, per the standing instruction not
+  to deploy without the owner's go-ahead. Next deploy should carry this
+  commit plus a real-device check of the new Planner calendar and the
+  screen-time bonus fix (neither could be exercised against real
+  Firestore data in the sandbox).
+
+  **Next:** no other planned work queued — the redesign is complete and
+  deployed, and this run's polish pass is committed. A future run should
+  do another UI/UX/security sweep per the scheduled-task brief, or wait
+  for the owner's next request.
+
 - **2026-07-12 — DEPLOYED (owner-directed). The React rebuild is now LIVE**
   at https://busick-recipes.web.app (hosting-only deploy; Firestore rules
   and Auth untouched). This is the first production cutover from the old
