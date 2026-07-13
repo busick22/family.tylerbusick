@@ -2,12 +2,19 @@
 // pushed to Google Calendar from the event modal when the parent asks for it.
 
 import { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
+import Modal from '../../components/Modal.jsx'
 import { useEvents } from '../../state/EventsContext.jsx'
-import { DAYS_SHORT, MONTHS, formatTime, todayStr } from '../../lib/family.js'
+import { DAYS, DAYS_SHORT, MONTHS, formatTime, todayStr } from '../../lib/family.js'
 
 function dateKeyOf(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+function longDayLabel(dateKey) {
+  const [y, m, d] = dateKey.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  return `${DAYS[date.getDay()]}, ${MONTHS[m - 1]} ${d}`
 }
 
 export default function CalendarTab({ onAddEvent, onEditEvent }) {
@@ -15,6 +22,7 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
   const now = new Date()
   const [calYear, setCalYear] = useState(now.getFullYear())
   const [calMonth, setCalMonth] = useState(now.getMonth())
+  const [expandedDay, setExpandedDay] = useState(null)
 
   function changeMonth(dir) {
     let m = calMonth + dir
@@ -113,18 +121,22 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
                 data-other={!cell.cur}
                 data-today={dk === today}
                 key={`${dk}-${index}`}
-                role="button"
-                tabIndex={0}
                 onClick={() => onAddEvent(dk)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    onAddEvent(dk)
-                  }
-                }}
-                aria-label={`Add event for ${dk}`}
               >
-                <span className="planner-month-date">{cell.day}</span>
+                <div className="planner-month-cell-head">
+                  <span className="planner-month-date">{cell.day}</span>
+                  <button
+                    type="button"
+                    className="planner-month-add"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onAddEvent(dk)
+                    }}
+                    aria-label={`Add event, ${longDayLabel(dk)}`}
+                  >
+                    <Plus aria-hidden="true" size={12} />
+                  </button>
+                </div>
                 <span className="planner-month-events">
                   {visible.map((event) => (
                     <button
@@ -141,13 +153,62 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
                       <span className="planner-month-title">{event.title}</span>
                     </button>
                   ))}
-                  {overflow > 0 && <span className="planner-month-more">+{overflow} more</span>}
+                  {overflow > 0 && (
+                    <button
+                      type="button"
+                      className="planner-month-more"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setExpandedDay(dk)
+                      }}
+                    >
+                      +{overflow} more
+                    </button>
+                  )}
                 </span>
               </div>
             )
           })}
         </div>
       </div>
+
+      {expandedDay && (
+        <Modal onClose={() => setExpandedDay(null)} width="min(420px, 100%)">
+          <button className="icon-btn modal-close" onClick={() => setExpandedDay(null)} aria-label="Close">
+            <X aria-hidden="true" />
+          </button>
+          <h3>{longDayLabel(expandedDay)}</h3>
+          <div className="calendar-day-list">
+            {(eventsByDate.get(expandedDay) || []).map((event) => (
+              <button
+                type="button"
+                className="planner-month-chip calendar-day-list-chip"
+                style={{ '--event-color': event.color || 'var(--accent-planner)' }}
+                key={event.id}
+                onClick={() => {
+                  setExpandedDay(null)
+                  onEditEvent(event)
+                }}
+              >
+                {event.time && <span className="planner-month-time">{formatTime(event.time)}</span>}
+                <span className="planner-month-title">{event.title}</span>
+              </button>
+            ))}
+          </div>
+          <div className="modal-actions">
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                const dk = expandedDay
+                setExpandedDay(null)
+                onAddEvent(dk)
+              }}
+            >
+              <Plus aria-hidden="true" size={15} /> Add event
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

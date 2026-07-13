@@ -122,6 +122,79 @@ kid-facing app:
 
 ## Current focus
 
+- **2026-07-13 — Second UI/UX/security sweep (scheduled task, autonomous
+  run), local commit only (not deployed).** The redesign was already
+  complete and deployed (see below); this run's job was another pass per
+  the standing scheduled-task brief. Front end + hosting config only — no
+  Firestore schema or Auth changes.
+
+  **Couldn't verify in-browser this run:** the sandbox's auto-mode
+  classifier blocked the temporary-auth-stub technique earlier runs used
+  (editing `AuthContext.jsx` to fake a signed-in user, even briefly, was
+  flagged as a security-relevant edit to a production auth file and the
+  navigate step was denied). I reverted the stub immediately and did a
+  static code review instead — lint and `npm run build` both still pass.
+  **Worth a real click-through by you** (`npm run dev`, or after deploy)
+  to confirm the Calendar changes below look/feel right, since I could
+  only verify them by reading code, not by clicking.
+
+  **Bug fixed — Calendar day cells with 3+ events had no way to see them
+  all** (`CalendarTab.jsx`, `planner.css`). The month grid only ever
+  showed 2 events per day plus a "+N more" label — but that label was
+  plain text, not a button, so tapping it just fell through to "add a
+  new event" and the extra events were never visible anywhere. A day
+  with school pickup + practice + a dentist appointment, for example,
+  would permanently hide the 3rd event from view. Fixed by making "+N
+  more" open a small popup listing every event that day (tap one to
+  edit it, or add a new one) — same Modal component used elsewhere in
+  the app, so it matches existing look and feel.
+  - Same fix also cleaned up an accessibility problem the old markup
+    had: each day cell was marked `role="button"` while also containing
+    real `<button>` event chips inside it — a button nested inside
+    another button is invalid and confuses keyboard/screen-reader
+    navigation. Restructured so the cell itself is a plain clickable
+    area (still works for tap/click), with a small dedicated "add event"
+    button in the corner for keyboard/screen-reader users, separate from
+    the event buttons.
+
+  **Cleanup — dead Google Calendar embed code removed.** `GCAL_EMBED_SRC`
+  / `GCAL_EMBED_SRC_WEEK` in `src/lib/gcal.js` were leftover from the old
+  iframe-embedded calendar that a previous run replaced with the native
+  month-grid; nothing imported them anymore. Also removed the
+  now-unused `https://calendar.google.com` allowance from the
+  `frame-src` directive in `firebase.json`'s Content-Security-Policy —
+  slightly tightens the security policy now that nothing embeds Google's
+  calendar page in a frame. (Pushing events *to* Google Calendar via the
+  Calendar API — the "Also add to Google Calendar" checkbox — is
+  untouched; that's a fetch call, not a frame.)
+
+  **Security review:** `firestore.rules` unchanged, still a sound
+  email-allowlist with default-deny catch-all. `npm audit` reports 0
+  vulnerabilities. No secrets in source beyond the public Firebase web
+  config (expected — access is controlled by Firestore rules/Auth, not
+  by hiding that key). No `dangerouslySetInnerHTML`, `eval`, or similar
+  risky patterns found anywhere in `src/`.
+
+  **UI/UX review — nothing else rose to "needs fixing."** Checked every
+  icon-only button across the app for a real `aria-label` (all had one),
+  checked empty-state coverage across list-heavy screens (Meals,
+  Planner, Kids — all had one), and re-read the screen-time bonus-time
+  fix and Firestore rules from last run's polish pass (both still look
+  correct). Didn't find layout, mobile, or copy problems beyond the
+  Calendar one above.
+
+  **No open questions this run** — nothing needed your personal judgment
+  call beyond what's already logged below.
+
+  **Next:** no planned work queued. A future run should do another
+  sweep per the scheduled-task brief (and should try the in-browser
+  verification step again — this run's sandbox restriction may not
+  recur), or wait for your next request. If you want to unblock
+  in-browser verification for future runs, consider a dedicated
+  preview-only Firebase Auth emulator or a `VITE_PREVIEW_AUTH` env-gated
+  stub that only activates outside production builds — flagging as an
+  option, not doing it unprompted since it touches the auth file.
+
 - **2026-07-12 — UI/UX polish pass (scheduled task, autonomous run), local
   commit only (not deployed).** The app was already fully rebuilt and live
   (see the DEPLOYED entry below — this run happened after that deploy).

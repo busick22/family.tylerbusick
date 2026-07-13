@@ -450,8 +450,14 @@
 .planner-month-cell:hover { background: var(--surface-2); }
 .planner-month-cell[data-other='true'] { opacity: 0.45; }
 
+.planner-month-cell-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+}
+
 .planner-month-date {
-  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -463,6 +469,25 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: 700;
+}
+
+.planner-month-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: var(--radius-full);
+  color: var(--text-dim);
+  background: transparent;
+  opacity: 0.5;
+  transition: opacity var(--speed-fast) var(--ease-out), background var(--speed-fast) var(--ease-out);
+}
+.planner-month-add:hover,
+.planner-month-add:focus-visible {
+  opacity: 1;
+  background: var(--surface-2);
 }
 
 .planner-month-cell[data-today='true'] .planner-month-date {
@@ -509,9 +534,35 @@
 }
 
 .planner-month-more {
+  background: none;
+  border: none;
+  padding: 2px 4px;
   color: var(--text-dim);
   font-size: var(--text-xs);
   font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.planner-month-more:hover,
+.planner-month-more:focus-visible {
+  color: var(--text);
+}
+
+.calendar-day-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.calendar-day-list-chip {
+  padding: 8px 10px;
+  font-size: var(--text-sm);
+}
+.calendar-day-list-chip .planner-month-title {
+  white-space: normal;
 }
 
 /* --- Event modal bits --------------------------------------------------------------------------- */

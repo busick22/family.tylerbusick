@@ -10,10 +10,6 @@ const GCAL_CLIENT_ID = '960392900060-gb81dv1v2rff65fmf0r46r6vfdgjsl0q.apps.googl
 const GCAL_CALENDAR_ID = 'family01860224846748827125@group.calendar.google.com'
 const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
 
-export const GCAL_EMBED_SRC =
-  'https://calendar.google.com/calendar/embed?src=family01860224846748827125%40group.calendar.google.com&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff'
-export const GCAL_EMBED_SRC_WEEK = `${GCAL_EMBED_SRC}&mode=WEEK`
-
 let accessToken = null
 let tokenClient = null
 let gsiLoadPromise = null
