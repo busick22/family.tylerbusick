@@ -1,25 +1,152 @@
-// Calendar tab: the embedded family Google Calendar (month on desktop,
-// week on phones) plus a shortcut to add an event to the Today view.
+// Calendar tab: native month view for Family events. Events can still be
+// pushed to Google Calendar from the event modal when the parent asks for it.
 
-import { Plus } from 'lucide-react'
-import { GCAL_EMBED_SRC, GCAL_EMBED_SRC_WEEK } from '../../lib/gcal.js'
+import { useMemo, useState } from 'react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { useEvents } from '../../state/EventsContext.jsx'
+import { DAYS_SHORT, MONTHS, formatTime, todayStr } from '../../lib/family.js'
 
-export default function CalendarTab({ onAddEvent }) {
+function dateKeyOf(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+export default function CalendarTab({ onAddEvent, onEditEvent }) {
+  const { events } = useEvents()
+  const now = new Date()
+  const [calYear, setCalYear] = useState(now.getFullYear())
+  const [calMonth, setCalMonth] = useState(now.getMonth())
+
+  function changeMonth(dir) {
+    let m = calMonth + dir
+    let y = calYear
+    if (m > 11) { m = 0; y += 1 }
+    if (m < 0) { m = 11; y -= 1 }
+    setCalMonth(m)
+    setCalYear(y)
+  }
+
+  function goToday() {
+    const t = new Date()
+    setCalYear(t.getFullYear())
+    setCalMonth(t.getMonth())
+  }
+
+  const cells = useMemo(() => {
+    const firstDay = new Date(calYear, calMonth, 1).getDay()
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+    const daysInPrev = new Date(calYear, calMonth, 0).getDate()
+    const out = []
+    for (let i = firstDay - 1; i >= 0; i -= 1) {
+      out.push({
+        day: daysInPrev - i,
+        cur: false,
+        year: calMonth === 0 ? calYear - 1 : calYear,
+        month: calMonth === 0 ? 11 : calMonth - 1,
+      })
+    }
+    for (let d = 1; d <= daysInMonth; d += 1) out.push({ day: d, cur: true, year: calYear, month: calMonth })
+    const trailing = 42 - out.length
+    for (let d = 1; d <= trailing; d += 1) {
+      out.push({
+        day: d,
+        cur: false,
+        year: calMonth === 11 ? calYear + 1 : calYear,
+        month: calMonth === 11 ? 0 : calMonth + 1,
+      })
+    }
+    return out
+  }, [calMonth, calYear])
+
+  const eventsByDate = useMemo(() => {
+    const grouped = new Map()
+    events.forEach((event) => {
+      if (!event.date) return
+      if (!grouped.has(event.date)) grouped.set(event.date, [])
+      grouped.get(event.date).push(event)
+    })
+    grouped.forEach((dayEvents) => {
+      dayEvents.sort((a, b) => {
+        if (!a.time && !b.time) return (a.title || '').localeCompare(b.title || '')
+        if (!a.time) return 1
+        if (!b.time) return -1
+        return a.time.localeCompare(b.time)
+      })
+    })
+    return grouped
+  }, [events])
+
+  const today = todayStr()
+
   return (
     <div className="calendar-tab">
       <div className="calendar-tab-head">
-        <p className="calendar-tab-copy">
-          Your embedded family Google Calendar. Add events here to track them on the Today tab too.
-        </p>
-        <button className="btn btn-sm" onClick={onAddEvent}>
-          <Plus aria-hidden="true" size={15} /> Add to Today view
+        <div className="cal-nav">
+          <button className="icon-btn" onClick={() => changeMonth(-1)} aria-label="Previous month">
+            <ChevronLeft aria-hidden="true" />
+          </button>
+          <button className="btn btn-sm" onClick={goToday}>Today</button>
+          <button className="icon-btn" onClick={() => changeMonth(1)} aria-label="Next month">
+            <ChevronRight aria-hidden="true" />
+          </button>
+        </div>
+        <h2 className="cal-month-label">{MONTHS[calMonth]} {calYear}</h2>
+        <button className="btn btn-sm" onClick={() => onAddEvent()}>
+          <Plus aria-hidden="true" size={15} /> Event
         </button>
       </div>
-      <div className="card cal-iframe-wrap cal-desktop-only">
-        <iframe src={GCAL_EMBED_SRC} title="Family Calendar" />
-      </div>
-      <div className="card cal-iframe-wrap cal-mobile-only">
-        <iframe src={GCAL_EMBED_SRC_WEEK} title="Family Calendar Weekly" />
+
+      <div className="card planner-month">
+        <div className="planner-month-weekdays">
+          {DAYS_SHORT.map((day) => (
+            <span key={day}>{day}</span>
+          ))}
+        </div>
+        <div className="planner-month-grid">
+          {cells.map((cell, index) => {
+            const dk = dateKeyOf(cell.year, cell.month, cell.day)
+            const dayEvents = eventsByDate.get(dk) || []
+            const visible = dayEvents.slice(0, 2)
+            const overflow = dayEvents.length - visible.length
+            return (
+              <div
+                className="planner-month-cell"
+                data-other={!cell.cur}
+                data-today={dk === today}
+                key={`${dk}-${index}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => onAddEvent(dk)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onAddEvent(dk)
+                  }
+                }}
+                aria-label={`Add event for ${dk}`}
+              >
+                <span className="planner-month-date">{cell.day}</span>
+                <span className="planner-month-events">
+                  {visible.map((event) => (
+                    <button
+                      type="button"
+                      className="planner-month-chip"
+                      style={{ '--event-color': event.color || 'var(--accent-planner)' }}
+                      key={event.id}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onEditEvent(event)
+                      }}
+                    >
+                      {event.time && <span className="planner-month-time">{formatTime(event.time)}</span>}
+                      <span className="planner-month-title">{event.title}</span>
+                    </button>
+                  ))}
+                  {overflow > 0 && <span className="planner-month-more">+{overflow} more</span>}
+                </span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

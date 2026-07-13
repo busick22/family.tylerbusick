@@ -43,7 +43,7 @@
   /* Layout */
   --sidebar-width: 240px;
   --sidebar-rail: 72px;
-  --dock-height: 68px;
+  --dock-height: 58px;
   --dock-inset: max(env(safe-area-inset-bottom, 0px), 14px);
   --page-pad: clamp(18px, 3vw, 36px);
 

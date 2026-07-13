@@ -97,6 +97,8 @@ export function ScreenTimeProvider({ children }) {
             ...data,
             usedMsToday: 0,
             lastResetDate: todayStr(),
+            bonusMsToday: 0,
+            bonusDate: todayStr(),
             activeSessionStart: data.activeSessionStart ? Date.now() : null,
           },
           { merge: true },
@@ -107,11 +109,12 @@ export function ScreenTimeProvider({ children }) {
       async expireSession(kidName) {
         const data = getFor(kidName)
         if (!data.activeSessionStart) return
+        const view = computeTimerView(data, kidName)
         await setDoc(
           doc(db, 'screenTime', kidName),
           {
             ...data,
-            usedMsToday: data.dailyBudgetMs || DEFAULT_BUDGETS_MS[kidName] || FALLBACK_DAILY_BUDGET_MS,
+            usedMsToday: view.budget || DEFAULT_BUDGETS_MS[kidName] || FALLBACK_DAILY_BUDGET_MS,
             lastResetDate: todayStr(),
             activeSessionStart: null,
           },
@@ -119,15 +122,26 @@ export function ScreenTimeProvider({ children }) {
         )
       },
 
-      // Positive delta = give MORE time (subtract from used); negative =
-      // take time away.
+      // Positive delta = give same-day bonus time; negative = take time away.
       async adjustTime(kidName, deltaMs) {
         const data = getFor(kidName)
         const today = todayStr()
         const baseUsed = data.lastResetDate === today ? data.usedMsToday || 0 : 0
+        const currentBonus = data.bonusDate === today ? data.bonusMsToday || 0 : 0
+        const updates = { ...data, lastResetDate: today, bonusDate: today }
+        if (deltaMs >= 0) {
+          updates.bonusMsToday = currentBonus + deltaMs
+          updates.usedMsToday = baseUsed
+        } else {
+          const takeMs = Math.abs(deltaMs)
+          const bonusAfterTake = Math.max(0, currentBonus - takeMs)
+          const usedPenalty = Math.max(0, takeMs - currentBonus)
+          updates.bonusMsToday = bonusAfterTake
+          updates.usedMsToday = baseUsed + usedPenalty
+        }
         await setDoc(
           doc(db, 'screenTime', kidName),
-          { ...data, usedMsToday: Math.max(0, baseUsed - deltaMs), lastResetDate: today },
+          updates,
           { merge: true },
         )
       },
@@ -136,7 +150,14 @@ export function ScreenTimeProvider({ children }) {
         const data = getFor(kidName)
         await setDoc(
           doc(db, 'screenTime', kidName),
-          { ...data, usedMsToday: 0, lastResetDate: todayStr(), activeSessionStart: null },
+          {
+            ...data,
+            usedMsToday: 0,
+            lastResetDate: todayStr(),
+            bonusMsToday: 0,
+            bonusDate: todayStr(),
+            activeSessionStart: null,
+          },
           { merge: true },
         )
       },

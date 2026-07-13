@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-x: hidden;
 }
 
 /* --- Schedule tab ------------------------------------------------------------ */
@@ -33,11 +34,13 @@
 
 .cal-card {
   padding: 14px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .cal-dow-row {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   margin-bottom: 6px;
 }
 
@@ -53,8 +56,9 @@
 
 .cal-days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
+  min-width: 0;
 }
 
 .cal-day {
@@ -63,6 +67,7 @@
   align-items: stretch;
   gap: 4px;
   min-height: 76px;
+  min-width: 0;
   padding: 6px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -233,6 +238,32 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.recipe-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.recipe-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-mid);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.recipe-filter-label svg {
+  color: var(--accent-meals);
+}
+
+.recipe-filter-select {
+  width: auto;
+  min-width: 190px;
+  max-width: 100%;
 }
 
 .recipe-grid {
@@ -735,13 +766,36 @@
 /* --- Mobile ------------------------------------------------------------------------------------------- */
 
 @media (max-width: 640px) {
-  .cal-day { min-height: 62px; padding: 4px; }
+  .page[data-page='meals'] {
+    overflow-x: hidden;
+  }
+
+  .cal-card {
+    padding: 8px 6px;
+  }
+
+  .cal-dow { padding: 4px 2px; }
+  .cal-days { gap: 3px; }
+  .cal-day {
+    min-height: 70px;
+    padding: 4px 3px;
+  }
   .cal-meal-chip { padding: 2px 4px; }
   .cal-clear { display: none; } /* too small to hit on the month grid — clear from the week list or day modal */
+  .cal-add-hint { display: none; }
 
   .recipes-toolbar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .recipe-filter-row {
+    align-items: stretch;
+  }
+
+  .recipe-filter-select {
+    flex: 1;
+    min-width: 0;
   }
 
   .grocery-amount { min-width: 52px; }

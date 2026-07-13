@@ -77,7 +77,12 @@ export default function PlannerPage() {
 
       <div className="page-scroll planner-scroll">
         {tab === 'today' && <TodayTab onAddEvent={() => setEditEvent(null)} showNotice={showNotice} />}
-        {tab === 'calendar' && <CalendarTab onAddEvent={() => setEditEvent(null)} />}
+        {tab === 'calendar' && (
+          <CalendarTab
+            onAddEvent={(date) => setEditEvent(date ? { date } : null)}
+            onEditEvent={(event) => setEditEvent(event)}
+          />
+        )}
         {tab === 'tasks' && (
           <TasksTab
             onEditTodo={(t) => setEditTodo(t)}

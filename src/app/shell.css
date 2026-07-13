@@ -194,12 +194,12 @@
   bottom: var(--dock-inset);
   z-index: 50;
   display: none;
-  width: min(480px, calc(100% - 28px));
+  width: min(420px, calc(100% - 32px));
   height: var(--dock-height);
   padding: 0 6px;
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow-2);
   touch-action: none;
@@ -215,13 +215,13 @@
   border-radius: var(--radius-full);
   color: var(--text-dim);
   font-size: var(--text-xs);
-  font-weight: 700;
+  font-weight: 550;
   transition: color var(--speed-fast) var(--ease-out);
 }
 
 .bottomnav-link svg {
-  width: 23px;
-  height: 23px;
+  width: 21px;
+  height: 21px;
   transition: transform var(--speed-fast) var(--ease-out);
 }
 
@@ -230,7 +230,7 @@
 }
 
 .bottomnav-link.active svg {
-  transform: translateY(-1px) scale(1.05);
+  transform: translateY(-1px);
 }
 
 /* --- Responsive switch ---------------------------------------------------------- */
@@ -263,6 +263,7 @@
   flex-direction: column;
   padding: var(--page-pad);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .page[data-scroll='locked'] {
@@ -273,6 +274,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media (max-width: 800px) {
@@ -310,6 +312,27 @@
 }
 
 @media (max-width: 640px) {
+  .seg-tabs {
+    width: 100%;
+    max-width: 100%;
+    gap: 4px;
+    padding: 4px;
+    overflow: hidden;
+  }
+
+  .seg-tab {
+    min-width: 0;
+    gap: 4px;
+    padding: 8px 6px;
+    font-size: clamp(0.68rem, 2.8vw, var(--text-xs));
+  }
+
+  .seg-tab svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+
   .page-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;

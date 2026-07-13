@@ -1,7 +1,7 @@
 // Recipes tab: searchable, tag-filterable grid of recipe cards.
 
 import { useMemo, useState } from 'react'
-import { Search, Star, Clock, Flame, Plus, CookingPot } from 'lucide-react'
+import { Search, Star, Clock, Flame, Plus, CookingPot, SlidersHorizontal } from 'lucide-react'
 import { useRecipes } from '../../state/RecipesContext.jsx'
 
 export default function RecipesTab({ onView, onAdd }) {
@@ -54,26 +54,22 @@ export default function RecipesTab({ onView, onAdd }) {
       </div>
 
       {allTags.length > 0 && (
-        <div className="tag-filter-bar">
-          <button
-            type="button"
-            className="chip"
-            data-active={!activeTag}
-            onClick={() => setActiveTag(null)}
+        <div className="recipe-filter-row">
+          <label className="recipe-filter-label" htmlFor="recipe-tag-filter">
+            <SlidersHorizontal aria-hidden="true" size={16} />
+            <span>Filter</span>
+          </label>
+          <select
+            id="recipe-tag-filter"
+            className="field recipe-filter-select"
+            value={activeTag || ''}
+            onChange={(e) => setActiveTag(e.target.value || null)}
           >
-            All
-          </button>
-          {allTags.map((t) => (
-            <button
-              type="button"
-              className="chip"
-              data-active={activeTag === t}
-              key={t}
-              onClick={() => setActiveTag(activeTag === t ? null : t)}
-            >
-              {t}
-            </button>
-          ))}
+            <option value="">All recipes</option>
+            {allTags.map((t) => (
+              <option value={t} key={t}>{t}</option>
+            ))}
+          </select>
         </div>
       )}
 
