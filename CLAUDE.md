@@ -123,14 +123,17 @@ kid-facing app:
 ## Current focus
 
 - **2026-08-02 — Mobile tab bar + Home density (owner-directed, live
-  session). Front end only — no Firestore/Auth changes. COMMITTED, deploy
-  attempted and BLOCKED** — the `firebase` CLI on this machine is logged in
+  session). Front end only — no Firestore/Auth changes. COMMITTED and
+  DEPLOYED (hosting only) to https://busick-recipes.web.app.** Verified
+  live: the served bundle hash matches the local build, and the shipped CSS
+  has the new anchored `.bottomnav` (`bottom:0`, `padding-bottom:
+  var(--dock-inset)`, `border-top`, no radius/shadow).
+  **Deploy gotcha worth remembering:** the first attempt failed with
+  "Failed to get Firebase project" because the `firebase` CLI was logged in
   as the school account `tbusick@trentonr9.k12.mo.us`, which can't see
-  `busick-recipes` (that's under the personal `busick22@gmail.com`), so
-  `firebase deploy --only hosting` failed with "Failed to get Firebase
-  project". Fix: `firebase login:add` the personal account, then deploy
-  with `--account busick22@gmail.com`. **Nothing from this commit is live
-  yet.** Verified in-browser at 375px and desktop, light + dark
+  `busick-recipes` (that lives under the personal `busick22@gmail.com`).
+  If that recurs: `firebase login:list` to check, then `firebase login` /
+  `login:add` the personal account. Also verified in-browser at 375px and desktop, light + dark
   (temporary auth stub in `App.jsx` + fixture data in `DashboardPage.jsx`,
   both fully removed — `grep -rn PREVIEW_STUB src/` is clean, `App.jsx` is
   back to a zero diff; lint + build pass).
