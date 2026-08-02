@@ -122,6 +122,91 @@ kid-facing app:
 
 ## Current focus
 
+- **2026-08-02 — Mobile tab bar + Home density (owner-directed, live
+  session). Front end only — no Firestore/Auth changes. COMMITTED, deploy
+  attempted and BLOCKED** — the `firebase` CLI on this machine is logged in
+  as the school account `tbusick@trentonr9.k12.mo.us`, which can't see
+  `busick-recipes` (that's under the personal `busick22@gmail.com`), so
+  `firebase deploy --only hosting` failed with "Failed to get Firebase
+  project". Fix: `firebase login:add` the personal account, then deploy
+  with `--account busick22@gmail.com`. **Nothing from this commit is live
+  yet.** Verified in-browser at 375px and desktop, light + dark
+  (temporary auth stub in `App.jsx` + fixture data in `DashboardPage.jsx`,
+  both fully removed — `grep -rn PREVIEW_STUB src/` is clean, `App.jsx` is
+  back to a zero diff; lint + build pass).
+  - **Bottom tab bar re-anchored to the screen edge.** The root cause of
+    "sitting way too high" was the design, not the offset: it was a
+    *floating pill* (centered, side margins, full border-radius, drop
+    shadow, `bottom: var(--dock-inset)`), so it always hovered above the
+    edge, and page content ("Family Duties") slid under it. Now a standard
+    full-width tab bar pinned to `bottom: 0` with a top border and no
+    shadow. `--dock-inset` changed meaning: it used to be the float gap,
+    it is now the safe-area *padding underneath* the row
+    (`env(safe-area-inset-bottom)`), so the row clears an iPhone home
+    indicator without the bar floating. `--dock-height` 58px → 56px.
+    Both are still the single source of truth — the FAB offset
+    (`base.css`) and `.kid-shell` padding (`kids.css`) derive from them and
+    needed no change. **Still worth a real-device PWA check** — the
+    preview browser can't simulate safe-area insets.
+  - **Home slimmed down** — owner's answer to "why does it feel busy?" was
+    *too much content*, not styling, so this cut content rather than
+    restyling. Removed: the hero's filler sub-line ("N things still need
+    attention" — duplicated the Tasks/Routines tiles directly beneath it);
+    all three uppercase section labels ("Today at a Glance", "The Kids",
+    "Family Duties" — the last one was a second heading for a card already
+    titled "Whose Turn"); the per-event "who" line in the calendar feed.
+    Changed: the calendar card now hides entirely when today is empty
+    (instead of a full-height panel saying "nothing"), and caps at 3 events
+    with a "+N more today" link to Planner. Kid cards no longer mirror up
+    to 3 task *titles* each (up to 9 lines of text duplicating the Kids
+    page) — just a "N tasks" pill. Hero padding/gap tightened on mobile.
+    Net: the hero went ~370px → ~150px and the kid cards are now visible
+    without scrolling. Dead CSS removed (`.dash-sub`,
+    `.dash-section-label`, `.dash-kid-task`, `.empty-msg`).
+  - **Not touched:** Planner and Kids looked fine at mobile width and were
+    left alone. Meals' month grid is dense on a phone but that's the
+    feature, not clutter — flagging rather than changing it.
+  - **This commit also carries the 2026-07-16 mobile fixes** (the entry
+    below), which had been sitting uncommitted in the working tree.
+  - **The `useCollection` refactor is now STASHED, not committed** —
+    `git stash list` → "useCollection refactor + firstName() helper
+    (pre-existing, awaiting owner decision)"; `git stash pop` restores it.
+    Owner's call, made this session: keep it out of this deploy so what
+    went live is only the UI work that was actually verified, and so the
+    Firestore listener layer in production stays exactly as it was. It
+    reads as correct and behavior-preserving (`mapEvent` is module-level
+    as the hook requires, `firstName()` is a faithful extraction), but it
+    rewrites the listener in 7 contexts and has still never run against
+    real Firestore data — the sandbox always gets `permission-denied`, so
+    lint/build/render only prove it compiles. **Whoever picks it up should
+    verify it against real data before shipping it.**
+
+- **2026-07-16 — Mobile fixes (owner-directed, live session). Front end
+  only — no Firestore/Auth changes. Not committed or deployed yet.**
+  Three owner-requested fixes, verified in-browser at 375px width (via the
+  usual temporary auth stub, fully removed after — `grep -rn PREVIEW_STUB
+  src/` is clean; lint + build pass):
+  - **Floating bottom dock lowered** (`tokens.css` `--dock-inset`): was
+    `max(safe-area-inset-bottom, 14px)` — as an iPhone PWA that's 34px of
+    float, which read as "the tab bar sits too high." Now
+    `max(calc(safe-area-inset-bottom - 16px), 10px)` → ~18px in a PWA,
+    10px in a browser. **Needs a real-device PWA check** — the preview
+    browser can't simulate safe-area insets.
+  - **Explainer subtitles removed** from the Planner/Meals/Kids page
+    titles (the `<small>` under each `h1`; Home's hero untouched). The
+    now-dead `.page-title small` CSS removed from `shell.css`.
+  - **Planner settings gear pinned top-right on mobile**: the ≤640px
+    `.page-head > :not(.page-title)` rule stretches header controls to a
+    full-width second row (right for wide controls, wrong for a 48px
+    icon button — it sat awkwardly mid-page). New `.page-head > .icon-btn`
+    override keeps icon buttons beside the title.
+  - **Found in the working tree, NOT mine, left uncommitted:** a
+    pre-existing refactor from some interrupted session — shared
+    `useCollection` hook replacing per-context `onSnapshot` boilerplate
+    (7 contexts), `firstName()` helper in `lib/family.js` + use in
+    `Sidebar.jsx`. Lints/builds/renders fine but needs the owner's call
+    on whether to keep and commit it.
+
 - **2026-07-13 — Second UI/UX/security sweep (scheduled task, autonomous
   run), local commit only (not deployed).** The redesign was already
   complete and deployed (see below); this run's job was another pass per

@@ -43,8 +43,13 @@
   /* Layout */
   --sidebar-width: 240px;
   --sidebar-rail: 72px;
-  --dock-height: 58px;
-  --dock-inset: max(env(safe-area-inset-bottom, 0px), 14px);
+  /* The mobile tab bar is anchored to the bottom edge (not a floating pill).
+     --dock-height is the tappable row; --dock-inset is the safe-area padding
+     underneath it, so on an iPhone the row clears the home indicator without
+     the whole bar floating up off the screen edge. Total bar height is the
+     sum of the two. */
+  --dock-height: 56px;
+  --dock-inset: env(safe-area-inset-bottom, 0px);
   --page-pad: clamp(18px, 3vw, 36px);
 
   /* Minimum touch target — every tappable control should clear this. */

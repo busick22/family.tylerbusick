@@ -59,11 +59,13 @@ export default function DashboardPage() {
     [events, todayKey],
   )
 
-  const total = openTasks.length + openChores.length
   const heroEyebrow = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-  const heroSub = total
-    ? `${total} thing${total !== 1 ? 's' : ''} still need${total === 1 ? 's' : ''} attention today.`
-    : "You're all caught up. Nice work! 🎉"
+
+  // Home shows at most a few events and links the rest to Planner — the full
+  // day belongs on the Planner page, not stacked onto the dashboard.
+  const CALENDAR_PREVIEW = 3
+  const visibleEvents = todayEvents.slice(0, CALENDAR_PREVIEW)
+  const moreEvents = todayEvents.length - visibleEvents.length
 
   async function handleAdvanceMovie() {
     try {
@@ -93,7 +95,6 @@ export default function DashboardPage() {
         <div>
           <div className="dash-eyebrow">{heroEyebrow}</div>
           <h1 className="dash-greeting">{greeting(now)}</h1>
-          <p className="dash-sub">{heroSub}</p>
         </div>
         <div className="dash-dinner">
           <div className="dash-dinner-label">Tonight&rsquo;s Dinner</div>
@@ -103,7 +104,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="dash-section-label">Today at a Glance</div>
       <div className="dash-stats-row">
         <div className="card dash-stat-tile">
           <div className="dash-stat-label">Tasks</div>
@@ -136,21 +136,20 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="card dash-panel">
-        <div className="panel-title">
-          <CalendarDays aria-hidden="true" /> On The Calendar Today
-        </div>
-        <div className="dash-calendar-feed">
-          {todayEvents.length ? (
-            todayEvents.map((event) => (
+      {/* Nothing on today's calendar means no card at all — an empty panel
+          saying "nothing" is just another block to scroll past. */}
+      {todayEvents.length > 0 && (
+        <div className="card dash-panel">
+          <div className="panel-title">
+            <CalendarDays aria-hidden="true" /> On The Calendar Today
+          </div>
+          <div className="dash-calendar-feed">
+            {visibleEvents.map((event) => (
               <div className="dash-calendar-row" key={event.id}>
                 <div className="dash-calendar-dot" style={{ background: event.color || 'var(--accent-planner)' }} />
                 <div className="dash-calendar-time">{formatTime(event.time)}</div>
                 <div className="dash-calendar-info">
                   <div className="dash-calendar-title">{event.title}</div>
-                  {Array.isArray(event.who) && event.who.length > 0 && (
-                    <div className="dash-calendar-meta">{event.who.join(', ')}</div>
-                  )}
                   {event.location && (
                     <div className="dash-calendar-meta">
                       <MapPin aria-hidden="true" size={12} /> {event.location}
@@ -158,14 +157,16 @@ export default function DashboardPage() {
                   )}
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="empty-msg">Nothing on the calendar today.</div>
-          )}
+            ))}
+            {moreEvents > 0 && (
+              <Link className="dash-calendar-more" to="/planner">
+                +{moreEvents} more today
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="dash-section-label">The Kids</div>
       <div className="dash-kids-strip">
         {KIDS.map((name) => (
           <KidCard
@@ -178,7 +179,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="dash-section-label">Family Duties</div>
       <div className="card dash-panel">
         <div className="panel-title">Whose Turn</div>
         <div className="dash-turn-list">
@@ -214,25 +214,23 @@ function KidCard({ name, choresToday, todos, todayKey }) {
     : KID_DEFAULT_STATUS[name] || ''
   const statusDone = kidChores.length > 0 && kidDone === kidChores.length
 
-  const visibleTasks = dueTodayTasks.slice(0, 3)
-  const extraCount = dueTodayTasks.length - visibleTasks.length
+  // Card shows a count, not the task text — the list itself lives on the
+  // kid's own page, one tap away, instead of being mirrored here.
+  const taskCount = dueTodayTasks.length
 
   return (
     <Link
       className="dash-kid-card"
       to={`/kids?kid=${encodeURIComponent(name)}`}
-      aria-label={`${name}. ${status}. ${dueTodayTasks.length} ${dueTodayTasks.length === 1 ? 'task' : 'tasks'} due today.`}
+      aria-label={`${name}. ${status}. ${taskCount} ${taskCount === 1 ? 'task' : 'tasks'} due today.`}
     >
       <span className="dash-kid-emoji" aria-hidden="true">{KID_EMOJI[name] || '🧒'}</span>
       <div className="dash-kid-copy">
         <div className="dash-kid-name">{name}</div>
         <div className="dash-kid-status" data-done={statusDone}>{status}</div>
-        {dueTodayTasks.length > 0 && (
+        {taskCount > 0 && (
           <div className="dash-kid-tasks">
-            {visibleTasks.map((task) => (
-              <div className="dash-kid-task" key={task.id}>{task.text}</div>
-            ))}
-            {extraCount > 0 && <div className="dash-kid-task-more">+{extraCount} more</div>}
+            {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
           </div>
         )}
       </div>

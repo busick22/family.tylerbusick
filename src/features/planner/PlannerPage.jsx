@@ -51,10 +51,7 @@ export default function PlannerPage() {
       <Notice notice={notice} />
 
       <header className="page-head">
-        <h1 className="page-title">
-          Planner
-          <small>Calendar, tasks &amp; chores</small>
-        </h1>
+        <h1 className="page-title">Planner</h1>
         <button className="icon-btn" onClick={() => setSettingsOpen(true)} title="Family Settings" aria-label="Family Settings">
           <SettingsIcon aria-hidden="true" />
         </button>

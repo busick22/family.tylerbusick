@@ -53,10 +53,7 @@ export default function MealsPage() {
       <Notice notice={notice} />
 
       <header className="page-head">
-        <h1 className="page-title">
-          Meals
-          <small>Recipes, calendar &amp; grocery list</small>
-        </h1>
+        <h1 className="page-title">Meals</h1>
       </header>
 
       <nav className="seg-tabs" aria-label="Meals sections">

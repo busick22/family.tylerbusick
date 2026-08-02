@@ -56,10 +56,7 @@ export default function KidSelector({ onSelectKid }) {
     <div className="page page-enter" data-page="kids">
       <Notice notice={notice} />
       <header className="page-head">
-        <h1 className="page-title">
-          Kids
-          <small>Tasks, chores, points &amp; screen time</small>
-        </h1>
+        <h1 className="page-title">Kids</h1>
       </header>
 
       <nav className="seg-tabs" aria-label="Kids sections">
