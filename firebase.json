@@ -70,6 +70,14 @@
         ]
       },
       {
+        "source": "/wish-lists/**",
+        "headers": [
+          { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+          { "key": "Referrer-Policy", "value": "no-referrer" },
+          { "key": "Cache-Control", "value": "no-store" }
+        ]
+      },
+      {
         "source": "/manifest.webmanifest",
         "headers": [
           { "key": "Cache-Control", "value": "public, max-age=3600" }

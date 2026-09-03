@@ -55,6 +55,16 @@
   /* Minimum touch target — every tappable control should clear this. */
   --tap: 48px;
 
+  /* Wish lists: reuse the shared rhythm in private and share-link views. */
+  --wish-gap-xs: 4px;
+  --wish-gap-sm: 8px;
+  --wish-gap: 16px;
+  --wish-card-pad: 20px;
+  --wish-empty-pad: 32px;
+  --wish-empty-icon: 36px;
+  --wish-checkbox-size: 20px;
+  --wish-page-width: 640px;
+
   /* Area accents — Home / Meals / Planner / Kids each get their own signal
      color, shared between both themes so a page's identity doesn't shift
      when you flip the theme. */

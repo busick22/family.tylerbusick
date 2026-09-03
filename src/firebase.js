@@ -17,8 +17,8 @@
 // `busick-recipes` still holds the old copy, untouched, as a fallback. Access
 // is controlled by Firestore rules and Auth, not by hiding these strings.
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { connectAuthEmulator, getAuth } from 'firebase/auth'
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDil4uFa3UmvXuueHlIuLvLA8_WVgxkKPY',
@@ -29,7 +29,16 @@ const firebaseConfig = {
   appId: '1:638053943595:web:b12ef84ec6bced097edd6e',
 }
 
-const app = initializeApp(firebaseConfig)
+// Local verification only: demo IDs prevent tests from touching family data.
+const useEmulators = import.meta.env.DEV && import.meta.env.VITE_FIREBASE_EMULATORS === 'true'
+const app = initializeApp(useEmulators ? {
+  apiKey: 'demo-family-wishes', projectId: 'demo-family-wishes', authDomain: 'localhost',
+} : firebaseConfig)
 
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+
+if (useEmulators) {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099')
+  connectFirestoreEmulator(db, '127.0.0.1', 8088)
+}

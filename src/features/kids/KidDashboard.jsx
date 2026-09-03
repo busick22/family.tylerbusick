@@ -1,4 +1,4 @@
-// A single kid's dashboard: sticky header, Today/Points/History tabs, a
+// A single kid's dashboard: sticky header, Today/Points/History/Wish Lists tabs, a
 // floating add-task button, and the modals those tabs open.
 
 import { useState } from 'react'
@@ -13,11 +13,13 @@ import HistoryTab from './HistoryTab.jsx'
 import KidTaskModal from './KidTaskModal.jsx'
 import KidChoreModal from './KidChoreModal.jsx'
 import TimeRequestModal from './TimeRequestModal.jsx'
+import WishListsTab from './WishListsTab.jsx'
 
 const TABS = [
   { id: 'today', key: 'tabToday' },
   { id: 'points', key: 'tabPoints' },
   { id: 'history', key: 'tabHistory' },
+  { id: 'wishes', label: '🎁 Wish Lists' },
 ]
 
 export default function KidDashboard({ kid, onSwitchKid }) {
@@ -51,7 +53,7 @@ export default function KidDashboard({ kid, onSwitchKid }) {
 
       <div className="kid-shell">
         <div className="kid-tabs">
-          {TABS.map(({ id, key }) => (
+          {TABS.map(({ id, key, label }) => (
             <button
               key={id}
               type="button"
@@ -59,7 +61,7 @@ export default function KidDashboard({ kid, onSwitchKid }) {
               data-active={tab === id}
               onClick={() => setTab(id)}
             >
-              {theme[key]}
+              {label || theme[key]}
             </button>
           ))}
         </div>
@@ -75,8 +77,9 @@ export default function KidDashboard({ kid, onSwitchKid }) {
         )}
         {tab === 'points' && <PointsTab kid={kid} />}
         {tab === 'history' && <HistoryTab kid={kid} />}
+        {tab === 'wishes' && <WishListsTab kid={kid} />}
 
-        <button
+        {tab !== 'wishes' && <button
           type="button"
           className="fab"
           style={{ background: theme.color }}
@@ -84,7 +87,7 @@ export default function KidDashboard({ kid, onSwitchKid }) {
           aria-label="Add task"
         >
           <Plus aria-hidden="true" />
-        </button>
+        </button>}
       </div>
 
       {editingTask !== undefined && (

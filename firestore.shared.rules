@@ -1,0 +1,173 @@
+rules_version = '2';
+
+// Staged shared-project rules for Family wish lists.
+//
+// ⚠️ SHARED PROJECT: `tyler-busick-22` currently serves BOTH this dashboard and
+// the standalone Accomplish app, and a rules deploy replaces the whole file.
+// Baseline copied from ../dashboard/firestore.rules on 2026-09-01, with the
+// wish-list match block appended. Compare with live rules and synchronize
+// dashboard/Accomplish before deploying; see docs/wish-lists.md.
+//
+// Single-owner: everything under users/{userId} belongs to that signed-in user
+// and nobody else. Only explicitly shared wish lists are public.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+
+    // Google refresh tokens, keyed by "{uid}__{email}". Written and read ONLY
+    // by Cloud Functions through the Admin SDK (which bypasses these rules).
+    // Kept top-level on purpose: as a subcollection of users/{uid} the
+    // wildcard above would let the browser read the tokens.
+    match /googleSecrets/{secretId} {
+      allow read, write: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Shared family data, migrated from the `busick-recipes` project.
+    //
+    // Top-level and NOT under users/{uid}, on purpose: the whole family
+    // shares this, and one day the kids get their own accounts.
+    //
+    // The collection names are EXACTLY the ones the Family app already uses,
+    // so the kitchen tablet can be repointed at this project by changing one
+    // config line rather than rewriting every data file in it. The price is
+    // this explicit list instead of a single tidy prefix — worth it.
+    //
+    // `familyEmails` — full read/write on family data.
+    // `parentEmails` — additionally manages recipes, meals and rewards.
+    // Identical today because the kids share a parent's account on the
+    // tablet. Adding a kid to familyEmails only will start the split doing
+    // real work with no other rule change.
+    // ─────────────────────────────────────────────────────────────
+    function familyEmails() {
+      return ["busick22@gmail.com"];
+    }
+
+    function parentEmails() {
+      return ["busick22@gmail.com"];
+    }
+
+    function isFamily() {
+      return request.auth != null
+             && request.auth.token.email in familyEmails();
+    }
+
+    function isParent() {
+      return request.auth != null
+             && request.auth.token.email in parentEmails();
+    }
+
+    // Everything the family shares. Anything not on this list gets nothing
+    // from this rule.
+    function familyShared() {
+      return [
+        "todos", "todoLists", "chores", "events", "meals",
+        "grocery", "aisles", "kidPoints", "screenTime",
+        "screenTimeRequests", "errors", "settings"
+      ];
+    }
+
+    // Parent-managed catalogues: the family reads, parents write.
+    function familyAdminOnly() {
+      return ["recipes", "rewards"];
+    }
+
+    // ⚠️ READ THIS BEFORE EDITING.
+    //
+    // This matches EVERY top-level collection, including `users` and
+    // `googleSecrets`. It is safe only because the condition checks the
+    // collection name against an allowlist first — an unlisted collection
+    // gets nothing here and falls through to the rules above.
+    //
+    // Firestore ORs its matches: if any rule grants access, access is
+    // granted. So never loosen this condition, and never add a collection
+    // holding personal data to familyShared().
+    match /{col}/{document=**} {
+      allow read: if isFamily()
+                  && (col in familyShared() || col in familyAdminOnly());
+      allow write: if (isFamily() && col in familyShared())
+                   || (isParent() && col in familyAdminOnly());
+    }
+
+
+    // Wish lists. Never add wishLists to familyShared(): that recursive
+    // allowlist would also expose the private purchases subcollection.
+    function wishFamily() {
+      return isFamily() && request.auth.token.email_verified == true;
+    }
+    function wishParent() {
+      return isParent() && request.auth.token.email_verified == true;
+    }
+    function wishListActive(listId) {
+      return get(/databases/$(database)/documents/wishLists/$(listId)).data.archived == false;
+    }
+    function wishListShared(listId) {
+      let list = get(/databases/$(database)/documents/wishLists/$(listId)).data;
+      return list.archived == false && list.shared == true;
+    }
+    function validWishList(data) {
+      return data.keys().hasOnly(['kid', 'name', 'shared', 'archived', 'createdAt'])
+        && data.kid in ['Liam', 'Livi', 'Spencer']
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 80
+        && data.shared is bool && data.archived is bool
+        && (!data.archived || !data.shared)
+        && data.createdAt is timestamp;
+    }
+    function validWishItem(data) {
+      return data.keys().hasOnly(['name', 'link', 'notes', 'price', 'createdAt'])
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 120
+        && data.link is string && data.link.size() <= 2000
+        && (data.link == '' || data.link.matches('https?://.*'))
+        && data.notes is string && data.notes.size() <= 1000
+        && (data.price == null || (data.price is number && data.price >= 0 && data.price <= 999999.99))
+        && data.createdAt is timestamp;
+    }
+    match /wishLists/{listId} {
+      allow get: if wishFamily() || (resource.data.shared == true && resource.data.archived == false);
+      allow list: if wishFamily();
+      allow create: if wishFamily()
+        && listId.matches('[A-Za-z0-9]{20}')
+        && validWishList(request.resource.data)
+        && request.resource.data.shared == false
+        && request.resource.data.archived == false
+        && request.resource.data.createdAt == request.time;
+      allow update: if wishFamily()
+        && resource.data.archived == false
+        && validWishList(request.resource.data)
+        && request.resource.data.kid == resource.data.kid
+        && request.resource.data.createdAt == resource.data.createdAt;
+      // A tombstone closes every link/child document at once, even while
+      // somebody on another device is editing. No recursive-delete race.
+      allow delete: if false;
+
+      match /items/{itemId} {
+        allow read: if (wishFamily() && wishListActive(listId)) || wishListShared(listId);
+        allow create: if wishFamily() && wishListActive(listId)
+          && validWishItem(request.resource.data)
+          && request.resource.data.createdAt == request.time;
+        allow update: if wishFamily() && wishListActive(listId)
+          && validWishItem(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if wishFamily() && wishListActive(listId);
+      }
+
+      match /purchases/{itemId} {
+        allow read: if wishParent() && wishListActive(listId);
+        allow create, update: if wishParent() && wishListActive(listId)
+          && existsAfter(/databases/$(database)/documents/wishLists/$(listId)/items/$(itemId))
+          && request.resource.data.keys().hasOnly(['purchased', 'purchasedBy', 'updatedAt'])
+          && request.resource.data.purchased is bool
+          && request.resource.data.purchasedBy is string
+          && request.resource.data.purchasedBy.size() <= 100
+          && (request.resource.data.purchased || request.resource.data.purchasedBy == '')
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if wishListActive(listId) && (wishParent()
+          || (wishFamily() && !existsAfter(/databases/$(database)/documents/wishLists/$(listId)/items/$(itemId))));
+      }
+    }
+
+  }
+}

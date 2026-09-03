@@ -9,7 +9,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "test": "node --test tests/wishLists.test.js",
+    "test:rules": "firebase emulators:exec --config firebase.wishlists.json --only firestore --project demo-family-wishes \"node --test tests/wishLists.rules.test.js\""
   },
   "dependencies": {
     "firebase": "^11.1.0",
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@firebase/rules-unit-testing": "^4.0.1",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.17.0",
     "eslint-plugin-react": "^7.37.0",
