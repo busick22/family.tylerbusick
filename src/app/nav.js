@@ -1,12 +1,11 @@
-// The four areas. Each gets its own accent color, applied to the page via
-// the --page-accent CSS variable (see AppShell) — mirrors the old
-// btn-nav / mobile-bottom-nav pages exactly (Home, Meals, Planner, Kids).
+// The same five working destinations on tablet and phone.
 
-import { Home, UtensilsCrossed, CalendarDays, Users } from 'lucide-react'
+import { CalendarRange, UtensilsCrossed, CalendarDays, Users, ListChecks } from 'lucide-react'
 
 export const NAV_ITEMS = [
-  { to: '/', label: 'Home', icon: Home, accent: 'var(--accent-home)' },
+  { to: '/', label: 'Week', icon: CalendarRange, accent: 'var(--accent)' },
+  { to: '/calendar', label: 'Calendar', icon: CalendarDays, accent: 'var(--accent)' },
+  { to: '/tasks', label: 'To-dos', icon: ListChecks, accent: 'var(--accent)' },
   { to: '/meals', label: 'Meals', icon: UtensilsCrossed, accent: 'var(--accent-meals)' },
-  { to: '/planner', label: 'Planner', icon: CalendarDays, accent: 'var(--accent-planner)' },
   { to: '/kids', label: 'Kids', icon: Users, accent: 'var(--accent-kids)' },
 ]

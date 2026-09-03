@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ChevronRight, Gift, LockKeyhole, Pencil, Plus, Share2 } from 'lucide-react'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { useWishItems, useWishLists } from '../../state/WishListsContext.jsx'
@@ -47,7 +48,16 @@ function WishListDetail({ list, onBack }) {
 
 export default function WishListsTab({ kid }) {
   const { lists, loading, error, createList } = useWishLists()
-  const [selectedId, setSelectedId] = useState(null)
+  const [params, setParams] = useSearchParams()
+  const selectedId = params.get('list')
+  function setSelectedId(id) {
+    setParams(previous => {
+      const next = new URLSearchParams(previous)
+      if (id) next.set('list', id)
+      else next.delete('list')
+      return next
+    })
+  }
   const [creating, setCreating] = useState(false)
   const mine = lists.filter((list) => list.kid === kid)
   const selected = mine.find((list) => list.id === selectedId)

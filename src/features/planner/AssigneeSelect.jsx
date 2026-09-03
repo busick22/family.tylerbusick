@@ -2,7 +2,7 @@
 // kid-stack value). `filterMode` swaps the empty label for filter bars.
 
 import { useMembers } from '../../state/MembersContext.jsx'
-import { ANY_KID_ASSIGNEE } from '../../lib/family.js'
+import { ANY_KID_ASSIGNEE, KIDS } from '../../lib/family.js'
 
 export default function AssigneeSelect({ value, onChange, filterMode = false, id, ariaLabel }) {
   const { members } = useMembers()
@@ -15,7 +15,7 @@ export default function AssigneeSelect({ value, onChange, filterMode = false, id
       aria-label={ariaLabel}
     >
       <option value="">{filterMode ? 'All people' : 'Anyone'}</option>
-      {members.map((m) => (
+      {[...new Set([...members, ...KIDS])].map((m) => (
         <option key={m} value={m}>
           {m}
         </option>

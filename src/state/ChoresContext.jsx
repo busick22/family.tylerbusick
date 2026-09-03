@@ -4,9 +4,10 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import {
-  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp,
+  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot,
 } from 'firebase/firestore'
 import { db } from '../firebase.js'
+import { setWorkCompletion } from '../lib/workCompletion.js'
 import { useAuth } from './AuthContext.jsx'
 import { normalizeAssignment } from '../lib/family.js'
 
@@ -16,21 +17,27 @@ export function ChoresProvider({ children }) {
   const { user } = useAuth()
   const [chores, setChores] = useState([])
 
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
   useEffect(() => {
+    setLoading(true)
+    setError('')
     if (!user) {
       setChores([])
+      setLoading(false)
       return undefined
     }
     return onSnapshot(
       collection(db, 'chores'),
-      (snap) => setChores(snap.docs.map((d) => normalizeAssignment({ id: d.id, ...d.data() }))),
-      (err) => console.error('Chores listener failed:', err),
+      (snap) => { setChores(snap.docs.map((d) => normalizeAssignment({ id: d.id, ...d.data() }))); setLoading(false) },
+      (err) => { console.error('weekly chores listener failed:', err); setLoading(false); setError('Could not load your weekly chores. Check your connection or sign in again.') },
     )
   }, [user])
 
   const value = useMemo(
     () => ({
-      chores,
+      chores, loading, error,
 
       async addChore(data) {
         await addDoc(collection(db, 'chores'), {
@@ -45,13 +52,8 @@ export function ChoresProvider({ children }) {
         await updateDoc(doc(db, 'chores', id), data)
       },
 
-      async toggleChore(id, done) {
-        const who = done ? user?.displayName?.split(' ')[0] || '' : ''
-        await updateDoc(doc(db, 'chores', id), {
-          done,
-          completedAt: done ? serverTimestamp() : null,
-          completedBy: who,
-        })
+      async toggleChore(id, done, actor = user?.displayName?.split(' ')[0] || '') {
+        await setWorkCompletion(db, 'chore', id, done, actor)
       },
 
       async deleteChore(id) {
@@ -67,7 +69,7 @@ export function ChoresProvider({ children }) {
         )
       },
     }),
-    [chores, user],
+    [chores, user, loading, error],
   )
 
   return <ChoresContext.Provider value={value}>{children}</ChoresContext.Provider>

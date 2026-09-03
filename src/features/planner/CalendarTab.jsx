@@ -121,22 +121,17 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
                 data-other={!cell.cur}
                 data-today={dk === today}
                 key={`${dk}-${index}`}
-                onClick={() => onAddEvent(dk)}
+                onClick={() => setExpandedDay(dk)}
               >
-                <div className="planner-month-cell-head">
+                <button
+                  type="button"
+                  className="planner-month-day-open"
+                  onClick={(e) => { e.stopPropagation(); setExpandedDay(dk) }}
+                  aria-label={`${longDayLabel(dk)}, ${dayEvents.length} ${dayEvents.length === 1 ? 'event' : 'events'}. View day`}
+                >
                   <span className="planner-month-date">{cell.day}</span>
-                  <button
-                    type="button"
-                    className="planner-month-add"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onAddEvent(dk)
-                    }}
-                    aria-label={`Add event, ${longDayLabel(dk)}`}
-                  >
-                    <Plus aria-hidden="true" size={12} />
-                  </button>
-                </div>
+                  <span className="planner-month-day-dot" data-events={dayEvents.length > 0} aria-hidden="true" />
+                </button>
                 <span className="planner-month-events">
                   {visible.map((event) => (
                     <button
@@ -178,6 +173,7 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
             <X aria-hidden="true" />
           </button>
           <h3>{longDayLabel(expandedDay)}</h3>
+          {!(eventsByDate.get(expandedDay) || []).length && <p className="empty-inline">No events planned.</p>}
           <div className="calendar-day-list">
             {(eventsByDate.get(expandedDay) || []).map((event) => (
               <button

@@ -16,27 +16,34 @@ export function EventsProvider({ children }) {
   const { user } = useAuth()
   const [events, setEvents] = useState([])
 
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
   useEffect(() => {
+    setLoading(true)
+    setError('')
     if (!user) {
       setEvents([])
+      setLoading(false)
       return undefined
     }
     return onSnapshot(
       collection(db, 'events'),
-      (snap) =>
+      (snap) => {
         setEvents(
           snap.docs.map((d) => {
             const data = { id: d.id, ...d.data() }
             return { ...data, who: normalizeMemberList(data.who) }
           }),
-        ),
-      (err) => console.error('Events listener failed:', err),
+        ); setLoading(false)
+      },
+      (err) => { console.error('calendar listener failed:', err); setLoading(false); setError('Could not load your calendar. Check your connection or sign in again.') },
     )
   }, [user])
 
   const value = useMemo(
     () => ({
-      events,
+      events, loading, error,
 
       async addEvent(data) {
         const ref = await addDoc(collection(db, 'events'), {
@@ -54,7 +61,7 @@ export function EventsProvider({ children }) {
         await deleteDoc(doc(db, 'events', id))
       },
     }),
-    [events],
+    [events, loading, error],
   )
 
   return <EventsContext.Provider value={value}>{children}</EventsContext.Provider>

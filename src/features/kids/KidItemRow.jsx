@@ -17,25 +17,38 @@ export default function KidItemRow({
 }) {
   const [confirming, setConfirming] = useState(false)
   const [bursting, setBursting] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
 
-  function handleToggle(e) {
+  async function handleToggle(e) {
     const next = e.target.checked
-    if (next && particles?.length) {
-      setBursting(true)
-      setTimeout(() => setBursting(false), 650)
+    setBusy(true)
+    setError('')
+    try {
+      await onToggle(next)
+      if (next && particles?.length) {
+        setBursting(true)
+        setTimeout(() => setBursting(false), 650)
+      }
+    } catch {
+      setError('Could not update this item. Please try again.')
+    } finally {
+      setBusy(false)
     }
-    onToggle(next)
   }
 
   return (
-    <div className={`k-row ${checked ? 'done' : ''} ${bursting ? 'k-row-burst' : ''}`}>
+    <div><div className={`k-row ${checked ? 'done' : ''} ${bursting ? 'k-row-burst' : ''}`}>
+      <label className="work-check">
       <input
         type="checkbox"
         className="k-check"
         checked={checked}
         onChange={handleToggle}
+        disabled={busy}
         aria-label={`Mark ${label} ${checked ? 'incomplete' : 'complete'}`}
       />
+      </label>
       {bursting && (
         <span className="k-row-particles" aria-hidden="true">
           {particles.map((p, i) => (
@@ -70,6 +83,6 @@ export default function KidItemRow({
             <X aria-hidden="true" size={15} />
           </button>
         ))}
-    </div>
+    </div>{error && <p className="kid-row-error" role="alert">{error}</p>}</div>
   )
 }

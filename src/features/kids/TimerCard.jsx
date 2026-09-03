@@ -31,7 +31,7 @@ export default function TimerCard({ kid, onAskMore }) {
   const usedMin = Math.round(Math.min(view.budget, view.budget - remaining) / 60000)
 
   return (
-    <div className="timer-card">
+    <div className="timer-card" data-running={view.running}>
       <div className="timer-card-head">
         <span className="timer-card-label">⏰ Screen Time</span>
         <span className={`timer-card-status ${expired ? 'expired' : view.running ? 'running' : ''}`}>

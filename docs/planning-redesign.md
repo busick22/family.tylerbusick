@@ -26,8 +26,8 @@
   (`2026-10-03T00:17:19Z`).
 - The owner explicitly authorized pushing this branch to
   `busick22/family.tylerbusick` on September 2, 2026.
-- No redesign UI has been implemented yet. The initial preview intentionally
-  matches the deployed app; branch/preview setup is not a visual redesign.
+- The initial preview matched production. The first implemented redesign
+  follows below; branch/preview setup alone was not a visual redesign.
 - Updates are explicit, not automatic on push: commit intended changes on
   this branch, then run `npm run deploy:preview`.
 - The command checks the branch and clean working tree, runs lint/unit tests
@@ -57,3 +57,52 @@ allowed domains.
 
 Local emulator testing remains available as described in `wish-lists.md` and
 does not access production family data.
+
+## First implemented pass — September 2, 2026
+
+- Week replaces the passive Home dashboard: landscape iPad has a week overview
+  beside an editable selected day; portrait phones use a compact date strip.
+- Direct navigation: Week / Calendar / To-dos / Meals / Kids. Parent management
+  has a consistent header entry instead of living inside the child selector.
+- Tasks and weekly chores share one searchable, filterable To-dos destination
+  and editor. Named lists, assignment, optional dates, points, and weekly reset
+  remain available. Legacy `/planner` links redirect here.
+- Completion and undo now use one atomic transaction for task/chore state and
+  point history. Repeated/concurrent taps do not duplicate awards. Parents
+  completing shared, point-bearing work can choose which child earned it.
+- Meal planning opens in a week-and-detail layout, with the month overview
+  still available. Dinner can be a recipe or a simple write-in plan. Groceries
+  have an always-visible add form; adding missing meal ingredients preserves
+  manual items, amounts, and checked items. It does not merge quantities.
+- Kids open directly into My day: one checklist with optional extras, a smaller
+  idle timer, and separate Wish lists / Points & rewards / History tabs.
+  Undated tasks are visible; child quick-add assigns today's date.
+- Phone calendar days open a readable day sheet instead of clipping event
+  names inside narrow cells. Theme controls work in the shared header.
+- PWA orientation is now `any`, allowing landscape iPad and portrait phone.
+
+### Scope boundaries
+
+No Firestore schema, rules, Auth behavior, or production records were migrated.
+Wish-list sharing and private gift tracking remain unchanged. The hosted
+preview still uses real family data. Test fixtures are confined to local
+emulators (`tests/seed-planning.mjs`); never deploy or run them against live data.
+
+Weekly chores retain the existing manual-reset lifecycle; automatic recurring
+instances and full Google Calendar synchronization are not part of this pass.
+Older inactive page components remain in the repository for reference but are
+not reachable from the new route table.
+
+### Verification
+
+- `npm test`: date boundaries, combined task grouping, undated task visibility,
+  safe grocery append, and wish-list validation.
+- `npm run test:rules`: wish-list privacy plus transactional completion/undo,
+  concurrent taps, shared-work attribution, unauthorized access, deleted items.
+  If the local emulator is already running, run the two `*.rules.test.js`
+  files directly with `node --test` instead of starting a second emulator.
+- Browser checks use local Auth/Firestore emulators with sample data at landscape
+  iPad and portrait phone widths. Write-in dinner, grocery add/merge, task
+  creation, child visibility, completion/undo, and calendar day sheets exercised.
+- Real-device Google sign-in, installed-PWA safe areas/orientation, and planning
+  with the family's actual data still need the owner's preview check.

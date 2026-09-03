@@ -1,6 +1,4 @@
-// Avatar-trigger dropdown used in the mobile top bar (the sidebar has its
-// own inline theme/sign-out controls, so this only renders on small
-// screens — see shell.css).
+// Account and device-theme controls shared by the tablet and phone header.
 
 import { useEffect, useRef, useState } from 'react'
 import { Sun, Moon, LogOut } from 'lucide-react'

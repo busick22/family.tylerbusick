@@ -1,54 +1,26 @@
-// The signed-in frame: desktop gets a collapsible sidebar, mobile gets a
-// top bar (brand + account) plus a bottom tab bar. Which shows is pure CSS
-// (media queries) — everything is always rendered, so there's no resize
-// flicker.
-
-import { useEffect, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
-import Sidebar from './Sidebar.jsx'
+import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 import BottomNav from './BottomNav.jsx'
 import AccountMenu from './AccountMenu.jsx'
 import { BrandMark, BrandWordmark } from './Brand.jsx'
 import { NAV_ITEMS } from './nav.js'
 import './shell.css'
+import '../features/planning/planning.css'
 
 export default function AppShell() {
-  const location = useLocation()
-  const [collapsed, setCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem('family:sidebar') === 'collapsed'
-    } catch {
-      return false
-    }
-  })
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('family:sidebar', collapsed ? 'collapsed' : 'open')
-    } catch {
-      /* ignore */
-    }
-  }, [collapsed])
-
-  const active = NAV_ITEMS.find((item) =>
-    item.to === '/' ? location.pathname === '/' : location.pathname.startsWith(item.to),
-  )
-  const pageAccent = active?.accent ?? 'var(--accent)'
-
-  return (
-    <div className="shell" data-collapsed={collapsed}>
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
-      <div className="shell-mobile-top">
-        <div className="shell-mobile-brand">
-          <BrandMark size={24} />
-          <BrandWordmark />
-        </div>
+  return <div className="shell planning-shell">
+    <a className="skip-link" href="#main-content">Skip to content</a>
+    <header className="workspace-bar">
+      <Link to="/" className="workspace-brand" aria-label="Family week"><BrandMark size={28} /><BrandWordmark /></Link>
+      <nav className="workspace-nav" aria-label="Main navigation">
+        {NAV_ITEMS.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === '/'}><Icon size={19} aria-hidden="true" />{label}</NavLink>)}
+      </nav>
+      <div className="workspace-account">
+        <NavLink to="/parent" className="parent-link"><Settings size={18} aria-hidden="true" /><span>Parent</span></NavLink>
         <AccountMenu />
       </div>
-      <main className="shell-main" style={{ '--page-accent': pageAccent }}>
-        <Outlet />
-      </main>
-      <BottomNav />
-    </div>
-  )
+    </header>
+    <main id="main-content" className="shell-main" tabIndex={-1}><Outlet /></main>
+    <BottomNav />
+  </div>
 }

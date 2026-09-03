@@ -16,9 +16,10 @@ import MembersModal from './admin/MembersModal.jsx'
 import ScreenTimeAdminModal from './admin/ScreenTimeAdminModal.jsx'
 import PointsAdminModal from './admin/PointsAdminModal.jsx'
 import PendingModal from './admin/PendingModal.jsx'
+import TurnControls from '../planning/TurnControls.jsx'
 
-export default function KidSelector({ onSelectKid }) {
-  const [section, setSection] = useState('kids')
+export default function KidSelector({ onSelectKid, parentOnly = false }) {
+  const section = parentOnly ? 'parent' : 'kids'
   const [notice, showNotice] = useNotice()
   const [openTile, setOpenTile] = useState(null)
 
@@ -56,17 +57,9 @@ export default function KidSelector({ onSelectKid }) {
     <div className="page page-enter" data-page="kids">
       <Notice notice={notice} />
       <header className="page-head">
-        <h1 className="page-title">Kids</h1>
+        <h1 className="page-title">{parentOnly ? 'Parent tools' : 'Kids'}</h1>
       </header>
 
-      <nav className="seg-tabs" aria-label="Kids sections">
-        <button type="button" className="seg-tab" data-active={section === 'kids'} onClick={() => setSection('kids')}>
-          👦 Kids
-        </button>
-        <button type="button" className="seg-tab" data-active={section === 'parent'} onClick={() => setSection('parent')}>
-          ⚙️ Parent
-        </button>
-      </nav>
 
       {section === 'kids' && (
         <div className="kid-select-shell">
@@ -115,7 +108,7 @@ export default function KidSelector({ onSelectKid }) {
             <Star aria-hidden="true" className="parent-tile-icon" />
             <span className="parent-tile-name">Points</span>
             <span className="parent-tile-stat">
-              {KIDS.map((n) => `${n[0]}:${kidBalance(kidPoints, n)}`).join(' · ')}
+              {KIDS.map((n) => `${n}: ${kidBalance(kidPoints, n)}`).join(' · ')}
             </span>
           </button>
           <button
@@ -133,6 +126,7 @@ export default function KidSelector({ onSelectKid }) {
         </div>
       )}
 
+      {parentOnly && <TurnControls showNotice={showNotice} />}
       {openTile === 'members' && <MembersModal onClose={() => setOpenTile(null)} />}
       {openTile === 'screen-time' && (
         <ScreenTimeAdminModal onClose={() => setOpenTile(null)} showNotice={showNotice} />

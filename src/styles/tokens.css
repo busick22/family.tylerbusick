@@ -50,10 +50,26 @@
      sum of the two. */
   --dock-height: 56px;
   --dock-inset: env(safe-area-inset-bottom, 0px);
-  --page-pad: clamp(18px, 3vw, 36px);
+  --page-pad: clamp(16px, 2vw, 28px);
 
   /* Minimum touch target — every tappable control should clear this. */
   --tap: 48px;
+
+  /* Shared planning-workspace rhythm. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --workspace-width: 1440px;
+  --workspace-bar: 76px;
+  --workspace-rail: 320px;
+  --workspace-row: 68px;
+  --workspace-detail: 520px;
+  --workspace-mobile-bar: 64px;
+  --z-navigation: 40;
+  --z-skip: 200;
 
   /* Wish lists: reuse the shared rhythm in private and share-link views. */
   --wish-gap-xs: 4px;
@@ -92,8 +108,8 @@
   --text-mid: #7a6a5c;
   --text-dim: #a5978a;
 
-  --accent: #e8733f;
-  --accent-strong: #d05f2d;
+  --accent: #a4482b;
+  --accent-strong: #8e3d23;
   --on-accent: #ffffff;
   --accent-soft: rgba(232, 115, 63, 0.12);
   --accent-glow: rgba(232, 115, 63, 0.22);

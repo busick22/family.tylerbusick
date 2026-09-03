@@ -11,8 +11,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "icons": "node scripts/generate-icons.mjs",
-    "test": "node --test tests/wishLists.test.js",
-    "test:rules": "firebase emulators:exec --config firebase.wishlists.json --only firestore --project demo-family-wishes \"node --test tests/wishLists.rules.test.js\""
+    "test": "node --test tests/wishLists.test.js tests/planning.test.js",
+    "test:rules": "firebase emulators:exec --config firebase.wishlists.json --only firestore --project demo-family-wishes \"node --test tests/wishLists.rules.test.js tests/workCompletion.rules.test.js\""
   },
   "dependencies": {
     "firebase": "^11.1.0",

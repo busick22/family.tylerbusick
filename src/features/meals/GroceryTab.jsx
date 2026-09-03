@@ -1,309 +1,90 @@
-// Grocery tab: pick upcoming planned-dinner days, build a merged shopping
-// list from their ingredients (grouped by remembered store aisle), then
-// check things off at the store.
-
-import { useMemo, useState } from 'react'
-import { ShoppingCart, Store, X, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, X } from 'lucide-react'
 import { useMeals } from '../../state/MealsContext.jsx'
 import { useRecipes } from '../../state/RecipesContext.jsx'
 import { useGrocery } from '../../state/GroceryContext.jsx'
 import { useAisles } from '../../state/AislesContext.jsx'
 import { todayStr } from '../../lib/family.js'
+import { dayLabel } from '../../lib/planning.js'
+import { addMissingIngredients } from '../../lib/groceryPlanning.js'
 
 export default function GroceryTab({ showNotice }) {
   const { meals } = useMeals()
   const { getRecipe } = useRecipes()
   const grocery = useGrocery()
   const { getAisle, saveAisle } = useAisles()
-  const [manualName, setManualName] = useState('')
-  const [manualAmount, setManualAmount] = useState('')
-  const [confirmingClear, setConfirmingClear] = useState(false)
-
-  // Days that still make sense to shop for: today or later, with a dinner.
-  const eligibleKeys = useMemo(() => {
-    const today = todayStr()
-    return Object.keys(meals).filter((dk) => dk >= today).sort()
-  }, [meals])
-
-  // Drop stale selections (past days, removed meals) at read time.
-  const selectedDays = useMemo(
-    () => grocery.selectedDays.filter((dk) => eligibleKeys.includes(dk)),
-    [grocery.selectedDays, eligibleKeys],
-  )
-
-  async function persist(nextItems, nextDays) {
-    try {
-      await grocery.save(nextItems, nextDays)
-    } catch (e) {
-      console.error(e)
-      showNotice("Couldn't save the grocery list.", 'error')
-    }
+  const [name, setName] = useState('')
+  const [amount, setAmount] = useState('')
+  const [picked, setPicked] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [editAisles, setEditAisles] = useState(false)
+  const [confirmClear, setConfirmClear] = useState(false)
+  const eligible = Object.keys(meals).filter(key => key >= todayStr() && meals[key].recipeId && getRecipe(meals[key].recipeId)).sort()
+  const selected = (picked || grocery.selectedDays).filter(key => eligible.includes(key))
+  async function save(items, days = selected) {
+    if (grocery.loading || grocery.error) { showNotice('Wait until your grocery list has loaded before making changes.', 'error'); return false }
+    setBusy(true)
+    try { await grocery.save(items, days); return true }
+    catch { showNotice('Could not save groceries. Please try again.', 'error'); return false }
+    finally { setBusy(false) }
   }
-
-  function toggleDay(dk) {
-    const next = selectedDays.includes(dk)
-      ? selectedDays.filter((x) => x !== dk)
-      : [...selectedDays, dk]
-    persist(grocery.items, next)
+  async function addManual(event) {
+    event.preventDefault()
+    if (!name.trim()) return
+    const item = { id: 'manual-' + crypto.randomUUID(), name: name.trim(), amount: amount.trim(), aisle: getAisle(name.trim()), checked: false, manual: true, sources: [] }
+    if (await save([...grocery.items, item])) { setName(''); setAmount('') }
   }
-
-  function buildList() {
-    if (!selectedDays.length) {
-      showNotice('Please select at least one day.', 'error')
-      return
-    }
-    const merged = {}
-    selectedDays.forEach((dk) => {
-      const meal = meals[dk]
-      if (!meal) return
-      const r = getRecipe(meal.recipeId)
-      if (!r) return
-      ;(r.ingredients || []).forEach((ing) => {
-        if (!ing.name) return
-        const key = ing.name.toLowerCase().trim()
-        if (!merged[key]) {
-          merged[key] = { name: ing.name, amounts: [], sources: [] }
-        }
-        if (ing.amount) merged[key].amounts.push(ing.amount)
-        merged[key].sources.push(r.name)
+  async function addFromMeals() {
+    const merged = new Map()
+    selected.forEach(key => {
+      const recipe = getRecipe(meals[key].recipeId)
+      recipe?.ingredients?.forEach(ingredient => {
+        const key = (ingredient.name || '').trim().toLowerCase()
+        if (!key) return
+        const current = merged.get(key) || { name: ingredient.name.trim(), amounts: [], sources: [] }
+        if (ingredient.amount) current.amounts.push(ingredient.amount)
+        current.sources.push(recipe.name)
+        merged.set(key, current)
       })
     })
-    const items = Object.entries(merged).map(([key, item], i) => ({
-      id: `ing-${i}-${key}`,
-      name: item.name,
-      amount: item.amounts.join(' + '),
-      aisle: getAisle(item.name),
-      checked: false,
-      manual: false,
-      sources: item.sources,
-    }))
-    persist(items, selectedDays)
-    showNotice('Grocery list built from selected meals.', 'success')
+    const generated = [...merged].map(([key, item]) => ({ id: 'ing-' + key, name: item.name, amount: item.amounts.join(' + '), sources: item.sources, checked: false, manual: false, aisle: getAisle(item.name) }))
+    const next = addMissingIngredients(grocery.items, generated)
+    if (await save(next)) showNotice((next.length - grocery.items.length) + ' new ingredients added. Existing items kept.', 'success')
   }
-
-  function toggleItem(id) {
-    persist(
-      grocery.items.map((x) => (x.id === id ? { ...x, checked: !x.checked } : x)),
-      selectedDays,
-    )
-  }
-
-  function removeItem(id) {
-    persist(grocery.items.filter((x) => x.id !== id), selectedDays)
-  }
-
-  async function changeAisle(id, aisle) {
-    const item = grocery.items.find((x) => x.id === id)
-    if (!item) return
-    const trimmed = aisle.trim()
-    try {
-      await saveAisle(item.name, trimmed)
-    } catch (e) {
-      console.error(e)
-    }
-    persist(
-      grocery.items.map((x) => (x.id === id ? { ...x, aisle: trimmed } : x)),
-      selectedDays,
-    )
-  }
-
-  function clearChecked() {
-    persist(grocery.items.filter((x) => !x.checked), selectedDays)
-  }
-
-  function startOver() {
-    if (!confirmingClear) {
-      setConfirmingClear(true)
-      return
-    }
-    setConfirmingClear(false)
-    persist([], [])
-    showNotice('Grocery list cleared.', 'success')
-  }
-
-  function addManual() {
-    const name = manualName.trim()
-    if (!name) return
-    persist(
-      [
-        ...grocery.items,
-        {
-          id: `manual-${Date.now()}`,
-          name,
-          amount: manualAmount.trim(),
-          aisle: getAisle(name),
-          checked: false,
-          manual: true,
-          sources: [],
-        },
-      ],
-      selectedDays,
-    )
-    setManualName('')
-    setManualAmount('')
-  }
-
-  // Group items by aisle, unassigned last.
-  const groups = useMemo(() => {
-    const byAisle = {}
-    grocery.items.forEach((item) => {
-      const a = item.aisle || '__other'
-      if (!byAisle[a]) byAisle[a] = []
-      byAisle[a].push(item)
-    })
-    return Object.keys(byAisle)
-      .sort((a, b) => {
-        if (a === '__other') return 1
-        if (b === '__other') return -1
-        return a.localeCompare(b)
-      })
-      .map((a) => ({ aisle: a, items: byAisle[a] }))
-  }, [grocery.items])
-
-  const checkedCount = grocery.items.filter((x) => x.checked).length
-
-  return (
-    <div className="grocery-tab">
-      <div className="card grocery-panel">
-        <div className="panel-title">Choose days to shop for</div>
-        {eligibleKeys.length ? (
-          <>
-            <div className="day-chips">
-              {eligibleKeys.map((dk) => {
-                const meal = meals[dk]
-                const [y, m, d] = dk.split('-').map(Number)
-                const label = new Date(y, m - 1, d).toLocaleDateString('en-US', {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric',
-                })
-                return (
-                  <button
-                    type="button"
-                    className="day-chip"
-                    data-selected={selectedDays.includes(dk)}
-                    key={dk}
-                    onClick={() => toggleDay(dk)}
-                  >
-                    <span className="day-chip-date">{label}</span>
-                    <span className="day-chip-meal">{meal.recipeName}</span>
-                  </button>
-                )
-              })}
-            </div>
-            <div className="grocery-actions-row">
-              <button className="btn btn-primary" onClick={buildList}>
-                <ShoppingCart aria-hidden="true" size={16} /> Build list
-              </button>
-              <button className="btn btn-sm" onClick={() => persist(grocery.items, [...eligibleKeys])}>
-                All days
-              </button>
-              <button className="btn btn-sm btn-ghost" onClick={() => persist(grocery.items, [])}>
-                Clear
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className="grocery-none">
-            No meals planned for today or later yet. Add some on the Schedule tab!
-          </p>
-        )}
-      </div>
-
-      {grocery.items.length > 0 && (
-        <div className="card grocery-panel">
-          <div className="grocery-list-head">
-            <div className="panel-title">Grocery list</div>
-            <div className="grocery-actions-row">
-              {checkedCount > 0 && (
-                <button className="btn btn-sm" onClick={clearChecked}>
-                  ✓ Clear checked
-                </button>
-              )}
-              <button className="btn btn-sm btn-ghost" onClick={startOver}>
-                {confirmingClear ? 'Really clear all?' : 'Start over'}
-              </button>
-              <span className="grocery-count">
-                {checkedCount} of {grocery.items.length} checked
-              </span>
-            </div>
-          </div>
-
-          {groups.map((g) => (
-            <div className="aisle-group" key={g.aisle}>
-              <div className="aisle-title">
-                <Store aria-hidden="true" size={13} />
-                {g.aisle === '__other' ? 'Other / Unassigned' : g.aisle}
-              </div>
-              {g.items.map((item) => (
-                <div className="grocery-item" data-checked={item.checked} key={item.id}>
-                  <input
-                    type="checkbox"
-                    className="grocery-check"
-                    checked={item.checked}
-                    onChange={() => toggleItem(item.id)}
-                    aria-label={`Toggle ${item.name}`}
-                  />
-                  <span className="grocery-amount">{item.amount}</span>
-                  <div className="grocery-name">
-                    {item.name}
-                    {item.sources?.length > 0 && (
-                      <span className="grocery-sources">From: {item.sources.join(', ')}</span>
-                    )}
-                  </div>
-                  <input
-                    className="grocery-aisle-field"
-                    defaultValue={item.aisle}
-                    placeholder="aisle…"
-                    title="Type aisle — saved forever!"
-                    aria-label={`Aisle for ${item.name}`}
-                    onBlur={(e) => {
-                      if (e.target.value.trim() !== (item.aisle || '')) changeAisle(item.id, e.target.value)
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') e.target.blur()
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="icon-btn"
-                    onClick={() => removeItem(item.id)}
-                    aria-label={`Remove ${item.name}`}
-                  >
-                    <X aria-hidden="true" size={15} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          ))}
-
-          <div className="manual-add-row">
-            <input
-              className="field"
-              value={manualName}
-              onChange={(e) => setManualName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') addManual()
-              }}
-              placeholder="Add item manually…"
-              aria-label="Manual item name"
-            />
-            <input
-              className="field manual-amount-field"
-              value={manualAmount}
-              onChange={(e) => setManualAmount(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') addManual()
-              }}
-              placeholder="Amount"
-              aria-label="Manual item amount"
-            />
-            <button className="btn btn-sm" onClick={addManual}>
-              <Plus aria-hidden="true" size={15} /> Add
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+  const groups = new Map()
+  grocery.items.forEach(item => { const aisle = item.aisle || 'Other'; if (!groups.has(aisle)) groups.set(aisle, []); groups.get(aisle).push(item) })
+  const checked = grocery.items.filter(item => item.checked).length
+  return <section className="workspace-surface grocery-panel">
+    <div className="section-heading"><h2>Grocery list</h2><span className="muted-copy">{grocery.items.length - checked} to pick up</span></div>
+    {grocery.error && <p className="workspace-status" role="alert">{grocery.error}</p>}
+    {grocery.loading && <p className="workspace-status" role="status">Loading groceries…</p>}
+    <form className="manual-add-row" onSubmit={addManual}>
+      <input className="field" aria-label="Grocery item" placeholder="Add milk, apples, paper towels…" value={name} onChange={e => setName(e.target.value)} required />
+      <input className="field manual-amount-field" aria-label="Amount" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} />
+      <button className="btn btn-primary" disabled={busy || grocery.loading || Boolean(grocery.error)}><Plus size={18} aria-hidden="true" /> Add</button>
+    </form>
+    <details className="grocery-source-picker"><summary>Add ingredients from meal plans</summary>
+      <p className="empty-inline">Choose dinners below. Only missing ingredients are added; existing amounts and checkmarks stay as they are.</p>
+      <div className="day-chips">{eligible.map(key => <button key={key} className="day-chip" data-selected={selected.includes(key)} aria-pressed={selected.includes(key)}
+        onClick={() => setPicked(selected.includes(key) ? selected.filter(day => day !== key) : [...selected, key])}><span className="day-chip-date">{dayLabel(key)}</span><span className="day-chip-meal">{meals[key].recipeName}</span></button>)}</div>
+      {!eligible.length && <p className="empty-inline">No upcoming recipe-based dinners. You can still add groceries above.</p>}
+      <button className="btn" disabled={!selected.length || busy} onClick={addFromMeals}>Add missing ingredients</button>
+    </details>
+    {!grocery.loading && !grocery.error && !grocery.items.length && <p className="empty-inline">Your list is clear. Add anything you need above.</p>}
+    {[...groups].sort(([a], [b]) => a.localeCompare(b)).map(([aisle, items]) => <section key={aisle} className="work-group"><h2>{aisle}</h2>
+      {items.map(item => <div className="work-row" key={item.id} data-done={item.checked}>
+        <label className="work-check"><input type="checkbox" checked={item.checked} disabled={busy} aria-label={'Picked up ' + item.name}
+          onChange={() => save(grocery.items.map(current => current.id === item.id ? { ...current, checked: !current.checked } : current))} /></label>
+        <span className="work-edit"><strong>{item.name}</strong>{item.amount && <small>{item.amount}</small>}</span>
+        {editAisles && <input className="field grocery-aisle-field" aria-label={'Aisle for ' + item.name} defaultValue={item.aisle} placeholder="Aisle" disabled={busy}
+          onBlur={async e => { const aisle = e.target.value.trim(); if (aisle === (item.aisle || '')) return; try { await saveAisle(item.name, aisle); await save(grocery.items.map(current => current.id === item.id ? { ...current, aisle } : current)) } catch { showNotice('Could not save the aisle.', 'error') } }} />}
+        <button className="icon-btn" aria-label={'Remove ' + item.name} disabled={busy} onClick={() => save(grocery.items.filter(current => current.id !== item.id))}><X size={16} aria-hidden="true" /></button>
+      </div>)}
+    </section>)}
+    {grocery.items.length > 0 && <details className="work-options"><summary>List options</summary><div className="workspace-actions">
+      <button className="btn" disabled={busy || !checked} onClick={() => save(grocery.items.filter(item => !item.checked))}>Clear checked</button>
+      <button className="btn" onClick={() => setEditAisles(value => !value)}>{editAisles ? 'Done editing aisles' : 'Edit aisles'}</button>
+      <button className="btn btn-ghost" disabled={busy} onClick={async () => { if (!confirmClear) return setConfirmClear(true); if (await save([], [])) setConfirmClear(false) }}>{confirmClear ? 'Confirm clear entire list' : 'Clear entire list'}</button>
+    </div></details>}
+  </section>
 }

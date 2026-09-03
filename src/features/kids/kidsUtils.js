@@ -37,7 +37,7 @@ export function isTaskVisible(task) {
 }
 
 export function taskShowsOn(task, date = todayStr()) {
-  return !!task?.dueDate && task.dueDate <= date
+  return !task?.dueDate || task.dueDate <= date
 }
 
 export function isOverdueChore(chore, todayIndex = new Date().getDay()) {

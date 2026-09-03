@@ -15,34 +15,39 @@ const EMPTY = { items: [], selectedDays: [] }
 export function GroceryProvider({ children }) {
   const { user } = useAuth()
   const [grocery, setGrocery] = useState(EMPTY)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
+    setLoading(true)
+    setError('')
     if (!user) {
       setGrocery(EMPTY)
+      setLoading(false)
       return undefined
     }
     return onSnapshot(
       doc(db, 'grocery', 'current'),
       (snap) => {
         const data = snap.exists() ? snap.data() : EMPTY
+        setLoading(false)
         setGrocery({
           items: Array.isArray(data.items) ? data.items : [],
           selectedDays: Array.isArray(data.selectedDays) ? data.selectedDays : [],
         })
       },
-      (err) => console.error('Grocery listener failed:', err),
+      (err) => { console.error('Grocery listener failed:', err); setLoading(false); setError('Could not load groceries. Check your connection or sign in again.') },
     )
   }, [user])
 
   const value = useMemo(
     () => ({
       items: grocery.items,
+      loading, error,
       selectedDays: grocery.selectedDays,
 
       async save(nextItems, nextSelectedDays) {
-        // Update local state immediately so the UI doesn't wait on the
-        // network round-trip; the snapshot listener confirms after.
-        setGrocery({ items: nextItems, selectedDays: nextSelectedDays })
+        // Firestore's snapshot listener owns the optimistic/rollback state.
         await setDoc(doc(db, 'grocery', 'current'), {
           items: nextItems,
           selectedDays: nextSelectedDays,
@@ -50,7 +55,7 @@ export function GroceryProvider({ children }) {
         })
       },
     }),
-    [grocery],
+    [grocery, loading, error],
   )
 
   return <GroceryContext.Provider value={value}>{children}</GroceryContext.Provider>

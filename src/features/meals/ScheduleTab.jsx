@@ -9,7 +9,7 @@ function dateKeyOf(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function ScheduleTab({ onPickDay, showNotice }) {
+export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false }) {
   const { meals, clearMeal } = useMeals()
   const now = new Date()
   const [calYear, setCalYear] = useState(now.getFullYear())
@@ -145,7 +145,7 @@ export default function ScheduleTab({ onPickDay, showNotice }) {
         </div>
       </div>
 
-      <div className="card week-list">
+      {!monthOnly && <div className="card week-list">
         <div className="week-list-head">
           <span className="week-label">
             {MONTHS_SHORT[weekStart.getMonth()]} {weekStart.getDate()} –{' '}
@@ -203,7 +203,7 @@ export default function ScheduleTab({ onPickDay, showNotice }) {
             </div>
           )
         })}
-      </div>
+      </div>}
     </div>
   )
 }

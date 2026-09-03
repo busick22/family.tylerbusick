@@ -1,8 +1,10 @@
+import { useTick } from './useTick.js'
 // A single kid's dashboard: sticky header, Today/Points/History/Wish Lists tabs, a
 // floating add-task button, and the modals those tabs open.
 
 import { useState } from 'react'
-import { RefreshCw, Plus } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { RefreshCw } from 'lucide-react'
 import Notice, { useNotice } from '../../components/Notice.jsx'
 import { kidTheme } from '../../lib/kidThemes.js'
 import { DAYS, MONTHS } from '../../lib/family.js'
@@ -16,17 +18,20 @@ import TimeRequestModal from './TimeRequestModal.jsx'
 import WishListsTab from './WishListsTab.jsx'
 
 const TABS = [
-  { id: 'today', key: 'tabToday' },
-  { id: 'points', key: 'tabPoints' },
-  { id: 'history', key: 'tabHistory' },
-  { id: 'wishes', label: '🎁 Wish Lists' },
+  { id: 'today', label: 'My day' },
+  { id: 'wishes', label: 'Wish lists' },
+  { id: 'points', label: 'Points & rewards' },
+  { id: 'history', label: 'History' },
 ]
 
 export default function KidDashboard({ kid, onSwitchKid }) {
+  useTick(60_000)
   const theme = kidTheme(kid)
   const actions = useKidActions(kid)
   const [notice, showNotice] = useNotice()
-  const [tab, setTab] = useState('today')
+  const [params, setParams] = useSearchParams()
+  const tab = TABS.some(t => t.id === params.get('tab')) ? params.get('tab') : 'today'
+  function setTab(value) { setParams(previous => { const next = new URLSearchParams(previous); next.set('tab', value); return next }) }
   const [editingTask, setEditingTask] = useState(undefined) // undefined=closed, null=new, obj=edit
   const [editingChore, setEditingChore] = useState(null)
   const [askingMoreTime, setAskingMoreTime] = useState(false)
@@ -79,15 +84,7 @@ export default function KidDashboard({ kid, onSwitchKid }) {
         {tab === 'history' && <HistoryTab kid={kid} />}
         {tab === 'wishes' && <WishListsTab kid={kid} />}
 
-        {tab !== 'wishes' && <button
-          type="button"
-          className="fab"
-          style={{ background: theme.color }}
-          onClick={() => setEditingTask(null)}
-          aria-label="Add task"
-        >
-          <Plus aria-hidden="true" />
-        </button>}
+
       </div>
 
       {editingTask !== undefined && (
