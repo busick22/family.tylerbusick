@@ -95,6 +95,12 @@ not reachable from the new route table.
 
 ### Verification
 
+Published code revision: `c65de90`. Preview release: `1788399600838000`.
+The served HTML and `/assets/index-C_5d9yqW.js` matched the local production
+build byte-for-byte. Live release `1788392907305000` and its previous bundle
+were verified unchanged. Preview expires October 2, 2026 at 8:39 p.m.
+America/Chicago. All 7 unit tests and 20 emulator checks passed.
+
 - `npm test`: date boundaries, combined task grouping, undated task visibility,
   safe grocery append, and wish-list validation.
 - `npm run test:rules`: wish-list privacy plus transactional completion/undo,
