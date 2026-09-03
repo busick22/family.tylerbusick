@@ -24,9 +24,10 @@
   bundle; live Hosting release `1788392907305000` remained unchanged.
 - Initial expiration: October 2, 2026 at 7:17 p.m. America/Chicago
   (`2026-10-03T00:17:19Z`).
-- Branch is saved locally. Uploading it to `busick22/family.tylerbusick`
-  was blocked by the safety review pending explicit owner approval to push
-  source to GitHub. Do not claim it has been pushed or auto-deploys.
+- The owner explicitly authorized pushing this branch to
+  `busick22/family.tylerbusick` on September 2, 2026.
+- No redesign UI has been implemented yet. The initial preview intentionally
+  matches the deployed app; branch/preview setup is not a visual redesign.
 - Updates are explicit, not automatic on push: commit intended changes on
   this branch, then run `npm run deploy:preview`.
 - The command checks the branch and clean working tree, runs lint/unit tests
@@ -40,8 +41,11 @@
 A Hosting preview is a separate website, NOT a separate database. The initial
 app configuration still points to live Auth/Firestore in `tyler-busick-22`.
 Changes made after signing into such a preview affect the same family data
-as production. Separate test data/backend is awaiting the owner's choice;
-do not assume isolation or run destructive experiments against live data.
+as production. On September 2, 2026, the owner explicitly chose to keep using
+real data and acknowledged that preview edits affect production data. Do not
+create a separate test backend for the hosted preview. Continue to use local
+emulators for write-heavy or destructive tests; do not run such experiments
+against live data.
 
 Hosting's automatic Auth-domain synchronization is disabled because it would
 target `busick-recipes`, not the app's actual Auth project. The exact preview
