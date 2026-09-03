@@ -19,6 +19,14 @@
   was uncommitted before the branch was created. `main` was not changed.
 - Firebase Hosting project/site: `busick-recipes`.
 - Preview channel: `planning-first`.
+- Preview URL: https://busick-recipes--planning-first-lci3xaw5.web.app
+- Initial deployment: `b69c9fb`, verified against the built HTML and main
+  bundle; live Hosting release `1788392907305000` remained unchanged.
+- Initial expiration: October 2, 2026 at 7:17 p.m. America/Chicago
+  (`2026-10-03T00:17:19Z`).
+- Branch is saved locally. Uploading it to `busick22/family.tylerbusick`
+  was blocked by the safety review pending explicit owner approval to push
+  source to GitHub. Do not claim it has been pushed or auto-deploys.
 - Updates are explicit, not automatic on push: commit intended changes on
   this branch, then run `npm run deploy:preview`.
 - The command checks the branch and clean working tree, runs lint/unit tests
@@ -37,8 +45,11 @@ do not assume isolation or run destructive experiments against live data.
 
 Hosting's automatic Auth-domain synchronization is disabled because it would
 target `busick-recipes`, not the app's actual Auth project. The exact preview
-hostname must be authorized in the chosen Auth project before Google sign-in
-can be used. Do not add wildcard domains or change existing allowed domains.
+hostname `busick-recipes--planning-first-lci3xaw5.web.app` was added to
+`tyler-busick-22` and verified, preserving every existing authorized domain.
+No Firestore rules or family records were changed. End-to-end Google sign-in
+still needs an owner check. Do not add wildcard domains or change existing
+allowed domains.
 
 Local emulator testing remains available as described in `wish-lists.md` and
 does not access production family data.
