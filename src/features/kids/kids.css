@@ -471,3 +471,18 @@
   .kid-tab { font-size: var(--text-xs); padding: var(--space-2); }
   .admin-points-tiles { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* Kids is a destination with named doors, not an admin mode selector. */
+.kid-select-shell { width: 100%; max-width: var(--home-width); margin: var(--space-3) auto; }
+.kid-select-sub { text-align: left; color: var(--text-mid); font-size: var(--text-md); margin-bottom: var(--space-5); }
+.kid-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+.kid-btn { display: flex; flex-direction: column; align-items: flex-start; text-align: left; width: 100%; min-width: 0; padding: var(--space-5); border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); box-shadow: none; }
+.kid-btn-info { text-align: left; }
+.kid-btn-age { font-size: var(--text-xs); line-height: 1.5; color: var(--text-mid); }
+.kid-btn-emoji { font-size: var(--space-8); margin-bottom: var(--space-4); }
+.kid-btn-name { font-size: var(--text-xl); }
+.kid-btn-badge { margin-top: var(--space-3); }
+.kids-parent-entry { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; padding: var(--space-5); margin-top: var(--space-5); background: var(--accent-soft); border-radius: var(--radius-md); font-size: var(--text-sm); }
+.kids-parent-entry span { color: var(--text-mid); }
+.kid-hdr-name { letter-spacing: var(--letter-tight); }
+@media (max-width: 900px) { .kid-btns { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); } .kid-btn { flex-direction: row; align-items: center; gap: var(--space-4); } .kid-btn-emoji { margin: 0; font-size: var(--space-7); } .kid-btn-badge { margin: 0 0 0 auto; } }

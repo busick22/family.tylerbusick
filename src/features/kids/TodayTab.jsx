@@ -47,13 +47,13 @@ export default function TodayTab({ kid, theme, onEditTask, onEditChore, onAskMor
       {loading && <p className="workspace-status" role="status">Loading your to-dos…</p>}
       {!loading && !loadError && total > 0 && done === total && <div className="all-done"><span className="all-done-icon">{theme.allDoneIcon}</span><div className="all-done-title">{theme.allDoneMsg}</div><p>Your responsibilities are finished. Extras are optional.</p></div>}
       <div className="kid-panel">
-        {chores.map(chore => <KidItemRow key={chore.id} label={chore.name} meta={isOverdueChore(chore) ? 'Overdue · ' + chore.day : 'Repeats weekly'} checked={Boolean(chore.done)} points={chore.points} particles={theme.particles} onToggle={value => actions.toggleChore(chore.id, value)} onEdit={() => onEditChore(chore)} />)}
+        {chores.map(chore => <KidItemRow key={chore.id} label={chore.name} meta={isOverdueChore(chore) ? 'Earlier this week · ' + chore.day : 'Repeats weekly'} checked={Boolean(chore.done)} points={chore.points} particles={theme.particles} onToggle={value => actions.toggleChore(chore.id, value)} onEdit={() => onEditChore(chore)} />)}
         {tasks.map(task => <KidItemRow key={task.id} label={task.text} meta={task.dueDate ? taskShowLabel(task.dueDate) : 'Anytime'} checked={isTaskChecked(task)} points={task.points} particles={theme.particles} onToggle={value => actions.toggleTask(task.id, value)} onEdit={() => onEditTask(task)} />)}
       </div>
       {!loading && !loadError && !total && <div className="empty-workspace"><h2>You’re caught up</h2><p>No responsibilities waiting for you today.</p></div>}
       <form className="k-add-row" onSubmit={add}><input className="field" aria-label="New personal to-do" placeholder="Add something to do…" value={taskInput} onChange={e => setTaskInput(e.target.value)} required /><button className="btn btn-primary" disabled={busy}>Add</button></form>
       {extras.length > 0 && <details className="work-options"><summary>Optional extras · {extras.length}</summary><div className="kid-panel">{extras.map(item => <KidItemRow key={item.kind + item.id} label={item.text || item.name} meta={item.kind === 'chore' ? 'Optional extra · every ' + item.day : 'Optional extra for any kid'} checked={item.kind === 'chore' ? Boolean(item.done) : isTaskChecked(item)} points={item.points} particles={theme.particles} onToggle={value => item.kind === 'chore' ? actions.toggleChore(item.id, value) : actions.toggleTask(item.id, value)} onEdit={() => item.kind === 'chore' ? onEditChore(item) : onEditTask(item)} />)}</div></details>}
-      <div className="workspace-footer-links"><Link to={'/tasks?who=' + kid}>See all my to-dos →</Link></div>
+      <div className="workspace-footer-links"><Link to={'/lists?who=' + kid}>See all my to-dos →</Link></div>
     </section>
     <aside className="kid-day-aside" aria-label="Time and family plans">
       <TimerCard kid={kid} onAskMore={onAskMoreTime} />

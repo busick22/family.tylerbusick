@@ -1,11 +1,11 @@
 // Account and device-theme controls shared by the tablet and phone header.
 
 import { useEffect, useRef, useState } from 'react'
-import { Sun, Moon, LogOut } from 'lucide-react'
+import { Sun, Moon, LogOut, CircleHelp } from 'lucide-react'
 import { useAuth } from '../state/AuthContext.jsx'
 import { useSettings } from '../state/SettingsContext.jsx'
 
-export default function AccountMenu() {
+export default function AccountMenu({ onHelp }) {
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useSettings()
   const [open, setOpen] = useState(false)
@@ -39,11 +39,12 @@ export default function AccountMenu() {
         {user?.photoURL ? (
           <img className="avatar" src={user.photoURL} alt="" />
         ) : (
-          <div className="avatar" />
+          <span className="avatar account-initial">{(user?.displayName || 'Family').slice(0, 1)}</span>
         )}
       </button>
       {open && (
         <div className="menu account-dropdown" role="menu">
+          {onHelp && <button type="button" className="menu-item" role="menuitem" onClick={() => { setOpen(false); onHelp() }}><CircleHelp aria-hidden="true" />Find your way</button>}
           <button type="button" className="menu-item" role="menuitem" onClick={toggleTheme}>
             {theme === 'dark' ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             {theme === 'dark' ? 'Light mode' : 'Dark mode'}

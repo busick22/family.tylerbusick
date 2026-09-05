@@ -1,0 +1,14 @@
+/* Keep the local-only emulator notice visible without covering the phone dock.
+   Imported only in Vite development with the demo emulator flag enabled. */
+.firebase-emulator-warning {
+  top: 0 !important;
+  bottom: auto !important;
+  left: 50% !important;
+  width: auto !important;
+  max-width: 50% !important;
+  transform: translateX(-50%);
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+  padding: 2px !important;
+  pointer-events: none !important;
+}

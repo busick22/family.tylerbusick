@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import PlanNav from './PlanNav.jsx'
 import CalendarTab from '../planner/CalendarTab.jsx'
 import EventModal from '../planner/EventModal.jsx'
 import Notice, { useNotice } from '../../components/Notice.jsx'
@@ -13,7 +13,8 @@ export default function CalendarPage() {
   const { loading, error } = useEvents()
   return <div className="page page-enter">
     <Notice notice={notice} />
-    <header className="workspace-title"><div><p className="workspace-eyebrow">Appointments & activities</p><h1>Calendar</h1></div><Link className="btn" to="/">Week view</Link></header>
+    <header className="workspace-title"><div><h1>Plan</h1><p className="page-intro">Make room for the week ahead.</p></div></header>
+    <PlanNav />
     {error && <p className="workspace-status" role="alert">{error}</p>}
     {loading && <p className="workspace-status" role="status">Loading your calendar…</p>}
     <CalendarTab onAddEvent={date => setEvent(date ? { date } : null)} onEditEvent={setEvent} />

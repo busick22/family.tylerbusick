@@ -10,8 +10,8 @@
        should read bright and cheerful, not like a nighttime dashboard.
      - Bigger type, bigger touch targets, bigger radii everywhere — kids tap
        this, so nothing should be fiddly.
-     - Per-area accents instead of a single brand color: one shared accent for
-       the planning surfaces (Week / Calendar / To-dos), plus Meals and Kids.
+     - Evergreen actions throughout, with a warm dinner note and personal
+       colors inside the kids’ spaces.
 --------------------------------------------------------------------------- */
 
 :root {
@@ -40,6 +40,19 @@
   --speed-fast: 140ms;
   --speed-med: 240ms;
   --speed-slow: 420ms;
+
+  /* Family home layout: predictable (3), feedback-only motion (2), daily density (4). */
+  --rail-width: 216px;
+  --home-width: 1220px;
+  --home-aside: 292px;
+  --home-title: clamp(1.8rem, 3vw, 2.6rem);
+  --space-7: 40px;
+  --space-8: 48px;
+  --letter-tight: -0.045em;
+  --capture-height: 60px;
+  --rail-icon: 22px;
+
+  --indicator-width: 3px;
 
   /* Layout */
   /* The mobile tab bar is anchored to the bottom edge (not a floating pill).
@@ -80,42 +93,40 @@
   --wish-checkbox-size: 20px;
   --wish-page-width: 640px;
 
-  /* Area accents, shared between both themes so a page's identity doesn't
-     shift when you flip the theme. Week / Calendar / To-dos are one planning
-     surface and share the base --accent; only Meals and Kids read as separate
-     places. (The old --accent-home and --accent-planner went away with the
-     Dashboard and Planner pages they belonged to.) */
-  --accent-meals: #d6524a;
-  --accent-kids: #9b5de5;
 }
 
 /* --- Light (default) -------------------------------------------------------- */
 :root,
 :root[data-theme='light'] {
+  --accent-meals: #8a5327;
+  --accent-kids: #6f5594;
+  --dinner-bg: #f4ebce;
+  --dinner-text: #644c23;
+  --rail-bg: #eef2e8;
   color-scheme: light;
 
-  --bg: #fbf6f1;
-  --bg-deep: #f3ece3;
+  --bg: #f7f8f4;
+  --bg-deep: #edf0e8;
   --surface: #ffffff;
-  --surface-2: #fbf6f1;
-  --surface-3: #f3e9de;
+  --surface-2: #f0f3ec;
+  --surface-3: #e6ebdf;
 
-  --border: rgba(90, 62, 38, 0.12);
-  --border-strong: rgba(90, 62, 38, 0.22);
+  --border: #e1e6dc;
+  --border-strong: #becbbd;
 
-  --text: #241a12;
-  --text-mid: #7a6a5c;
-  --text-dim: #a5978a;
+  --text: #26352d;
+  --text-mid: #617066;
+  --text-dim: #68776d;
 
-  --accent: #a4482b;
-  --accent-strong: #8e3d23;
+  --accent: #35634c;
+  --accent-strong: #254b38;
   --on-accent: #ffffff;
-  --accent-soft: rgba(164, 72, 43, 0.12);
-  --accent-glow: rgba(164, 72, 43, 0.22);
+  --accent-soft: #e5eddf;
+  --accent-glow: #dae6d2;
 
-  --danger: #d6524a;
+  --danger: #ae3e37;
   --danger-soft: rgba(214, 82, 74, 0.1);
-  --ok: #3d9a5c;
+  --ok: #35634c;
 
   --shadow-1: 0 1px 2px rgba(60, 40, 20, 0.06);
   --shadow-2: 0 10px 28px rgba(60, 40, 20, 0.1);
@@ -128,30 +139,35 @@
 
 /* --- Dark ----------------------------------------------------------------- */
 :root[data-theme='dark'] {
+  --accent-meals: #e4c995;
+  --accent-kids: #c6a9e6;
+  --dinner-bg: #3c3523;
+  --dinner-text: #ecdaad;
+  --rail-bg: #202a21;
   color-scheme: dark;
 
-  --bg: #17130f;
-  --bg-deep: #0f0c09;
-  --surface: #211a14;
-  --surface-2: #2a2119;
-  --surface-3: #34291f;
+  --bg: #19211c;
+  --bg-deep: #131914;
+  --surface: #222d25;
+  --surface-2: #2b372e;
+  --surface-3: #344237;
 
-  --border: rgba(232, 200, 170, 0.14);
-  --border-strong: rgba(232, 200, 170, 0.24);
+  --border: #39463a;
+  --border-strong: #5a6f5c;
 
-  --text: #f5ece2;
-  --text-mid: #b4a190;
-  --text-dim: #7d6f61;
+  --text: #eef2e8;
+  --text-mid: #b5c2b1;
+  --text-dim: #a6b4a4;
 
-  --accent: #f0895a;
-  --accent-strong: #f5a37c;
-  --on-accent: #221207;
-  --accent-soft: rgba(240, 137, 90, 0.16);
-  --accent-glow: rgba(240, 137, 90, 0.26);
+  --accent: #b4d49d;
+  --accent-strong: #cbe6b8;
+  --on-accent: #1a2a1e;
+  --accent-soft: #34432e;
+  --accent-glow: #3d5133;
 
   --danger: #e37d76;
   --danger-soft: rgba(227, 125, 118, 0.16);
-  --ok: #5cb97e;
+  --ok: #b4d49d;
 
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-2: 0 10px 28px rgba(0, 0, 0, 0.45);

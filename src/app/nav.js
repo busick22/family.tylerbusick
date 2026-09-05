@@ -1,11 +1,9 @@
-// The same five working destinations on tablet and phone.
-
-import { CalendarRange, UtensilsCrossed, CalendarDays, Users, ListChecks } from 'lucide-react'
+import { House, CalendarDays, ListChecks, UtensilsCrossed, Users } from 'lucide-react'
 
 export const NAV_ITEMS = [
-  { to: '/', label: 'Week', icon: CalendarRange, accent: 'var(--accent)' },
-  { to: '/calendar', label: 'Calendar', icon: CalendarDays, accent: 'var(--accent)' },
-  { to: '/tasks', label: 'To-dos', icon: ListChecks, accent: 'var(--accent)' },
-  { to: '/meals', label: 'Meals', icon: UtensilsCrossed, accent: 'var(--accent-meals)' },
-  { to: '/kids', label: 'Kids', icon: Users, accent: 'var(--accent-kids)' },
+  { to: '/', label: 'Home', detail: 'Today, at a glance', icon: House },
+  { to: '/plan', label: 'Plan', detail: 'The family calendar', icon: CalendarDays },
+  { to: '/lists', label: 'Lists', detail: 'To-dos & groceries', icon: ListChecks },
+  { to: '/meals', label: 'Meals', detail: 'Dinners & recipes', icon: UtensilsCrossed },
+  { to: '/kids', label: 'Kids', detail: 'Chores, time & wishes', icon: Users },
 ]

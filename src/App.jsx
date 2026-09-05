@@ -1,15 +1,21 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './state/AuthContext.jsx'
 import AppShell from './app/AppShell.jsx'
 import SignInPage from './features/auth/SignInPage.jsx'
+import HomePage from './features/home/HomePage.jsx'
+import ListsPage from './features/planning/ListsPage.jsx'
 import WeekPage from './features/planning/WeekPage.jsx'
 import CalendarPage from './features/planning/CalendarPage.jsx'
-import WorkPage from './features/planning/WorkPage.jsx'
 import KidSelector from './features/kids/KidSelector.jsx'
 import MealsPage from './features/meals/MealsPage.jsx'
 import KidsPage from './features/kids/KidsPage.jsx'
 import SharedWishListPage from './features/kids/SharedWishListPage.jsx'
 import FamilyDataProviders from './state/FamilyDataProviders.jsx'
+
+function LegacyTasks() {
+  const { search } = useLocation()
+  return <Navigate to={'/lists' + search} replace />
+}
 
 function BootScreen() {
   return (
@@ -36,9 +42,13 @@ function PrivateApp() {
     <FamilyDataProviders>
       <Routes>
         <Route element={<AppShell />}>
-          <Route index element={<WeekPage />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="tasks" element={<WorkPage />} />
+          <Route index element={<HomePage />} />
+          <Route path="plan" element={<WeekPage />} />
+          <Route path="plan/month" element={<CalendarPage />} />
+          <Route path="lists" element={<ListsPage />} />
+          <Route path="lists/groceries" element={<ListsPage grocery />} />
+          <Route path="calendar" element={<Navigate to="/plan/month" replace />} />
+          <Route path="tasks" element={<LegacyTasks />} />
           <Route path="parent" element={<KidSelector parentOnly />} />
           <Route path="meals" element={<MealsPage />} />
           <Route path="planner" element={<Navigate to="/tasks" replace />} />

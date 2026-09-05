@@ -1,6 +1,7 @@
 // "Who are you?" — kid picker plus a Parent tab with a 4-tile admin
 // dashboard (Members, Screen Time, Points, Pending requests).
 
+import { Link, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
 import { Users, Clock, Star, Inbox } from 'lucide-react'
 import Notice, { useNotice } from '../../components/Notice.jsx'
@@ -22,7 +23,8 @@ import TurnControls from '../planning/TurnControls.jsx'
 export default function KidSelector({ onSelectKid, parentOnly = false }) {
   const section = parentOnly ? 'parent' : 'kids'
   const [notice, showNotice] = useNotice()
-  const [openTile, setOpenTile] = useState(null)
+  const [params] = useSearchParams()
+  const [openTile, setOpenTile] = useState(parentOnly && params.get('open') === 'pending' ? 'pending' : null)
 
   const { chores } = useChores()
   const { todos } = useTodos()
@@ -40,7 +42,7 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
     const total = openChores.length + myTasks.length
     const allDone = (myChores.length > 0 || myTasks.length > 0) && total === 0
     if (allDone) return { text: 'All done ✓', cls: 'all-done' }
-    if (total > 0) return { text: `${total} today`, cls: 'has-items' }
+    if (total > 0) return { text: `${total} to do`, cls: 'has-items' }
     return null
   }
 
@@ -58,13 +60,13 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
     <div className="page page-enter" data-page="kids">
       <Notice notice={notice} />
       <header className="page-head">
-        <h1 className="page-title">{parentOnly ? 'Parent tools' : 'Kids'}</h1>
+        <h1 className="page-title">{parentOnly ? 'Family settings' : 'Kids'}</h1>
       </header>
 
 
       {section === 'kids' && (
         <div className="kid-select-shell">
-          <p className="kid-select-sub">Tap your name to get started</p>
+          <p className="kid-select-sub">Your day. Your things. Your own space.</p>
           <div className="kid-btns">
             {KIDS.map((name) => {
               const theme = kidTheme(name)
@@ -81,7 +83,7 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
                   <span className="kid-btn-emoji">{theme.emoji}</span>
                   <span className="kid-btn-info">
                     <span className="kid-btn-name">{name}</span>
-                    <span className="kid-btn-age">{theme.age} · {theme.vibe}</span>
+                    <span className="kid-btn-age">To-dos, screen time & wish lists</span>
                   </span>
                   {badge && <span className={`kid-btn-badge ${badge.cls}`}>{badge.text}</span>}
                 </button>
@@ -119,7 +121,7 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
             onClick={() => setOpenTile('pending')}
           >
             <Inbox aria-hidden="true" className="parent-tile-icon" />
-            <span className="parent-tile-name">Pending</span>
+            <span className="parent-tile-name">Requests</span>
             <span className="parent-tile-stat">
               {pendingCount ? `${pendingCount} ${pendingCount === 1 ? 'request' : 'requests'} waiting` : 'No requests'}
             </span>
@@ -127,6 +129,7 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
         </div>
       )}
 
+      {!parentOnly && <Link className="kids-parent-entry" to="/parent"><strong>For the grown-ups</strong><span>Requests, points & screen time →</span></Link>}
       {parentOnly && <TurnControls showNotice={showNotice} />}
       {openTile === 'members' && <MembersModal onClose={() => setOpenTile(null)} />}
       {openTile === 'screen-time' && (

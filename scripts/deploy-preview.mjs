@@ -2,7 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
-const branch = 'codex/planning-first-redesign'
+const branch = 'codex/family-home-redesign'
 const current = execFileSync('git', ['branch', '--show-current'], { cwd: root, encoding: 'utf8' }).trim()
 if (current !== branch) {
   console.error(`Preview deployment requires ${branch}; current branch is ${current || 'detached HEAD'}.`)
@@ -20,7 +20,7 @@ const steps = [
   ['npm', ['run', 'lint']],
   ['npm', ['test']],
   ['npm', ['run', 'build']],
-  ['firebase', ['hosting:channel:deploy', 'planning-first', '--project', 'busick-recipes',
+  ['firebase', ['hosting:channel:deploy', 'family-home', '--project', 'busick-recipes',
     '--config', 'firebase.json', '--expires', '30d', '--no-authorized-domains']],
 ]
 for (const [command, args] of steps) {

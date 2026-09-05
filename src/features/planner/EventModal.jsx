@@ -95,13 +95,13 @@ export default function EventModal({ event, onClose, showNotice }) {
   }
 
   return (
-    <Modal onClose={onClose} width="min(480px, 100%)">
-      <button className="icon-btn modal-close" onClick={onClose} aria-label="Close">
+    <Modal onClose={busy ? () => {} : onClose} width="min(480px, 100%)">
+      <button className="icon-btn modal-close" onClick={onClose} disabled={busy} aria-label="Close">
         <X aria-hidden="true" />
       </button>
-      <h3>{editing ? 'Edit Event' : 'Add Event'}</h3>
+      <h3>{editing ? 'Edit event' : 'Add an event'}</h3>
 
-      <label className="field-label" htmlFor="ev-title">Title *</label>
+      <label className="field-label" htmlFor="ev-title">What’s happening?</label>
       <input
         id="ev-title"
         className="field"
@@ -113,7 +113,7 @@ export default function EventModal({ event, onClose, showNotice }) {
 
       <div className="form-2col">
         <div>
-          <label className="field-label" htmlFor="ev-date">Date *</label>
+          <label className="field-label" htmlFor="ev-date">Date</label>
           <input
             id="ev-date"
             type="date"
@@ -123,7 +123,7 @@ export default function EventModal({ event, onClose, showNotice }) {
           />
         </div>
         <div>
-          <label className="field-label" htmlFor="ev-time">Time</label>
+          <label className="field-label" htmlFor="ev-time">Time · optional</label>
           <input
             id="ev-time"
             type="time"
@@ -143,6 +143,43 @@ export default function EventModal({ event, onClose, showNotice }) {
         placeholder="Optional"
       />
 
+      <span className="field-label">Who&rsquo;s involved</span>
+      {members.length ? (
+        <div className="who-picker">
+          {members.map((m) => (
+            <button
+              type="button"
+              key={m}
+              className="chip"
+              data-active={who.includes(m)}
+              aria-pressed={who.includes(m)}
+              onClick={() => toggleWho(m)}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="planner-empty" style={{ padding: '4px 0' }}>
+          Add members first (Family Settings)
+        </p>
+      )}
+
+      <details className="work-options"><summary>Notes, color & Google Calendar</summary>
+      <label className="field-label" htmlFor="ev-notes">Notes</label>
+      <textarea
+        id="ev-notes"
+        className="field event-notes-field"
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Optional"
+      />
+
+      <label className="check-row">
+        <input type="checkbox" checked={syncGcal} onChange={(e) => setSyncGcal(e.target.checked)} />
+        Also add to the family Google Calendar
+      </label>
+
       <span className="field-label">Color</span>
       <div className="color-picker" role="radiogroup" aria-label="Event color">
         {EVENT_COLORS.map((c) => (
@@ -160,40 +197,7 @@ export default function EventModal({ event, onClose, showNotice }) {
         ))}
       </div>
 
-      <span className="field-label">Who&rsquo;s involved</span>
-      {members.length ? (
-        <div className="who-picker">
-          {members.map((m) => (
-            <button
-              type="button"
-              key={m}
-              className="chip"
-              data-active={who.includes(m)}
-              onClick={() => toggleWho(m)}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="planner-empty" style={{ padding: '4px 0' }}>
-          Add members first (Family Settings)
-        </p>
-      )}
-
-      <label className="field-label" htmlFor="ev-notes">Notes</label>
-      <textarea
-        id="ev-notes"
-        className="field event-notes-field"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        placeholder="Optional"
-      />
-
-      <label className="check-row">
-        <input type="checkbox" checked={syncGcal} onChange={(e) => setSyncGcal(e.target.checked)} />
-        Also add to the family Google Calendar
-      </label>
+      </details>
 
       <div className="modal-actions">
         {editing && (

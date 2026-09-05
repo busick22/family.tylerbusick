@@ -154,6 +154,21 @@ kid-facing app:
 
 ## Current focus
 
+- **2026-09-05 — Family home redesign, separate preview.** Owner requested a
+  complete rethink without preference questions. Work is on
+  `codex/family-home-redesign`; the prior branch and production are preserved.
+  `6ebfe56` checkpoints the pre-existing uncommitted review fixes. Read
+  `docs/family-home-redesign.md` for design decisions and verification.
+  Navigation is now Home / Plan / Lists / Meals / Kids. The desktop/tablet
+  rail, phone dock, global Add menu, quick capture, dinner menu, family
+  settings and dialog focus behavior were redesigned. Firestore model/rules
+  unchanged; exact preview hostname added to the separate Auth project's
+  existing allowlist. **Preview only:**
+  https://busick-recipes--family-home-tzhi5rls.web.app
+  `npm run deploy:preview` on this branch publishes only `family-home`.
+  The preview uses real family data; local write tests use emulators.
+
+
 - **2026-09-02 — Planning-first redesign, then a review-fix pass (branch
   `codex/planning-first-redesign`; PREVIEW ONLY, not live).** The redesign
   itself is described in `docs/planning-redesign.md` — read that first. This

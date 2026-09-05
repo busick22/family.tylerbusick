@@ -1,6 +1,7 @@
 // Calendar tab: native month view for Family events. Events can still be
 // pushed to Google Calendar from the event modal when the parent asks for it.
 
+import { usePlanDate } from '../planning/usePlanDate.js'
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
 import Modal from '../../components/Modal.jsx'
@@ -19,9 +20,10 @@ function longDayLabel(dateKey) {
 
 export default function CalendarTab({ onAddEvent, onEditEvent }) {
   const { events } = useEvents()
-  const now = new Date()
-  const [calYear, setCalYear] = useState(now.getFullYear())
-  const [calMonth, setCalMonth] = useState(now.getMonth())
+  const [selectedDate, setSelectedDate] = usePlanDate()
+  const current = new Date(selectedDate + 'T12:00:00')
+  const calYear = current.getFullYear()
+  const calMonth = current.getMonth()
   const [expandedDay, setExpandedDay] = useState(null)
 
   function changeMonth(dir) {
@@ -29,14 +31,11 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
     let y = calYear
     if (m > 11) { m = 0; y += 1 }
     if (m < 0) { m = 11; y -= 1 }
-    setCalMonth(m)
-    setCalYear(y)
+    setSelectedDate(dateKeyOf(y, m, 1))
   }
 
   function goToday() {
-    const t = new Date()
-    setCalYear(t.getFullYear())
-    setCalMonth(t.getMonth())
+    setSelectedDate(todayStr())
   }
 
   const cells = useMemo(() => {
@@ -121,12 +120,12 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
                 data-other={!cell.cur}
                 data-today={dk === today}
                 key={`${dk}-${index}`}
-                onClick={() => setExpandedDay(dk)}
+                onClick={() => { setSelectedDate(dk); setExpandedDay(dk) }}
               >
                 <button
                   type="button"
                   className="planner-month-day-open"
-                  onClick={(e) => { e.stopPropagation(); setExpandedDay(dk) }}
+                  onClick={(e) => { e.stopPropagation(); setSelectedDate(dk); setExpandedDay(dk) }}
                   aria-label={`${longDayLabel(dk)}, ${dayEvents.length} ${dayEvents.length === 1 ? 'event' : 'events'}. View day`}
                 >
                   <span className="planner-month-date">{cell.day}</span>

@@ -1,3 +1,6 @@
+import ListsNav from './ListsNav.jsx'
+import QuickCapture from '../home/QuickCapture.jsx'
+import '../home/home.css'
 import { useTick } from '../kids/useTick.js'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
@@ -52,14 +55,16 @@ export default function WorkPage() {
   }
   return <div className="page page-enter">
     <Notice notice={notice} />
-    <header className="workspace-title"><div><p className="workspace-eyebrow">One-time tasks & weekly chores, together</p><h1>To-dos</h1></div>
-      <button className="btn btn-primary" onClick={() => setEditing({ assignee: who, listId: list })}><Plus size={18} aria-hidden="true" /> Add to-do</button></header>
-    <div className="work-toolbar">
+    <header className="workspace-title"><div><h1>Lists</h1><p className="page-intro">To-dos and groceries, shared by everyone.</p></div>
+      <button className="btn btn-primary" onClick={() => setEditing({ assignee: who, listId: list })}><Plus size={18} aria-hidden="true" /> Add with details</button></header>
+    <ListsNav />
+    <QuickCapture compact listId={list || 'general'} assignee={who} onAdded={() => setParams(previous => { const next = new URLSearchParams(previous); next.delete('view'); next.delete('q'); return next }, { replace: true })} />
+    <details className="list-refine"><summary>Find & filter{(who || list || query) ? ' · Filters active' : ''}</summary><div className="work-toolbar">
       <input className="field work-search" type="search" aria-label="Search to-dos" placeholder="Find a to-do…" value={query} onChange={e => change('q', e.target.value)} />
       <AssigneeSelect value={who} onChange={v => change('who', v)} filterMode ariaLabel="Filter by person" />
       <select className="field" aria-label="Filter by list" value={list} onChange={e => change('list', e.target.value)}><option value="">All lists</option>{lists.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}</select>
-    </div>
-    <nav className="work-filters" aria-label="To-do views">{[['open', 'All open'], ['today', 'Today & behind'], ['repeat', 'Repeating'], ['done', 'Completed']].map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => change('view', value)}>{label}</button>)}</nav>
+    </div></details>
+    <nav className="work-filters" aria-label="To-do views">{[['open', 'All open'], ['today', 'Due now'], ['repeat', 'Weekly chores'], ['done', 'Completed']].map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => change('view', value)}>{label}</button>)}</nav>
     {error && <p className="workspace-status" role="alert">{error}</p>}
     {loading && !error && <p className="workspace-status" role="status">Loading to-dos…</p>}
     {!loading && !error && !visible.length && <div className="workspace-surface empty-workspace"><h2>{all.length ? 'Nothing in this view' : 'A place for everything that needs doing'}</h2><p>{all.length ? 'Try another person, list, or view.' : 'Add a to-do, choose who it is for, and repeat it if needed.'}</p><button className="btn" onClick={() => setEditing({})}>Add a to-do</button></div>}
@@ -67,11 +72,11 @@ export default function WorkPage() {
       const items = visible.filter(item => workGroup(item, today) === group)
       return items.length ? <section className="work-group" key={group}><h2>{group} · {items.length}</h2><div className="workspace-surface">{items.map(item => <WorkRow key={item.kind + item.id} item={item} onEdit={setEditing} showNotice={showNotice} />)}</div></section> : null
     })}
-    <details className="work-options"><summary>Lists & weekly maintenance</summary><div className="workspace-actions">
+    <details className="work-options"><summary>Manage lists & weekly chores</summary><div className="workspace-actions">
       <button className="btn" onClick={() => setNewList(true)}>New list</button><button className="btn" onClick={() => setManageLists(true)}>Manage lists</button>
       <button className="btn" onClick={reset} disabled={resetting}>{confirmReset ? 'Confirm reset of all weekly checkmarks' : 'Reset weekly checkmarks'}</button>
       {confirmReset && <button className="btn btn-ghost" onClick={() => setConfirmReset(false)}>Cancel reset</button>}
-    </div><p className="empty-inline">Repeating chores keep the existing weekly reset behavior. Resetting clears checkmarks for everyone, not earned points.</p></details>
+    </div><p className="empty-inline">Start a new week by clearing everyone’s chore checkmarks. Earned points are kept.</p></details>
     {editing !== undefined && <WorkEditModal item={editing} onClose={() => setEditing(undefined)} showNotice={showNotice} />}
     {newList && <TodoListModal onClose={() => setNewList(false)} showNotice={showNotice} />}
     {manageLists && <ListManager onClose={() => setManageLists(false)} showNotice={showNotice} />}

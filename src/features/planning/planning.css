@@ -16,14 +16,6 @@
 
 /* --- App bar -------------------------------------------------------------- */
 
-.workspace-bar { flex: none; min-height: var(--workspace-bar); padding: var(--space-2) var(--page-pad); display: flex; align-items: center; gap: var(--space-5); border-bottom: 1px solid var(--border); background: var(--surface); z-index: var(--z-navigation); }
-.workspace-brand, .workspace-account, .workspace-nav, .parent-link { display: flex; align-items: center; gap: var(--space-2); }
-.workspace-brand { font: 700 var(--text-lg) var(--font-display); }
-.workspace-nav { margin: 0 auto; gap: var(--space-1); }
-.workspace-nav a, .parent-link { min-height: var(--tap); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 600; color: var(--text-mid); }
-.workspace-nav a { display: flex; align-items: center; gap: var(--space-2); }
-.workspace-nav a:hover, .parent-link:hover { background: var(--surface-2); color: var(--text); }
-.workspace-nav a.active, .parent-link.active { background: var(--accent-soft); color: var(--accent); }
 .skip-link { position: fixed; transform: translateY(-200%); background: var(--surface); padding: var(--space-4); z-index: var(--z-skip); }
 .skip-link:focus { transform: none; }
 
@@ -123,12 +115,6 @@
 
 @media (min-width: 801px) { .day-detail { position: sticky; top: 0; } }
 
-@media (max-width: 900px) {
-  .workspace-bar { gap: var(--space-3); }
-  .workspace-nav a { padding: var(--space-2); }
-  .workspace-nav a svg { display: none; }
-}
-
 @media (max-width: 800px) {
   /* The week becomes a horizontal date strip above the day detail. */
   .week-column { display: contents; }
@@ -139,9 +125,6 @@
   .week-surface .week-row-copy { display: none; }
   .workspace-split > .workspace-footer-links, .workspace-split .week-column > .workspace-footer-links { order: 2; }
   .workspace-split .people-strip { order: 3; margin-top: 0; }
-  .workspace-bar { min-height: var(--workspace-mobile-bar); padding-top: max(var(--space-2), env(safe-area-inset-top)); }
-  .workspace-nav { display: none; }
-  .workspace-account { margin-left: auto; }
   .planning-shell .shell-main { margin: 0 0 calc(var(--dock-height) + var(--dock-inset)); }
   .workspace-split { grid-template-columns: minmax(0, 1fr); }
   .workspace-title { flex-wrap: wrap; }
@@ -154,3 +137,8 @@
   .week-row-count { display: none; }
   .day-detail, .surface-heading { padding: var(--space-4); }
 }
+
+/* Lists keeps everyday capture visible and reveals filters on request. */
+.list-refine { margin-bottom: var(--space-3); }
+.list-refine > summary { cursor: pointer; min-height: var(--tap); padding: var(--space-3) 0; color: var(--text-mid); font-size: var(--text-sm); }
+.list-refine .work-toolbar { padding: var(--space-3) 0; }

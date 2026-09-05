@@ -850,3 +850,45 @@
 
   .day-chip-meal { max-width: 140px; }
 }
+
+.meal-grocery-link { margin-left: auto; color: var(--accent); }
+@media (max-width: 640px) {
+  .meal-grocery-link { font-size: var(--text-xs); padding-left: var(--space-2); padding-right: var(--space-2); }
+  .meal-grocery-link svg { display: none; }
+  /* Dinner names are the point of the meal plan, even on a phone. */
+  [data-page='meals'] .week-surface { display: block; }
+  [data-page='meals'] .week-surface .week-day-row { display: grid; grid-template-columns: var(--tap) minmax(0, 1fr); text-align: left; padding: var(--space-3); }
+  [data-page='meals'] .week-surface .week-row-copy { display: grid; }
+  [data-page='meals'] .week-surface .week-row-copy strong { white-space: normal; }
+}
+
+/* A dinner plan reads like a menu; editing starts only after choosing a day. */
+.dinner-week { max-width: var(--workspace-width); }
+.dinner-week-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); }
+.dinner-week-heading h2 { font: 600 var(--text-lg) var(--font-display); }
+.dinner-week-heading p { color: var(--text-mid); font-size: var(--text-sm); margin-top: var(--space-1); }
+.dinner-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.dinner-day { display: flex; gap: var(--space-4); align-items: center; text-align: left; padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); min-width: 0; }
+.dinner-day[data-today='true'] { background: var(--dinner-bg); border-color: transparent; }
+.dinner-day:hover { border-color: var(--accent); }
+.dinner-date { width: var(--space-7); flex: none; text-align: center; display: grid; gap: var(--space-1); }
+.dinner-date strong { font-size: var(--text-xs); color: var(--text-mid); font-weight: 500; }
+.dinner-date small { font: 600 var(--text-xl) var(--font-display); }
+.dinner-day-copy { display: grid; gap: var(--space-2); flex: 1; min-width: 0; }
+.dinner-day-copy strong { font-weight: 550; overflow-wrap: anywhere; }
+.dinner-day-copy small { color: var(--text-mid); font-size: var(--text-xs); }
+.dinner-day > svg { color: var(--accent); flex: none; }
+.dinner-shop-link { display: flex; gap: var(--space-4); align-items: center; margin-top: var(--space-5); padding: var(--space-5); border-radius: var(--radius-md); background: var(--accent-soft); }
+.dinner-shop-link span { flex: 1; display: grid; gap: var(--space-1); }
+.dinner-shop-link strong { font-size: var(--text-sm); font-weight: 550; }
+.dinner-shop-link small { font-size: var(--text-xs); color: var(--text-mid); }
+.dinner-shop-link > svg { flex: none; color: var(--accent); }
+@media (max-width: 800px) { .dinner-days { grid-template-columns: minmax(0, 1fr); } .dinner-week-heading { flex-wrap: wrap; } .dinner-day { padding: var(--space-4); } }
+.meal-month-back { align-self: flex-start; margin: var(--space-4) 0; }
+@media (max-width: 800px) {
+  .manual-add-row > .field:first-child { grid-column: 1 / -1; }
+  .manual-add-row .manual-amount-field { grid-column: 1; grid-row: 2; max-width: none; }
+  .manual-add-row button { grid-column: 2; grid-row: 2; }
+  .dinner-week-heading .week-picker { gap: 0; }
+  .dinner-week-heading .week-picker .btn { padding-left: var(--space-3); padding-right: var(--space-3); }
+}

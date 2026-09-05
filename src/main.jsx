@@ -10,6 +10,8 @@ import { AuthProvider } from './state/AuthContext.jsx'
 import { SettingsProvider } from './state/SettingsContext.jsx'
 import { installErrorReporter } from './lib/errorReporter.js'
 
+if (import.meta.env.DEV && import.meta.env.VITE_FIREBASE_EMULATORS === 'true') import('../tests/emulator.css')
+
 installErrorReporter()
 
 createRoot(document.getElementById('root')).render(

@@ -4,7 +4,7 @@ import { useTick } from './useTick.js'
 
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { RefreshCw } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Notice, { useNotice } from '../../components/Notice.jsx'
 import { kidTheme } from '../../lib/kidThemes.js'
 import { DAYS, MONTHS } from '../../lib/family.js'
@@ -20,7 +20,7 @@ import WishListsTab from './WishListsTab.jsx'
 const TABS = [
   { id: 'today', label: 'My day' },
   { id: 'wishes', label: 'Wish lists' },
-  { id: 'points', label: 'Points & rewards' },
+  { id: 'points', label: 'Rewards' },
   { id: 'history', label: 'History' },
 ]
 
@@ -52,7 +52,7 @@ export default function KidDashboard({ kid, onSwitchKid }) {
           </div>
         </div>
         <button type="button" className="btn-switch-kid" onClick={onSwitchKid}>
-          <RefreshCw aria-hidden="true" size={14} /> Switch kid
+          <ArrowLeft aria-hidden="true" size={18} /> All kids
         </button>
       </div>
 
@@ -64,6 +64,7 @@ export default function KidDashboard({ kid, onSwitchKid }) {
               type="button"
               className="kid-tab"
               data-active={tab === id}
+              aria-pressed={tab === id}
               onClick={() => setTab(id)}
             >
               {label || theme[key]}
