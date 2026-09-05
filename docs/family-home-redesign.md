@@ -7,7 +7,7 @@ prioritize first-time understanding, reconsider the whole app, and preserve
 previous versions. No additional preference questions were needed.
 
 - Branch: `codex/family-home-redesign`.
-- Starting branch: `codex/planning-first-redesign` at `c65de90`.
+- Starting branch: `codex/planning-first-redesign` at `f210c7b`.
 - Checkpoint `6ebfe56` preserves all review fixes that were already uncommitted
   when work began. Neither the old branch ref nor `main` was advanced.
 - Hosting preview channel: `family-home` in `busick-recipes`.
@@ -98,7 +98,7 @@ by Vite DEV and the emulator flag and is eliminated from production builds.
 - ESLint, 8 unit tests and production build pass.
 - 20 local emulator regression tests pass, including concurrent completion,
   point attribution/undo, shared-wish access and private gift tracking.
-- Browser checks at 1194×834, 1024×768 and 390×844 cover navigation, light/dark
+- Browser checks at 1194×834, 1024×768, 390×844 and 375×812 cover navigation, light/dark
   layouts, quick capture, chore completion and undo, event creation, simple
   dinner saving, grocery addition, kids, settings and wish-list navigation.
 - Empty Home and child checklist states were inspected after the emulator
@@ -108,3 +108,16 @@ by Vite DEV and the emulator flag and is eliminated from production builds.
 
 Real Google sign-in and installed-PWA behavior on the family's physical tablet
 still need an owner check. Automated browser checks used emulator sign-in.
+
+## Published release
+
+- App code revision: `0083df6` (pushed to origin).
+- Preview release: `1788635566198000`.
+- Expires October 5, 2026 at 2:12 p.m. America/Chicago
+  (`2026-10-05T19:12:42.436637190Z`).
+- Served HTML and all eight referenced assets match the production build
+  byte-for-byte. The hosted sign-in page opens successfully.
+- Live release `1788392907305000` and prior preview release
+  `1788399600838000` were verified unchanged after publication.
+- Working branch is backed up at
+  https://github.com/busick22/family.tylerbusick/tree/codex/family-home-redesign
