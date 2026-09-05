@@ -4,16 +4,13 @@
 // deleting it both need to know whether points were already awarded.
 
 import { db } from '../../firebase.js'
-import { setWorkCompletion } from '../../lib/workCompletion.js'
+import { deleteWork, setWorkCompletion } from '../../lib/workCompletion.js'
 import { useChores } from '../../state/ChoresContext.jsx'
 import { useTodos } from '../../state/TodosContext.jsx'
-import { useKidPoints } from '../../state/KidPointsContext.jsx'
-import { isTaskChecked } from './kidsUtils.js'
 
 export function useKidActions(kid) {
   const { updateChore, deleteChore: removeChore } = useChores()
-  const { todos, updateTodo, addTodo, deleteTodo: removeTodo } = useTodos()
-  const { revokePoints } = useKidPoints()
+  const { updateTodo, addTodo } = useTodos()
 
   async function toggleChore(id, done) {
     await setWorkCompletion(db, 'chore', id, done, kid)
@@ -31,12 +28,10 @@ export function useKidActions(kid) {
     await updateTodo(id, { text, dueDate: dueDate || null })
   }
 
+  // Deleting and taking back any points it awarded happen together, so a
+  // failure part-way can't leave the kid holding points for a deleted task.
   async function deleteTask(id) {
-    const task = todos.find((t) => t.id === id)
-    if (!task) return
-    const awardedTo = task.pendingDoneBy || task.completedBy || ''
-    if ((task.points || 0) > 0 && awardedTo && isTaskChecked(task)) await revokePoints(awardedTo, 'task', id)
-    await removeTodo(id)
+    await deleteWork(db, 'task', id)
   }
 
   async function editChore(id, name, day) {

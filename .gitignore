@@ -77,3 +77,8 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Local env overrides (e.g. VITE_FIREBASE_EMULATORS) — never committed, and
+# they must not block scripts/deploy-preview.mjs's clean-tree check.
+.env.local
+.env.*.local

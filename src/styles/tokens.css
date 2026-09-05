@@ -10,7 +10,8 @@
        should read bright and cheerful, not like a nighttime dashboard.
      - Bigger type, bigger touch targets, bigger radii everywhere — kids tap
        this, so nothing should be fiddly.
-     - Four playful per-tab accents instead of a single brand color.
+     - Per-area accents instead of a single brand color: one shared accent for
+       the planning surfaces (Week / Calendar / To-dos), plus Meals and Kids.
 --------------------------------------------------------------------------- */
 
 :root {
@@ -41,8 +42,6 @@
   --speed-slow: 420ms;
 
   /* Layout */
-  --sidebar-width: 240px;
-  --sidebar-rail: 72px;
   /* The mobile tab bar is anchored to the bottom edge (not a floating pill).
      --dock-height is the tappable row; --dock-inset is the safe-area padding
      underneath it, so on an iPhone the row clears the home indicator without
@@ -81,12 +80,12 @@
   --wish-checkbox-size: 20px;
   --wish-page-width: 640px;
 
-  /* Area accents — Home / Meals / Planner / Kids each get their own signal
-     color, shared between both themes so a page's identity doesn't shift
-     when you flip the theme. */
-  --accent-home: #e8733f;
+  /* Area accents, shared between both themes so a page's identity doesn't
+     shift when you flip the theme. Week / Calendar / To-dos are one planning
+     surface and share the base --accent; only Meals and Kids read as separate
+     places. (The old --accent-home and --accent-planner went away with the
+     Dashboard and Planner pages they belonged to.) */
   --accent-meals: #d6524a;
-  --accent-planner: #4c7ef3;
   --accent-kids: #9b5de5;
 }
 
@@ -111,8 +110,8 @@
   --accent: #a4482b;
   --accent-strong: #8e3d23;
   --on-accent: #ffffff;
-  --accent-soft: rgba(232, 115, 63, 0.12);
-  --accent-glow: rgba(232, 115, 63, 0.22);
+  --accent-soft: rgba(164, 72, 43, 0.12);
+  --accent-glow: rgba(164, 72, 43, 0.22);
 
   --danger: #d6524a;
   --danger-soft: rgba(214, 82, 74, 0.1);

@@ -8,7 +8,12 @@ import { useEvents } from '../../state/EventsContext.jsx'
 import { useMembers } from '../../state/MembersContext.jsx'
 import { normalizeMemberList, todayStr } from '../../lib/family.js'
 import { addToGoogleCalendar, deleteFromGoogleCalendar } from '../../lib/gcal.js'
-import { EVENT_COLORS } from './plannerUtils.js'
+
+// The event colour swatches. Lived in plannerUtils.js until the planning
+// redesign retired that file's other helpers along with the old Planner page.
+const EVENT_COLORS = [
+  '#2563eb', '#7c3aed', '#ea580c', '#16a34a', '#db2777', '#0891b2', '#d97706',
+]
 
 export default function EventModal({ event, onClose, showNotice }) {
   const { addEvent, updateEvent, deleteEvent } = useEvents()

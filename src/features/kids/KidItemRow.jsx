@@ -2,7 +2,7 @@
 // (edit), points chip, tap-to-confirm delete. Checking it off pops a little
 // themed particle burst so it feels celebratory without per-kid physics.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 
 export default function KidItemRow({
@@ -20,17 +20,30 @@ export default function KidItemRow({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
+  // Completion goes through a Firestore transaction, which — unlike an
+  // ordinary write — always waits for the server instead of applying locally
+  // first. Showing `pending` until the real value catches up keeps the tick
+  // and the celebration instant on a slow kitchen connection.
+  const [pending, setPending] = useState(null)
+  const shown = pending === null ? checked : pending
+  useEffect(() => {
+    setPending((p) => (p === null || p === checked ? null : p))
+  }, [checked])
+
   async function handleToggle(e) {
     const next = e.target.checked
     setBusy(true)
     setError('')
+    setPending(next)
+    if (next && particles?.length) {
+      setBursting(true)
+      setTimeout(() => setBursting(false), 650)
+    }
     try {
       await onToggle(next)
-      if (next && particles?.length) {
-        setBursting(true)
-        setTimeout(() => setBursting(false), 650)
-      }
     } catch {
+      setPending(null)
+      setBursting(false)
       setError('Could not update this item. Please try again.')
     } finally {
       setBusy(false)
@@ -38,15 +51,15 @@ export default function KidItemRow({
   }
 
   return (
-    <div><div className={`k-row ${checked ? 'done' : ''} ${bursting ? 'k-row-burst' : ''}`}>
+    <div><div className={`k-row ${shown ? 'done' : ''} ${bursting ? 'k-row-burst' : ''}`}>
       <label className="work-check">
       <input
         type="checkbox"
         className="k-check"
-        checked={checked}
+        checked={shown}
         onChange={handleToggle}
         disabled={busy}
-        aria-label={`Mark ${label} ${checked ? 'incomplete' : 'complete'}`}
+        aria-label={`Mark ${label} ${shown ? 'incomplete' : 'complete'}`}
       />
       </label>
       {bursting && (

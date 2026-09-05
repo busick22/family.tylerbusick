@@ -11,6 +11,7 @@ import { dayLabel, weekDates } from '../../lib/planning.js'
 import EventModal from '../planner/EventModal.jsx'
 import PlanDinnerModal from '../meals/PlanDinnerModal.jsx'
 import WorkEditModal from './WorkEditModal.jsx'
+import WorkRow from './WorkRow.jsx'
 import WeekPicker from './WeekPicker.jsx'
 import { usePlanDate } from './usePlanDate.js'
 import Notice, { useNotice } from '../../components/Notice.jsx'
@@ -31,8 +32,12 @@ export default function WeekPage() {
   const dates = weekDates(date)
   const today = todayStr()
   const dayEvents = events.filter(e => e.date === date).sort((a, b) => (a.time || '').localeCompare(b.time || ''))
-  const dayTasks = todos.filter(t => !t.done && t.dueDate === date)
+  const dayTasks = todos.filter(t => t.dueDate === date)
   const dayChores = chores.filter(c => c.day === DAYS[new Date(date + 'T12:00:00').getDay()])
+  const dayWork = [
+    ...dayTasks.map(t => ({ ...t, kind: 'task', title: t.text, date: t.dueDate || null })),
+    ...dayChores.map(c => ({ ...c, kind: 'chore', title: c.name, date })),
+  ].sort((a, b) => Number(Boolean(a.done)) - Number(Boolean(b.done)) || (a.title || '').localeCompare(b.title || ''))
   const undated = todos.filter(t => !t.done && !t.dueDate).length
   const states = [eventState, mealState, taskState, choreState]
   const loading = states.some(state => state.loading)
@@ -76,9 +81,8 @@ export default function WeekPage() {
         <div className="section-heading"><h2>Dinner</h2></div>
         <button className="agenda-row" onClick={() => setModal({ type: 'dinner' })}><UtensilsCrossed size={18} aria-hidden="true" /><span><strong>{meals[date]?.recipeName || 'Plan dinner'}</strong><small>{meals[date] ? 'View or change the plan' : 'A recipe, leftovers, or eating out'}</small></span><ArrowUpRight size={16} aria-hidden="true" /></button>
         <div className="section-heading"><h2>To-dos</h2><button className="btn btn-ghost" onClick={() => setModal({ type: 'work', value: { date } })}><Plus size={16} aria-hidden="true" /> To-do</button></div>
-        {!loading && !error && !dayTasks.length && !dayChores.length && <p className="empty-inline">Nothing assigned to this day.</p>}
-        {[...dayTasks.map(t => ({ ...t, kind: 'task', title: t.text })), ...dayChores.map(c => ({ ...c, kind: 'chore', title: c.name }))].map(item =>
-          <button className="agenda-row" key={item.kind + item.id} onClick={() => setModal({ type: 'work', value: item })}><span><strong>{item.title}</strong><small>{[item.assignee || 'Anyone', item.kind === 'chore' ? 'Repeats weekly' : 'One-time'].join(' · ')}</small></span><ArrowUpRight size={16} aria-hidden="true" /></button>)}
+        {!loading && !error && !dayWork.length && <p className="empty-inline">Nothing assigned to this day.</p>}
+        {dayWork.map(item => <WorkRow key={item.kind + item.id} item={item} onEdit={value => setModal({ type: 'work', value })} showNotice={showNotice} />)}
         <div className="workspace-footer-links"><Link to="/tasks">See all to-dos, including overdue →</Link></div>
       </section>
     </div>

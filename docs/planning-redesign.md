@@ -112,3 +112,49 @@ America/Chicago. All 7 unit tests and 20 emulator checks passed.
   creation, child visibility, completion/undo, and calendar day sheets exercised.
 - Real-device Google sign-in, installed-PWA safe areas/orientation, and planning
   with the family's actual data still need the owner's preview check.
+
+## Review follow-up — September 2, 2026
+
+A review of the first pass produced the fixes below. Front end plus one
+config change; no Firestore schema, rules, Auth, or production records were
+touched, and the scope boundaries above still hold.
+
+### Correctness
+
+- Completion stays transactional, but the UI is now optimistic. A transaction
+  always round-trips to the server, unlike an ordinary write, so every
+  checkbox previously waited on the network before it ticked. Rows now update
+  and celebrate immediately and roll back only on a real failure.
+- All `kidPoints` mutations run in transactions and write only the array they
+  own. Reading the document and writing it back whole meant a redemption
+  approval could discard points awarded a moment earlier by a completed
+  chore. Entries are matched by `ts`/`requestedAt` rather than a rendered
+  array index.
+- `deleteWork` removes a kid's completed task and takes back its points in
+  one transaction. Parent deletion still keeps history deliberately.
+- Weekly chores past their day group under "Earlier this week" instead of
+  "Overdue", which previously mixed them with genuinely missed one-time
+  tasks every week.
+- The Week day detail uses `WorkRow`, so work can be completed from the
+  landing page and finished chores render as done.
+- Clearing the whole grocery list offers a cancel and states there is no undo.
+
+### Cleanup
+
+- Removed the unreachable Dashboard/Planner pages, the desktop sidebar, and
+  the old planner tabs, modals and rows, plus `plannerUtils.js`.
+- Folded the `.planning-shell`-prefixed overrides of other features' CSS back
+  into those features' own stylesheets. `planner.css` 749 → 255 lines,
+  `shell.css` 350 → 168; total CSS 75.5 kB → 62.8 kB.
+- Retired `--accent-home`/`--accent-planner`; corrected `--accent-soft` and
+  `--accent-glow`, which still held the pre-redesign orange.
+- Gitignored `.env.local`, which had been blocking `npm run deploy:preview`'s
+  clean-tree check.
+- Dropped the `firestore` block from `firebase.json` so a bare
+  `firebase deploy` here cannot push the stale `busick-recipes` ruleset.
+
+### Verification
+
+Lint, 8 unit tests, and a production build pass. Real-data sign-in, an
+installed-PWA check, and a visual pass over Kids, Meals and the calendar
+after the CSS consolidation still need the owner's preview check.

@@ -94,7 +94,7 @@ export default function HistoryTab({ kid }) {
               {e.points ? <span className="hist-pts">+{e.points}pts</span> : null}
               <button
                 className="hist-del"
-                onClick={() => deleteHistoryEntry(kid, e._idx)}
+                onClick={() => deleteHistoryEntry(kid, e._idx, e)}
                 aria-label={`Remove ${e.label}`}
               >
                 ✕

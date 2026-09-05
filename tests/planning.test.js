@@ -14,8 +14,19 @@ test('dates reject malformed inputs and handle month/year boundaries', () => {
 test('one-time and repeating work share dated groups without changing source data', () => {
   const items = workItems([{ id: 't', text: 'Form', dueDate: null }], [{ id: 'c', name: 'Bins', day: 'Monday' }], '2026-09-02')
   assert.equal(workGroup(items[0], '2026-09-02'), 'Anytime')
-  assert.equal(workGroup(items[1], '2026-09-02'), 'Overdue')
   assert.equal(workGroup({ ...items[1], done: true }, '2026-09-02'), 'Completed')
+})
+test('a late weekly chore is separated from a genuinely overdue one-time task', () => {
+  // Wednesday 2026-09-02: the Monday chore recurs weekly and resets by hand,
+  // so it must not sit in Overdue next to a task whose real due date passed.
+  const [task, chore] = workItems(
+    [{ id: 't', text: 'Permission slip', dueDate: '2026-08-31' }],
+    [{ id: 'c', name: 'Bins', day: 'Monday' }],
+    '2026-09-02',
+  )
+  assert.equal(workGroup(task, '2026-09-02'), 'Overdue')
+  assert.equal(workGroup(chore, '2026-09-02'), 'Earlier this week')
+  assert.equal(workGroup({ ...chore, date: '2026-09-02' }, '2026-09-02'), 'Today')
 })
 test('undated child tasks stay visible rather than disappearing after creation', () => {
   const tasks = [{ id: 'a', text: 'Read', assignee: 'Liam', dueDate: null, done: false }]

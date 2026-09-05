@@ -84,7 +84,8 @@ export default function GroceryTab({ showNotice }) {
     {grocery.items.length > 0 && <details className="work-options"><summary>List options</summary><div className="workspace-actions">
       <button className="btn" disabled={busy || !checked} onClick={() => save(grocery.items.filter(item => !item.checked))}>Clear checked</button>
       <button className="btn" onClick={() => setEditAisles(value => !value)}>{editAisles ? 'Done editing aisles' : 'Edit aisles'}</button>
-      <button className="btn btn-ghost" disabled={busy} onClick={async () => { if (!confirmClear) return setConfirmClear(true); if (await save([], [])) setConfirmClear(false) }}>{confirmClear ? 'Confirm clear entire list' : 'Clear entire list'}</button>
-    </div></details>}
+      <button className={confirmClear ? 'btn btn-danger' : 'btn btn-ghost'} disabled={busy} onClick={async () => { if (!confirmClear) return setConfirmClear(true); if (await save([], [])) setConfirmClear(false) }}>{confirmClear ? 'Confirm clear entire list' : 'Clear entire list'}</button>
+      {confirmClear && <button className="btn" disabled={busy} onClick={() => setConfirmClear(false)}>Keep my list</button>}
+    </div>{confirmClear && <p className="empty-inline">This removes every item, including the ones you added by hand. There is no undo.</p>}</details>}
   </section>
 }

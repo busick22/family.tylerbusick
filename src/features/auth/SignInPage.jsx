@@ -28,7 +28,7 @@ export default function SignInPage() {
         <div className="signin-brand">
           <BrandMark size={48} />
           <h1>Family</h1>
-          <p>Today at a glance.</p>
+          <p>Plan the week together.</p>
         </div>
 
         <button className="btn signin-google" onClick={handleSignIn} disabled={busy}>

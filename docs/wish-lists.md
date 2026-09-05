@@ -51,7 +51,9 @@ the public route's no-index, no-referrer and no-store headers.
 
 Hosting is in `busick-recipes`; live Auth/Firestore is in `tyler-busick-22`.
 The root `firestore.rules` is the historical busick-recipes ruleset and is
-not the ruleset to deploy for this feature.
+not the ruleset to deploy for this feature. It is no longer referenced by
+`firebase.json` either, so a bare `firebase deploy` from this folder deploys
+hosting only and cannot push the wrong ruleset by accident.
 
 `firestore.shared.rules` preserves the dashboard's current shared-project
 rules and adds the isolated wish-list rules. `firebase.wishlists.json`

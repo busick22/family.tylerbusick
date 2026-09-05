@@ -87,7 +87,7 @@ export function pendingItems(kidPoints, screenTimeRequests) {
   const items = []
   Object.entries(kidPoints).forEach(([kidName, data]) => {
     ;(data.pendingRedemptions || []).forEach((r, idx) =>
-      items.push({ kind: 'redeem', kidName, idx, name: r.name, cost: r.cost }),
+      items.push({ kind: 'redeem', kidName, idx, name: r.name, cost: r.cost, requestedAt: r.requestedAt }),
     )
   })
   screenTimeRequests.forEach((r) =>

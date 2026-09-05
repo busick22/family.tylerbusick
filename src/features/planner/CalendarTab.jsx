@@ -137,7 +137,7 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
                     <button
                       type="button"
                       className="planner-month-chip"
-                      style={{ '--event-color': event.color || 'var(--accent-planner)' }}
+                      style={{ '--event-color': event.color || 'var(--accent)' }}
                       key={event.id}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -179,7 +179,7 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
               <button
                 type="button"
                 className="planner-month-chip calendar-day-list-chip"
-                style={{ '--event-color': event.color || 'var(--accent-planner)' }}
+                style={{ '--event-color': event.color || 'var(--accent)' }}
                 key={event.id}
                 onClick={() => {
                   setExpandedDay(null)

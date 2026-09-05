@@ -59,11 +59,11 @@ export default function WorkPage() {
       <AssigneeSelect value={who} onChange={v => change('who', v)} filterMode ariaLabel="Filter by person" />
       <select className="field" aria-label="Filter by list" value={list} onChange={e => change('list', e.target.value)}><option value="">All lists</option>{lists.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}</select>
     </div>
-    <nav className="work-filters" aria-label="To-do views">{[['open', 'All open'], ['today', 'Today & overdue'], ['repeat', 'Repeating'], ['done', 'Completed']].map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => change('view', value)}>{label}</button>)}</nav>
+    <nav className="work-filters" aria-label="To-do views">{[['open', 'All open'], ['today', 'Today & behind'], ['repeat', 'Repeating'], ['done', 'Completed']].map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => change('view', value)}>{label}</button>)}</nav>
     {error && <p className="workspace-status" role="alert">{error}</p>}
     {loading && !error && <p className="workspace-status" role="status">Loading to-dos…</p>}
     {!loading && !error && !visible.length && <div className="workspace-surface empty-workspace"><h2>{all.length ? 'Nothing in this view' : 'A place for everything that needs doing'}</h2><p>{all.length ? 'Try another person, list, or view.' : 'Add a to-do, choose who it is for, and repeat it if needed.'}</p><button className="btn" onClick={() => setEditing({})}>Add a to-do</button></div>}
-    {['Overdue', 'Today', 'Upcoming', 'Anytime', 'Completed'].map(group => {
+    {['Overdue', 'Earlier this week', 'Today', 'Upcoming', 'Anytime', 'Completed'].map(group => {
       const items = visible.filter(item => workGroup(item, today) === group)
       return items.length ? <section className="work-group" key={group}><h2>{group} · {items.length}</h2><div className="workspace-surface">{items.map(item => <WorkRow key={item.kind + item.id} item={item} onEdit={setEditing} showNotice={showNotice} />)}</div></section> : null
     })}

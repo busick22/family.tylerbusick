@@ -11,8 +11,22 @@ last name if it ever goes public — see Current focus).
   (`../accomplish`, `../budget`) — when in doubt, look at how they do it —
   but keeps its own touch-friendly, playful identity (see Design system
   below).
-- **Firebase project:** `busick-recipes` (see `.firebaserc`) — unchanged
-  from the old static site, so all existing data keeps working.
+- **Firebase projects — hosting and data are NOT the same project:**
+  - **Hosting:** `busick-recipes` (see `.firebaserc`), live at
+    busick-recipes.web.app and family.tylerbusick.com.
+  - **Firestore + Auth:** `tyler-busick-22`, the dashboard's project —
+    repointed on 2026-08-09 when the family's data was copied across under
+    the same collection names (see the comment at the top of
+    `src/firebase.js`). `busick-recipes` still holds the old copy, untouched.
+  - Because they differ, `busick-recipes.web.app` and each Hosting preview
+    hostname must be added to `tyler-busick-22`'s Auth → Authorized domains
+    or sign-in fails, and `npm run deploy:preview` passes
+    `--no-authorized-domains` so Hosting can't sync the wrong allowlist.
+  - **Rules live in `firestore.shared.rules`**, deployed to `tyler-busick-22`
+    with `--config firebase.wishlists.json --only firestore:rules`. The root
+    `firestore.rules` is the historical `busick-recipes` ruleset, kept for
+    reference; it is deliberately no longer wired into `firebase.json`, so a
+    bare `firebase deploy` from this folder is hosting-only.
 - **Firebase services:** Firestore (shared family data), Auth (Google
   sign-in only — the whole family shares one signed-in account on the
   tablet), Hosting.
@@ -34,6 +48,9 @@ whole family uses one signed-in account on the tablet:
 - `recipes/{id}`, `meals/{dateKey}`, `aisles/{id}` — meal planning
 - `rewards/{id}` — kids' rewards catalog
 - `screenTime/{kidName}`, `screenTimeRequests/{id}` — kids' screen-time
+- `wishLists/{id}` + its `items` / `purchases` subcollections — per-kid wish
+  lists with optional public share links; `purchases` is parent-only and must
+  never join the recursive family allowlist (see `docs/wish-lists.md`)
 - `errors/{id}` — client error log (`window.onerror` → Firestore)
 
 Kids: `Liam` (10), `Livi` (8), `Spencer` (5) — see `src/lib/family.js`.
@@ -54,13 +71,15 @@ Kids: `Liam` (10), `Livi` (8), `Spencer` (5) — see `src/lib/family.js`.
   helpers (dates, names, turn-index math) — ported from the old
   `shared-utils.js`.
 - `src/lib/errorReporter.js` — ported `window.onerror` → Firestore reporter.
-- `src/app/` — the shell: `AppShell.jsx` (desktop sidebar / mobile top bar +
-  floating dock, switched by CSS media query, never JS resize logic),
-  `Sidebar.jsx`, `BottomNav.jsx`, `AccountMenu.jsx` (mobile-only dropdown),
-  `Brand.jsx`, `nav.js` (the four areas + their accent colors).
-- `src/features/<area>/` — one folder per page: `auth` (SignInPage),
-  `dashboard` (built), `meals`, `planner`, `kids` (all three still
-  `ComingSoon` placeholders — see below).
+- `src/app/` — the shell: `AppShell.jsx` (a top app bar on tablet/desktop,
+  top bar + bottom tab dock on phones, switched by CSS media query, never JS
+  resize logic), `BottomNav.jsx`, `AccountMenu.jsx`, `Brand.jsx`, `nav.js`
+  (the five destinations). The old desktop `Sidebar.jsx` was removed by the
+  planning redesign.
+- `src/features/<area>/` — `auth` (SignInPage), `planning` (Week, Calendar,
+  To-dos — the redesign's own pages), `meals`, `kids`, and `planner`, which
+  is now only the shared calendar/event/assignee components the planning
+  pages reuse, not a page of its own.
 - `src/styles/tokens.css` + `base.css` — every color/size/timing, plus the
   shared component kit (`.btn`, `.card`, `.modal`, `.chip`, ...).
 - `src/components/` — small shared pieces: `Modal.jsx`, `Notice.jsx`
@@ -90,9 +109,11 @@ kid-facing app:
 - **Bigger everything:** type scale, radii, and a `--tap: 48px` minimum
   touch-target size used throughout (buttons, icon buttons, fields, sidebar
   links) — kids tap this, nothing should be fiddly.
-- **Four playful per-tab accents** instead of one brand color: Home
-  (warm orange), Meals (tomato red), Planner (blue), Kids (purple) — same
-  pattern as Budget's five accents, just family-appropriate hues.
+- **Per-area accents** instead of one brand color: the planning surfaces
+  (Week / Calendar / To-dos) share the base `--accent` because they are one
+  place, and only Meals (tomato red) and Kids (purple) get their own. The
+  base accent is a deep brick `#a4482b` rather than the original bright
+  orange, which failed contrast for text on white.
 - Warm brown/cream palette (vs. Accomplish's navy/cyan, Budget's forest/
   green) — closest to the old static site's terracotta identity, just
   reorganized into the token architecture.
@@ -101,7 +122,13 @@ kid-facing app:
 
 - `npm install` then `npm run dev` → http://localhost:5175
 - `npm run lint` → check code style
+- `npm test` → unit tests (dates, work grouping, grocery merge, wish lists)
+- `npm run test:rules` → Firestore rules + transaction tests against a local
+  emulator (never against family data)
 - `npm run build` → produce `dist/`
+- `npm run deploy:preview` → publish the current commit to the
+  `planning-first` Hosting preview channel only. Refuses to run on another
+  branch or a dirty tree, and never touches the live channel or rules.
 - Deploy (when ready): `npm run build`, then `firebase deploy` — **not done
   yet, do not run this until the owner asks.** `firebase.json` now points
   `hosting.public` at `dist/` with SPA rewrites, mirroring Budget's CSP
@@ -116,11 +143,92 @@ kid-facing app:
 - New Firestore collections need a matching `state/*Context.jsx` (copy an
   existing one — `onSnapshot`, gate on `user`, normalize on read).
 - **New colors/sizes only via `tokens.css` variables** — that's what keeps
-  both themes and the four page accents working everywhere.
+  both themes and the page accents working everywhere.
+- **Each feature's stylesheet owns that feature's whole appearance.** Don't
+  reach into another feature from `planning.css`; the only rules scoped to
+  `.planning-shell` are deliberate overrides of *shared* component classes
+  (`.card`, `.seg-tabs`, `.page-head`), scoped so sign-in and the public
+  wish-list page keep the original styling.
 - `firestore.rules` is untouched and should stay that way unless the data
   model genuinely changes — it's shared, tested against real family data.
 
 ## Current focus
+
+- **2026-09-02 — Planning-first redesign, then a review-fix pass (branch
+  `codex/planning-first-redesign`; PREVIEW ONLY, not live).** The redesign
+  itself is described in `docs/planning-redesign.md` — read that first. This
+  entry records the follow-up pass that resolved a review of it. Front end,
+  plus one config change; **no Firestore schema, rules, or Auth changes.**
+
+  **Where things stand:** `main` and the live site are untouched. Live still
+  serves the wish-list release. Publish preview revisions with
+  `npm run deploy:preview`; do not deploy to production without the owner
+  asking. The preview uses **real family data** (a Hosting preview is a
+  separate site, not a separate database) — that was the owner's explicit
+  choice; use the emulators for anything write-heavy.
+
+  **Correctness fixes:**
+  - **Completion is now optimistic in the UI.** Checking a chore or task off
+    runs through a Firestore *transaction* (that's what makes concurrent taps
+    safe), but a transaction always waits for the server instead of applying
+    locally the way an ordinary write does. The row now ticks and celebrates
+    immediately and rolls back only if the write actually fails — otherwise
+    every checkbox on the tablet paused for a network round-trip.
+    See `KidItemRow.jsx` and `planning/WorkRow.jsx`.
+  - **`kidPoints` writes are all transactional now.** `awardPoints`,
+    `revokePoints`, `deleteHistoryEntry`, `approveRedemption` and
+    `denyRedemption` used to read the document and write the *whole thing*
+    back, so a parent approving a reward at the same moment a kid finished a
+    chore silently erased the points that landed in between. Each one now
+    writes only the array it owns, inside a transaction, and identifies the
+    entry by its timestamp rather than by the array index the screen happened
+    to render.
+  - **Deleting a kid's completed task takes back its points atomically**
+    (`lib/workCompletion.js` → `deleteWork`), instead of two writes that
+    could half-fail. Parent deletion via `WorkEditModal` still keeps the
+    history on purpose.
+  - **Late weekly chores are no longer labelled "Overdue."** A Monday chore
+    looks late from Tuesday on, every week, so it drowned out genuinely
+    missed one-time tasks; repeating work now groups under "Earlier this
+    week." The filter chip is "Today & behind."
+  - **The Week page's day detail is now checkable.** It reuses `WorkRow`, so
+    you can tick things off from the landing page, and finished chores show
+    as done instead of lingering as though they were still outstanding.
+  - **Grocery "Clear entire list" has a way out** — a "Keep my list" button
+    and a line saying there's no undo, matching the weekly-reset pattern.
+
+  **Cleanup — a lot of code the redesign left behind is now gone:**
+  - Deleted the unreachable `DashboardPage`, `PlannerPage`, `Sidebar`, and
+    the old planner's tabs/modals/rows, plus `plannerUtils.js` (its one live
+    export, `EVENT_COLORS`, moved into `EventModal.jsx`). That also removed
+    the last `busick-family.*` localStorage keys.
+  - `planner.css` 749 → 255 lines, `shell.css` 350 → 168, and the
+    `.planning-shell`-prefixed overrides of other features' CSS were folded
+    into the stylesheets they belonged to. **Total CSS 75.5 kB → 62.8 kB.**
+  - `--accent-home` and `--accent-planner` retired with the pages they
+    served; `--accent-soft`/`--accent-glow` were still the *old* orange after
+    the accent changed to brick, and now match.
+  - `.env.local` is gitignored — it was untracked, which made
+    `npm run deploy:preview` refuse to run on a "dirty" tree.
+  - `firebase.json` no longer carries a `firestore` block, so a bare
+    `firebase deploy` here can't push the stale `busick-recipes` ruleset.
+
+  **Verified:** lint, 8 unit tests, and a production build all pass.
+  **Not verified — needs you:** none of this could be exercised against real
+  family data or a real Google sign-in from here. Worth a click-through on
+  the preview: check a chore off (it should tick instantly), the Week day
+  detail, the Kids page and parent tiles, Meals and the calendar month grid,
+  in both themes. The CSS consolidation is the change most likely to have a
+  cosmetic regression — it was verified by build and by reading, plus a
+  render check against the emulator, not against your data.
+
+  **Environment note:** `git` broke mid-session on this Mac with
+  `xcrun: invalid active developer path` — `xcode-select -p` points at
+  `/Applications/Xcode.app`, which is gone. The Command Line Tools at
+  `/Library/Developer/CommandLineTools` are fine. Needs your password:
+  `sudo xcode-select --switch /Library/Developer/CommandLineTools`.
+  Until then, prefix git commands with
+  `DEVELOPER_DIR=/Library/Developer/CommandLineTools`.
 
 - **2026-08-02 — Mobile tab bar + Home density (owner-directed, live
   session). Front end only — no Firestore/Auth changes. COMMITTED and

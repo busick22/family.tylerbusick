@@ -27,10 +27,14 @@ export function workItems(todos, chores, today) {
     ...chores.map(item => ({ ...item, kind: 'chore', title: item.name, date: week[DAYS.indexOf(item.day)] || null })),
   ]
 }
+// A weekly chore is pinned to its weekday, so an unchecked Monday chore looks
+// "late" from Tuesday onward every single week. Calling that Overdue alongside
+// genuinely missed one-time tasks trains everyone to ignore the group, so
+// repeating work gets its own gentler heading.
 export function workGroup(item, today) {
   if (item.done) return 'Completed'
   if (!item.date) return 'Anytime'
-  if (item.date < today) return 'Overdue'
+  if (item.date < today) return item.kind === 'chore' ? 'Earlier this week' : 'Overdue'
   if (item.date === today) return 'Today'
   return 'Upcoming'
 }

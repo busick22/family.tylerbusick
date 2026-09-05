@@ -47,10 +47,10 @@ export default function PendingModal({ onClose, showNotice }) {
             <div className="admin-req-text">
               🎁 <strong>{item.kidName}</strong> wants <strong>{item.name}</strong> · {item.cost} pts
             </div>
-            <button className="chip" onClick={() => approveRedemption(item.kidName, item.idx)}>
+            <button className="chip" onClick={() => approveRedemption(item.kidName, item.idx, item)}>
               Approve
             </button>
-            <button className="chip" data-danger="true" onClick={() => denyRedemption(item.kidName, item.idx)}>
+            <button className="chip" data-danger="true" onClick={() => denyRedemption(item.kidName, item.idx, item)}>
               Deny
             </button>
           </div>

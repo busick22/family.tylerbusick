@@ -1,4 +1,7 @@
-/* The signed-in frame: sidebar (desktop) / top bar + bottom tabs (mobile). */
+/* The signed-in frame's shared pieces: the page background, the main scroll
+   area, the mobile bottom tab bar, and the account menu.
+   The desktop sidebar this file used to style was replaced by the planning
+   redesign's top app bar — see features/planning/planning.css. */
 
 .shell {
   display: flex;
@@ -10,7 +13,6 @@
     var(--bg);
   background-size: auto, 44px 44px, 44px 44px, auto;
 }
-
 .shell-main {
   flex: 1;
   min-width: 0;
@@ -19,156 +21,11 @@
   display: flex;
   flex-direction: column;
 }
-
-/* --- Sidebar (desktop) ------------------------------------------------------ */
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  width: var(--sidebar-width);
-  flex: none;
-  padding: 20px 14px 16px;
-  border-right: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
-  backdrop-filter: blur(10px);
-  transition: width var(--speed-med) var(--ease-out);
-}
-
-.shell[data-collapsed='true'] .sidebar {
-  width: var(--sidebar-rail);
-}
-
-.sidebar-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 10px 20px;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.sidebar-foot {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.sidebar-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px 12px;
-}
-
-.sidebar-user-name {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-link {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: var(--tap);
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  color: var(--text-mid);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  transition:
-    background var(--speed-fast) var(--ease-out),
-    color var(--speed-fast) var(--ease-out);
-}
-
-.sidebar-link svg {
-  width: 20px;
-  height: 20px;
-  flex: none;
-}
-
-.sidebar-link:hover {
-  background: var(--surface-2);
-  color: var(--text);
-}
-
-.sidebar-link.active {
-  background: color-mix(in srgb, var(--item-accent) 14%, transparent);
-  color: var(--text);
-}
-
-.sidebar-link.active svg {
-  color: var(--item-accent);
-}
-
-.sidebar-link.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  translate: 0 -50%;
-  width: 3px;
-  height: 55%;
-  border-radius: var(--radius-full);
-  background: var(--item-accent);
-  box-shadow: 0 0 10px var(--item-accent);
-}
-
-.shell[data-collapsed='true'] .sidebar-link {
-  justify-content: center;
-  padding: 10px 0;
-}
-
-.sidebar-collapse {
-  color: var(--text-dim);
-}
-
-/* --- Mobile top bar ----------------------------------------------------------- */
-
-.shell-mobile-top {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  align-items: center;
-  justify-content: space-between;
-  padding: max(env(safe-area-inset-top, 0px), 10px) 16px 10px;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-}
-
-.shell-mobile-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-md);
-}
-
 /* --- Account menu (mobile top bar) --------------------------------------------- */
 
 .account-menu {
   position: relative;
 }
-
 .account-trigger {
   display: flex;
   align-items: center;
@@ -177,14 +34,12 @@
   height: var(--tap);
   border-radius: var(--radius-full);
 }
-
 .account-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
   z-index: 1;
 }
-
 /* --- Bottom nav (mobile): a tab bar anchored to the bottom edge ---------------- */
 
 .bottomnav {
@@ -200,7 +55,6 @@
   backdrop-filter: blur(18px);
   touch-action: none;
 }
-
 .bottomnav-link {
   flex: 1;
   display: flex;
@@ -214,42 +68,28 @@
   font-weight: 550;
   transition: color var(--speed-fast) var(--ease-out);
 }
-
 .bottomnav-link svg {
   width: 21px;
   height: 21px;
   transition: transform var(--speed-fast) var(--ease-out);
 }
-
 .bottomnav-link.active {
   color: var(--item-accent);
 }
-
 .bottomnav-link.active svg {
   transform: translateY(-1px);
 }
-
 /* --- Responsive switch ---------------------------------------------------------- */
 
 @media (max-width: 800px) {
-  .sidebar {
-    display: none;
-  }
-
-  .shell-mobile-top {
+.bottomnav {
     display: flex;
   }
-
-  .bottomnav {
-    display: flex;
-  }
-
-  .shell-main {
+.shell-main {
     height: calc(100% - var(--dock-height) - var(--dock-inset));
     margin-top: calc(52px + env(safe-area-inset-top, 0px));
   }
 }
-
 /* --- Shared page scaffolding ------------------------------------------------------ */
 
 .page {
@@ -261,25 +101,15 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
-
 .page[data-scroll='locked'] {
   overflow: hidden;
 }
-
-.page-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
 @media (max-width: 800px) {
-  .page {
+.page {
     padding-top: 16px;
     padding-bottom: 12px;
   }
 }
-
 .page-head {
   display: flex;
   align-items: center;
@@ -287,39 +117,33 @@
   margin-bottom: 20px;
   flex: none;
 }
-
 .page-head > .page-title {
   margin-right: auto;
 }
-
 .page-title {
   font-size: var(--text-xl);
   min-width: 0;
 }
-
 @media (max-width: 640px) {
-  .seg-tabs {
+.seg-tabs {
     width: 100%;
     max-width: 100%;
     gap: 4px;
     padding: 4px;
     overflow: hidden;
   }
-
-  .seg-tab {
+.seg-tab {
     min-width: 0;
     gap: 4px;
     padding: 8px 6px;
     font-size: clamp(0.68rem, 2.8vw, var(--text-xs));
   }
-
-  .seg-tab svg {
+.seg-tab svg {
     width: 15px;
     height: 15px;
     flex: none;
   }
-
-  .page-head {
+.page-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
@@ -327,18 +151,15 @@
     row-gap: 10px;
     margin-bottom: 16px;
   }
-
-  .page-head > .page-title {
+.page-head > .page-title {
     grid-column: 1;
     margin-right: 0;
   }
-
-  .page-head > :not(.page-title) {
+.page-head > :not(.page-title) {
     grid-column: 1 / -1;
     width: 100%;
   }
-
-  /* Icon-only buttons (e.g. Planner's settings gear) stay beside the title
+/* Icon-only buttons (e.g. Planner's settings gear) stay beside the title
      instead of dropping to a stretched full-width row of their own. */
   .page-head > .icon-btn {
     grid-column: 2;

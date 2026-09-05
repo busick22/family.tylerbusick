@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useTurns } from '../../state/TurnsContext.jsx'
+// .parent-turns lives with the rest of the parent-page styling.
+import '../kids/kids.css'
 
 export default function TurnControls({ showNotice }) {
   const turns = useTurns()
