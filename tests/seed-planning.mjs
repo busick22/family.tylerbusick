@@ -41,6 +41,21 @@ try {
       await write('meals', key, { recipeId: recipe.id, recipeName: recipe.name, updatedAt: serverTimestamp() })
     }
     await write('grocery', 'current', { items: [{ id: 'planning-demo-milk', name: 'Milk', amount: '2 cartons', checked: false, manual: true, aisle: 'Dairy', sources: [] }, { id: 'planning-demo-apples', name: 'Apples', amount: '6', checked: true, manual: true, aisle: 'Produce', sources: [] }], selectedDays: [] })
+    const wishListId = 'planningDemoWish0001'
+    await write('wishLists', wishListId, { kid: 'Liam', name: 'Birthday', shared: false, archived: false, createdAt: serverTimestamp() })
+    for (let i = 1; i <= 18; i += 1) {
+      await setDoc(doc(db, 'wishLists', wishListId, 'items', `planning-demo-wish-${i}`), {
+        name: i === 1 ? 'A longer wish name that should wrap cleanly on a phone' : `Birthday wish ${i}`,
+        link: i % 3 === 0 ? 'https://example.com/gift' : '',
+        notes: i % 4 === 0 ? 'Favorite color: green' : '',
+        price: i % 2 === 0 ? i * 5 : null,
+        createdAt: serverTimestamp(),
+      })
+    }
+    await write('rewards', 'planning-demo-movie', { name: 'Pick family movie', cost: 10, archived: false, createdAt: serverTimestamp() })
+    await write('kidPoints', 'Liam', { history: [{ label: 'Read for 20 minutes', points: 3, type: 'task', refId: 'planning-demo-reading', date: today, ts: Date.now() }], redeemed: [], pendingRedemptions: [] })
+    await write('screenTime', 'Liam', { dailyBudgetMs: 40 * 60 * 1000, usedMsToday: 5 * 60 * 1000, lastResetDate: today, bonusMsToday: 0, bonusDate: today, activeSessionStart: null })
+    await write('screenTimeRequests', 'planning-demo-time-request', { kidName: 'Liam', requestedMs: 10 * 60 * 1000, createdAt: serverTimestamp() })
     console.log('Seeded local demo-family-wishes only. No live project was accessed.')
   })
 } finally { await env.cleanup() }

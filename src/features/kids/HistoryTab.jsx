@@ -2,6 +2,7 @@
 // points earned), missed chores they can still knock out, and a peek at
 // next week's chores.
 
+import { useState } from 'react'
 import { useChores } from '../../state/ChoresContext.jsx'
 import { useKidPoints } from '../../state/KidPointsContext.jsx'
 import { DAYS, todayStr } from '../../lib/family.js'
@@ -18,6 +19,8 @@ export default function HistoryTab({ kid }) {
   const { chores } = useChores()
   const { kidPoints, deleteHistoryEntry } = useKidPoints()
   const actions = useKidActions(kid)
+  const [busy, setBusy] = useState(null)
+  const [error, setError] = useState('')
 
   const data = kidPoints[kid] || { history: [], redeemed: [] }
   const historyEntries = data.history || []
@@ -59,8 +62,19 @@ export default function HistoryTab({ kid }) {
 
   const isEmpty = !upcomingGroups.length && !pastGroups.length
 
+  async function runAction(key, action) {
+    setBusy(key)
+    setError('')
+    try { await action() }
+    catch (actionError) {
+      console.error(actionError)
+      setError('Could not update that item. Please try again.')
+    } finally { setBusy(null) }
+  }
+
   return (
     <div>
+      {error && <p className="kid-row-error" role="alert">{error}</p>}
       {isEmpty && <div className="k-empty">No history yet — complete some tasks!</div>}
 
       {upcomingGroups.length > 0 && (
@@ -87,27 +101,29 @@ export default function HistoryTab({ kid }) {
             {g.label}
             {g.dayPts > 0 && <span className="hist-day-pts">+{g.dayPts} pts</span>}
           </div>
-          {g.dayHistory.map((e) => (
-            <div className="hist-item" key={e._idx}>
+          {g.dayHistory.map((e) => {
+            const actionKey = `history-${e.ts ?? e.requestedAt ?? e._idx}`
+            return <div className="hist-item" key={actionKey}>
               <span className="hist-status">✅</span>
               <span className="hist-name">{e.label}</span>
               {e.points ? <span className="hist-pts">+{e.points}pts</span> : null}
               <button
                 className="hist-del"
-                onClick={() => deleteHistoryEntry(kid, e._idx, e)}
+                disabled={busy !== null}
+                onClick={() => runAction(actionKey, () => deleteHistoryEntry(kid, e._idx, e))}
                 aria-label={`Remove ${e.label}`}
               >
                 ✕
               </button>
             </div>
-          ))}
+          })}
           {g.missedChores.map((c) => (
             <div className="hist-item" key={c.id}>
               <span className="hist-status">❌</span>
               <span className="hist-name hist-missed">{c.name}</span>
               {c.points ? <span className="hist-pts">{c.points}pts</span> : null}
-              <button className="hist-complete-btn" onClick={() => actions.completeChoreNow(c.id)}>
-                Complete now
+              <button className="hist-complete-btn" disabled={busy !== null} onClick={() => runAction(`chore-${c.id}`, () => actions.completeChoreNow(c.id))}>
+                {busy === `chore-${c.id}` ? 'Saving…' : 'Complete now'}
               </button>
             </div>
           ))}

@@ -3,7 +3,7 @@
 // updatedAt, updatedBy }.
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, onSnapshot, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
 import { MOVIE_TURN_ORDER, DOG_FEED_TURN_ORDER, resolveTurnIndex } from '../lib/family.js'
@@ -45,25 +45,27 @@ export function TurnsProvider({ children }) {
       dogFeeder: DOG_FEED_TURN_ORDER[dogFeedTurnIndex] || DOG_FEED_TURN_ORDER[0],
 
       async advanceMovieTurn() {
-        const nextIndex = (movieTurnIndex + 1) % MOVIE_TURN_ORDER.length
+        const ref = doc(db, 'settings', 'movieTurn')
         const who = user?.displayName?.split(' ')[0] || 'Family'
-        await setDoc(
-          doc(db, 'settings', 'movieTurn'),
-          { currentIndex: nextIndex, order: MOVIE_TURN_ORDER, updatedAt: serverTimestamp(), updatedBy: who },
-          { merge: true },
-        )
-        return MOVIE_TURN_ORDER[nextIndex]
+        return runTransaction(db, async (transaction) => {
+          const snap = await transaction.get(ref)
+          const current = resolveTurnIndex(snap.exists() ? snap.data() : null, MOVIE_TURN_ORDER)
+          const nextIndex = (current + 1) % MOVIE_TURN_ORDER.length
+          transaction.set(ref, { currentIndex: nextIndex, order: MOVIE_TURN_ORDER, updatedAt: serverTimestamp(), updatedBy: who }, { merge: true })
+          return MOVIE_TURN_ORDER[nextIndex]
+        })
       },
 
       async advanceDogTurn() {
-        const nextIndex = (dogFeedTurnIndex + 1) % DOG_FEED_TURN_ORDER.length
+        const ref = doc(db, 'settings', 'dogFeedTurn')
         const who = user?.displayName?.split(' ')[0] || 'Family'
-        await setDoc(
-          doc(db, 'settings', 'dogFeedTurn'),
-          { currentIndex: nextIndex, order: DOG_FEED_TURN_ORDER, updatedAt: serverTimestamp(), updatedBy: who },
-          { merge: true },
-        )
-        return DOG_FEED_TURN_ORDER[nextIndex]
+        return runTransaction(db, async (transaction) => {
+          const snap = await transaction.get(ref)
+          const current = resolveTurnIndex(snap.exists() ? snap.data() : null, DOG_FEED_TURN_ORDER)
+          const nextIndex = (current + 1) % DOG_FEED_TURN_ORDER.length
+          transaction.set(ref, { currentIndex: nextIndex, order: DOG_FEED_TURN_ORDER, updatedAt: serverTimestamp(), updatedBy: who }, { merge: true })
+          return DOG_FEED_TURN_ORDER[nextIndex]
+        })
       },
     }),
     [movieTurnIndex, dogFeedTurnIndex, user],

@@ -4,7 +4,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import {
-  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot,
+  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, writeBatch,
 } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { setWorkCompletion } from '../lib/workCompletion.js'
@@ -62,11 +62,9 @@ export function ChoresProvider({ children }) {
 
       // Sunday-morning ritual: uncheck everything for a fresh week.
       async resetWeek() {
-        await Promise.all(
-          chores.map((c) =>
-            updateDoc(doc(db, 'chores', c.id), { done: false, completedAt: null, completedBy: '' }),
-          ),
-        )
+        const batch = writeBatch(db)
+        chores.forEach((c) => batch.update(doc(db, 'chores', c.id), { done: false, completedAt: null, completedBy: '' }))
+        await batch.commit()
       },
     }),
     [chores, user, loading, error],

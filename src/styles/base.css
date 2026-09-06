@@ -289,7 +289,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
   background: var(--backdrop);
   backdrop-filter: blur(6px);
   animation: fade-in var(--speed-fast) ease-out;
@@ -298,8 +298,10 @@ a {
 .modal {
   position: relative;
   width: min(460px, 100%);
-  max-height: min(660px, 90vh);
+  max-height: min(660px, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px));
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 24px;
   background: var(--surface);
   border: 1px solid var(--border);

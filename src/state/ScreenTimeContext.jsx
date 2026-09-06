@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import {
-  collection, addDoc, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp,
+  collection, addDoc, deleteDoc, doc, onSnapshot, runTransaction, setDoc, serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
@@ -11,6 +11,26 @@ import { KIDS, todayStr } from '../lib/family.js'
 import { defaultScreenTime, computeTimerView, DEFAULT_BUDGETS_MS, FALLBACK_DAILY_BUDGET_MS } from '../lib/screenTime.js'
 
 const ScreenTimeContext = createContext(null)
+
+function timeAdjustment(data, deltaMs) {
+  const today = todayStr()
+  const baseUsed = data.lastResetDate === today ? data.usedMsToday || 0 : 0
+  const currentBonus = data.bonusDate === today ? data.bonusMsToday || 0 : 0
+  if (deltaMs >= 0) return {
+    lastResetDate: today,
+    bonusDate: today,
+    bonusMsToday: currentBonus + deltaMs,
+    usedMsToday: baseUsed,
+  }
+  const takeMs = Math.abs(deltaMs)
+  const bonusAfterTake = Math.max(0, currentBonus - takeMs)
+  return {
+    lastResetDate: today,
+    bonusDate: today,
+    bonusMsToday: bonusAfterTake,
+    usedMsToday: baseUsed + Math.max(0, takeMs - currentBonus),
+  }
+}
 
 export function ScreenTimeProvider({ children }) {
   const { user } = useAuth()
@@ -65,110 +85,112 @@ export function ScreenTimeProvider({ children }) {
 
       // Start/pause the kid's session. Returns 'started' | 'paused'.
       async toggleSession(kidName) {
-        const data = getFor(kidName)
-        const view = computeTimerView(data, kidName)
-        const today = todayStr()
-        if (view.running) {
-          const elapsed = Date.now() - data.activeSessionStart
-          const baseUsed = data.lastResetDate === today ? data.usedMsToday || 0 : 0
-          await setDoc(
-            doc(db, 'screenTime', kidName),
-            { ...data, usedMsToday: baseUsed + Math.max(0, elapsed), lastResetDate: today, activeSessionStart: null },
-            { merge: true },
-          )
-          return 'paused'
-        }
-        await setDoc(
-          doc(db, 'screenTime', kidName),
-          { ...data, lastResetDate: today, activeSessionStart: Date.now() },
-          { merge: true },
-        )
-        return 'started'
+        const ref = doc(db, 'screenTime', kidName)
+        return runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(ref)
+          const data = snapshot.exists() ? snapshot.data() : defaultScreenTime(kidName)
+          const view = computeTimerView(data, kidName)
+          const today = todayStr()
+          if (view.running) {
+            const elapsed = Date.now() - data.activeSessionStart
+            const baseUsed = data.lastResetDate === today ? data.usedMsToday || 0 : 0
+            transaction.set(ref, {
+              usedMsToday: baseUsed + Math.max(0, elapsed),
+              lastResetDate: today,
+              activeSessionStart: null,
+            }, { merge: true })
+            return 'paused'
+          }
+          transaction.set(ref, { lastResetDate: today, activeSessionStart: Date.now() }, { merge: true })
+          return 'started'
+        })
       },
 
       // First render of a new day: zero out yesterday's usage. A session
       // still running across midnight is re-anchored to now, not killed.
       async ensureDailyReset(kidName) {
-        const data = getFor(kidName)
-        if (data.lastResetDate === todayStr()) return
-        await setDoc(
-          doc(db, 'screenTime', kidName),
-          {
-            ...data,
+        const ref = doc(db, 'screenTime', kidName)
+        await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(ref)
+          const data = snapshot.exists() ? snapshot.data() : defaultScreenTime(kidName)
+          const today = todayStr()
+          if (data.lastResetDate === today) return
+          transaction.set(ref, {
             usedMsToday: 0,
-            lastResetDate: todayStr(),
+            lastResetDate: today,
             bonusMsToday: 0,
-            bonusDate: todayStr(),
+            bonusDate: today,
             activeSessionStart: data.activeSessionStart ? Date.now() : null,
-          },
-          { merge: true },
-        )
+          }, { merge: true })
+        })
       },
 
       // Timer hit zero while running: bank the full budget and stop.
       async expireSession(kidName) {
-        const data = getFor(kidName)
-        if (!data.activeSessionStart) return
-        const view = computeTimerView(data, kidName)
-        await setDoc(
-          doc(db, 'screenTime', kidName),
-          {
-            ...data,
+        const ref = doc(db, 'screenTime', kidName)
+        await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(ref)
+          const data = snapshot.exists() ? snapshot.data() : defaultScreenTime(kidName)
+          if (!data.activeSessionStart) return
+          const view = computeTimerView(data, kidName)
+          transaction.set(ref, {
             usedMsToday: view.budget || DEFAULT_BUDGETS_MS[kidName] || FALLBACK_DAILY_BUDGET_MS,
             lastResetDate: todayStr(),
             activeSessionStart: null,
-          },
-          { merge: true },
-        )
+          }, { merge: true })
+        })
       },
 
       // Positive delta = give same-day bonus time; negative = take time away.
       async adjustTime(kidName, deltaMs) {
-        const data = getFor(kidName)
-        const today = todayStr()
-        const baseUsed = data.lastResetDate === today ? data.usedMsToday || 0 : 0
-        const currentBonus = data.bonusDate === today ? data.bonusMsToday || 0 : 0
-        const updates = { ...data, lastResetDate: today, bonusDate: today }
-        if (deltaMs >= 0) {
-          updates.bonusMsToday = currentBonus + deltaMs
-          updates.usedMsToday = baseUsed
-        } else {
-          const takeMs = Math.abs(deltaMs)
-          const bonusAfterTake = Math.max(0, currentBonus - takeMs)
-          const usedPenalty = Math.max(0, takeMs - currentBonus)
-          updates.bonusMsToday = bonusAfterTake
-          updates.usedMsToday = baseUsed + usedPenalty
-        }
-        await setDoc(
-          doc(db, 'screenTime', kidName),
-          updates,
-          { merge: true },
-        )
+        const ref = doc(db, 'screenTime', kidName)
+        await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(ref)
+          const data = snapshot.exists() ? snapshot.data() : defaultScreenTime(kidName)
+          transaction.set(ref, timeAdjustment(data, deltaMs), { merge: true })
+        })
+      },
+
+      // Granting a request and removing it are one operation. Retrying after a
+      // network interruption cannot add the same bonus twice.
+      async grantRequest(id) {
+        const requestRef = doc(db, 'screenTimeRequests', id)
+        return runTransaction(db, async (transaction) => {
+          const requestSnapshot = await transaction.get(requestRef)
+          if (!requestSnapshot.exists()) return null
+          const request = requestSnapshot.data()
+          const kidName = request.kidName
+          const requestedMs = Number(request.requestedMs) || 0
+          if (!KIDS.includes(kidName) || requestedMs <= 0) throw new Error('Invalid screen-time request.')
+          const timeRef = doc(db, 'screenTime', kidName)
+          const timeSnapshot = await transaction.get(timeRef)
+          const data = timeSnapshot.exists() ? timeSnapshot.data() : defaultScreenTime(kidName)
+          transaction.set(timeRef, timeAdjustment(data, requestedMs), { merge: true })
+          transaction.delete(requestRef)
+          return { kidName, requestedMs }
+        })
       },
 
       async resetToday(kidName) {
-        const data = getFor(kidName)
-        await setDoc(
-          doc(db, 'screenTime', kidName),
-          {
-            ...data,
-            usedMsToday: 0,
-            lastResetDate: todayStr(),
-            bonusMsToday: 0,
-            bonusDate: todayStr(),
-            activeSessionStart: null,
-          },
-          { merge: true },
-        )
+        await setDoc(doc(db, 'screenTime', kidName), {
+          usedMsToday: 0,
+          lastResetDate: todayStr(),
+          bonusMsToday: 0,
+          bonusDate: todayStr(),
+          activeSessionStart: null,
+        }, { merge: true })
       },
 
       async setBudget(kidName, minutes) {
-        const data = getFor(kidName)
-        await setDoc(
-          doc(db, 'screenTime', kidName),
-          { ...data, dailyBudgetMs: minutes * 60000, lastResetDate: data.lastResetDate || todayStr() },
-          { merge: true },
-        )
+        const ref = doc(db, 'screenTime', kidName)
+        await runTransaction(db, async (transaction) => {
+          const snapshot = await transaction.get(ref)
+          const data = snapshot.exists() ? snapshot.data() : {}
+          transaction.set(ref, {
+            dailyBudgetMs: minutes * 60000,
+            lastResetDate: data.lastResetDate || todayStr(),
+          }, { merge: true })
+        })
       },
 
       async addRequest(kidName, requestedMs) {

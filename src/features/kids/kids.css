@@ -168,13 +168,20 @@
 .chip[data-danger='true']:hover { background: var(--danger); color: #fff; }
 
 /* ── Per-kid dashboard shell ──────────────────────────────── */
-.kid-dash { min-height: 100%; }
+.kid-dash {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .kid-hdr {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 14px var(--page-pad);
+  padding: 14px max(var(--page-pad), env(safe-area-inset-right, 0px)) 14px max(var(--page-pad), env(safe-area-inset-left, 0px));
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -204,7 +211,7 @@
 }
 .btn-switch-kid:hover { border-color: var(--kc); color: var(--kc); }
 
-.kid-shell { padding: 16px var(--page-pad) var(--space-6); max-width: var(--workspace-width); margin: 0 auto; }
+.kid-shell { padding: 16px max(var(--page-pad), env(safe-area-inset-right, 0px)) var(--space-6) max(var(--page-pad), env(safe-area-inset-left, 0px)); max-width: var(--workspace-width); margin: 0 auto; }
 @media (min-width: 801px) {
   .kid-shell { padding-bottom: 96px; }
 }

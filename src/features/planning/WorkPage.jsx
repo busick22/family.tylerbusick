@@ -38,7 +38,7 @@ export default function WorkPage() {
   const all = workItems(tasks.todos, chores.chores, today)
   const visible = all.filter(item => {
     if (filter === 'done' ? !item.done : item.done) return false
-    if (filter === 'today' && item.date && item.date > today) return false
+    if (filter === 'today' && (!item.date || item.date > today)) return false
     if (filter === 'repeat' && item.kind !== 'chore') return false
     if (who && item.assignee !== who) return false
     if (list && (item.kind !== 'task' || normalizedTodoListId(item.listId) !== list)) return false

@@ -28,34 +28,50 @@ export default function PointsAdminModal({ onClose, showNotice }) {
   const [resetTarget, setResetTarget] = useState(null) // kid name | 'all' | null
   const [rewardName, setRewardName] = useState('')
   const [rewardCost, setRewardCost] = useState('')
+  const [busy, setBusy] = useState(false)
 
   const kidTodos = todos.filter((t) => !t.done && isKidStackAssignee(t.assignee))
   const kidChores = chores.filter((c) => KIDS.includes(c.assignee))
 
   async function setTodoPoints(id, value) {
-    await updateTodo(id, { points: Math.max(0, parseInt(value, 10) || 0) })
+    try { await updateTodo(id, { points: Math.max(0, parseInt(value, 10) || 0) }) }
+    catch (error) { console.error(error); showNotice?.("Couldn't update those points.", 'error') }
   }
   async function setChorePoints(id, value) {
-    await updateChore(id, { points: Math.max(0, parseInt(value, 10) || 0) })
+    try { await updateChore(id, { points: Math.max(0, parseInt(value, 10) || 0) }) }
+    catch (error) { console.error(error); showNotice?.("Couldn't update those points.", 'error') }
   }
   async function confirmReset() {
     const targets = resetTarget === 'all' ? [...KIDS] : [resetTarget]
-    setResetTarget(null)
+    setBusy(true)
     try {
       await resetKids(targets)
+      setResetTarget(null)
       showNotice?.('Points reset.', 'success')
     } catch (e) {
       console.error(e)
       showNotice?.("Couldn't reset points.", 'error')
-    }
+    } finally { setBusy(false) }
   }
   async function addRewardEntry() {
     const name = rewardName.trim()
     const cost = Math.max(1, parseInt(rewardCost, 10) || 1)
     if (!name) return
-    await addReward(name, cost)
-    setRewardName('')
-    setRewardCost('')
+    setBusy(true)
+    try {
+      await addReward(name, cost)
+      setRewardName('')
+      setRewardCost('')
+    } catch (error) {
+      console.error(error)
+      showNotice?.("Couldn't add that reward.", 'error')
+    } finally { setBusy(false) }
+  }
+  async function removeReward(id) {
+    setBusy(true)
+    try { await archiveReward(id) }
+    catch (error) { console.error(error); showNotice?.("Couldn't remove that reward.", 'error') }
+    finally { setBusy(false) }
   }
 
   return (
@@ -103,10 +119,10 @@ export default function PointsAdminModal({ onClose, showNotice }) {
           {resetTarget && (
             <div className="admin-inline-confirm">
               <span>Reset {resetTarget === 'all' ? "ALL kids'" : `${resetTarget}'s`} points?</span>
-              <button className="btn btn-danger btn-sm" onClick={confirmReset}>
+              <button className="btn btn-danger btn-sm" disabled={busy} onClick={confirmReset}>
                 Yes, reset
               </button>
-              <button className="btn btn-ghost btn-sm" onClick={() => setResetTarget(null)}>
+              <button className="btn btn-ghost btn-sm" disabled={busy} onClick={() => setResetTarget(null)}>
                 Cancel
               </button>
             </div>
@@ -168,7 +184,8 @@ export default function PointsAdminModal({ onClose, showNotice }) {
               <span className="admin-pts-cost">{r.cost}pts</span>
               <button
                 className="icon-btn"
-                onClick={() => archiveReward(r.id)}
+                disabled={busy}
+                onClick={() => removeReward(r.id)}
                 aria-label={`Remove reward ${r.name}`}
               >
                 ✕
@@ -178,6 +195,7 @@ export default function PointsAdminModal({ onClose, showNotice }) {
           <div className="admin-add-row">
             <input
               className="field"
+              disabled={busy}
               placeholder="Reward name…"
               value={rewardName}
               onChange={(e) => setRewardName(e.target.value)}
@@ -187,12 +205,13 @@ export default function PointsAdminModal({ onClose, showNotice }) {
               type="number"
               min="1"
               className="field admin-pts-input"
+              disabled={busy}
               placeholder="pts"
               value={rewardCost}
               onChange={(e) => setRewardCost(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addRewardEntry()}
             />
-            <button className="btn btn-primary" onClick={addRewardEntry}>
+            <button className="btn btn-primary" disabled={busy || !rewardName.trim()} onClick={addRewardEntry}>
               ＋ Add
             </button>
           </div>

@@ -31,7 +31,7 @@
 .wish-parent { justify-self: start; color: var(--text-mid); }
 .wish-purchase-row { border-top: 1px solid var(--border); padding-block: var(--wish-gap); }
 .wish-purchase-row h4 { overflow-wrap: anywhere; }
-.shared-wish-page { height: 100%; overflow-y: auto; background: var(--bg); padding: var(--page-pad); }
+.shared-wish-page { height: 100%; overflow-y: auto; background: var(--bg); padding: max(var(--page-pad), env(safe-area-inset-top, 0px)) max(var(--page-pad), env(safe-area-inset-right, 0px)) max(var(--page-pad), env(safe-area-inset-bottom, 0px)) max(var(--page-pad), env(safe-area-inset-left, 0px)); }
 .shared-wish-shell { max-width: var(--wish-page-width); margin-inline: auto; padding-bottom: var(--wish-empty-pad); }
 .wish-brand { display: flex; align-items: center; gap: var(--wish-gap-sm); font-family: var(--font-display); font-weight: 700; color: var(--text-mid); margin-bottom: var(--wish-empty-pad); }
 .wish-eyebrow { color: var(--text-mid); font-weight: 600; margin-bottom: var(--wish-gap-xs); }

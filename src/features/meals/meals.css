@@ -63,17 +63,24 @@
 
 .cal-day {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
   min-height: 76px;
   min-width: 0;
-  padding: 6px;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-2);
   text-align: left;
   transition: border-color var(--speed-fast) var(--ease-out), background var(--speed-fast) var(--ease-out);
+}
+.cal-day-pick {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px;
+  text-align: left;
 }
 .cal-day:hover { border-color: var(--accent-meals); background: var(--surface-3); }
 .cal-day[data-other='true'] { opacity: 0.45; }
@@ -160,6 +167,15 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: background var(--speed-fast) var(--ease-out);
+}
+.week-row-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  align-self: stretch;
+  gap: 12px;
+  min-width: 0;
+  text-align: left;
 }
 .week-row:hover { background: var(--surface-2); }
 .week-row[data-today='true'] {

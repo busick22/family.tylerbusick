@@ -9,11 +9,12 @@ function dateKeyOf(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false }) {
+export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false, selectedDate, onNavigateDate }) {
   const { meals, clearMeal } = useMeals()
   const now = new Date()
-  const [calYear, setCalYear] = useState(now.getFullYear())
-  const [calMonth, setCalMonth] = useState(now.getMonth())
+  const selected = selectedDate ? new Date(selectedDate + 'T12:00:00') : now
+  const calYear = selected.getFullYear()
+  const calMonth = selected.getMonth()
   const [weekOffset, setWeekOffset] = useState(0)
 
   async function clearDay(dateKey) {
@@ -30,14 +31,12 @@ export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false }
     let y = calYear
     if (m > 11) { m = 0; y++ }
     if (m < 0) { m = 11; y-- }
-    setCalMonth(m)
-    setCalYear(y)
+    onNavigateDate?.(dateKeyOf(y, m, 1))
   }
 
   function goToday() {
     const t = new Date()
-    setCalYear(t.getFullYear())
-    setCalMonth(t.getMonth())
+    onNavigateDate?.(dateKeyOf(t.getFullYear(), t.getMonth(), t.getDate()))
     setWeekOffset(0)
   }
 
@@ -111,35 +110,17 @@ export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false }
               c.month === now.getMonth() &&
               c.year === now.getFullYear()
             return (
-              <button
-                type="button"
+              <div
                 key={i}
                 className="cal-day"
                 data-other={!c.cur}
                 data-today={isToday}
-                onClick={() => onPickDay(dk)}
-                aria-label={`${dk}${meal ? ` — ${meal.recipeName}` : ''}`}
               >
-                <span className="cal-day-num">{c.day}</span>
-                {meal ? (
-                  <span className="cal-meal-chip">
-                    <span className="cal-meal-chip-name">{meal.recipeName}</span>
-                    <span
-                      className="cal-clear"
-                      role="button"
-                      aria-label={`Clear dinner for ${dk}`}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        clearDay(dk)
-                      }}
-                    >
-                      <X aria-hidden="true" size={11} />
-                    </span>
-                  </span>
-                ) : (
-                  <span className="cal-add-hint">+ dinner</span>
-                )}
-              </button>
+                <button type="button" className="cal-day-pick" onClick={() => onPickDay(dk)} aria-label={`${dk}${meal ? ` — ${meal.recipeName}` : ''}`}>
+                  <span className="cal-day-num">{c.day}</span>
+                  {meal ? <span className="cal-meal-chip"><span className="cal-meal-chip-name">{meal.recipeName}</span></span> : <span className="cal-add-hint">+ dinner</span>}
+                </button>
+              </div>
             )
           })}
         </div>
@@ -166,40 +147,13 @@ export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false }
           const meal = meals[dk]
           const isToday = d.getTime() === todayMidnight.getTime()
           return (
-            <div
-              className="week-row"
-              data-today={isToday}
-              key={dk}
-              role="button"
-              tabIndex={0}
-              onClick={() => onPickDay(dk)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  onPickDay(dk)
-                }
-              }}
-            >
-              <span className="week-dayname">{DAYS_SHORT[d.getDay()]}</span>
-              <span className="week-datenum">{d.getDate()}</span>
-              {meal ? (
-                <>
-                  <span className="week-meal">{meal.recipeName}</span>
-                  <button
-                    type="button"
-                    className="icon-btn"
-                    aria-label={`Clear dinner for ${dk}`}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      clearDay(dk)
-                    }}
-                  >
-                    <X aria-hidden="true" size={15} />
-                  </button>
-                </>
-              ) : (
-                <span className="week-empty">Tap to plan dinner</span>
-              )}
+            <div className="week-row" data-today={isToday} key={dk}>
+              <button type="button" className="week-row-main" onClick={() => onPickDay(dk)} aria-label={`Plan dinner for ${dk}`}>
+                <span className="week-dayname">{DAYS_SHORT[d.getDay()]}</span>
+                <span className="week-datenum">{d.getDate()}</span>
+                {meal ? <span className="week-meal">{meal.recipeName}</span> : <span className="week-empty">Tap to plan dinner</span>}
+              </button>
+              {meal && <button type="button" className="icon-btn" aria-label={`Clear dinner for ${dk}`} onClick={() => clearDay(dk)}><X aria-hidden="true" size={15} /></button>}
             </div>
           )
         })}

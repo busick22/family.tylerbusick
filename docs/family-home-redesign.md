@@ -82,6 +82,24 @@ menu and links to real destinations.
   row. iOS safe-area spacing now treats the status inset and 64px top control
   row separately, protects landscape side insets and removes the extra page
   gap above the already-inset bottom dock.
+- The September 6 bug pass fixes scrolling for every selected-kid view,
+  including long wish lists. Kid headers, kid content, shared wish pages and
+  dialogs now respect iOS safe areas; long dialogs scroll independently on
+  short screens.
+- Due now excludes undated to-dos. They remain available in All open and their
+  named list instead of appearing to be late forever.
+- The meal month follows the date in the URL, so direct links and browser
+  navigation open the correct month. Calendar days and week rows use separate,
+  valid controls instead of nesting a clear action inside another button.
+- Related Firestore changes now commit atomically: list removal and reordering,
+  weekly chore resets, multi-kid point resets, screen-time adjustments and
+  request grants. Member edits and turn rotations re-read the current server
+  value before writing, which prevents simultaneous tablets from overwriting
+  one another.
+- Parent request, member, reward and kid-history actions prevent duplicate taps
+  while saving and show a useful error if the write fails. Repeated SVG marks
+  also use unique gradient IDs, and notice timers clean up when their screen is
+  removed.
 
 ## Data boundary
 
@@ -112,6 +130,14 @@ by Vite DEV and the emulator flag and is eliminated from production builds.
   suite cleared its sample data. Sample fixtures were then restored locally.
 - Month navigation to October, switching to Week, dialog Shift-Tab trapping,
   Escape dismissal and focus restoration were exercised.
+- The bug pass added a long 18-item wish-list fixture and exercised its scroll
+  position and last-item editor at 390×844. A 390×600 check verified long
+  dialogs can reach their final actions. A route sweep at phone and tablet
+  sizes found no horizontal overflow, duplicate DOM IDs, unnamed buttons or
+  nested interactive controls.
+- Emulator-backed writes verified two rapid screen-time adjustments both land,
+  granting time removes the pending request in the same commit, member add and
+  removal work, and a turn rotation advances from the current stored value.
 
 Real Google sign-in and installed-PWA behavior on the family's physical tablet
 still need an owner check. Automated browser checks used emulator sign-in.

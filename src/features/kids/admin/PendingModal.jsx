@@ -1,6 +1,7 @@
 // Parent admin — one inbox for everything waiting on a parent: reward
 // redemption requests and screen-time "more please" requests.
 
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import Modal from '../../../components/Modal.jsx'
 import { useKidPoints } from '../../../state/KidPointsContext.jsx'
@@ -9,27 +10,41 @@ import { pendingItems } from '../kidsUtils.js'
 
 export default function PendingModal({ onClose, showNotice }) {
   const { kidPoints, approveRedemption, denyRedemption } = useKidPoints()
-  const { requests, adjustTime, deleteRequest } = useScreenTime()
+  const { requests, grantRequest, deleteRequest } = useScreenTime()
+  const [busy, setBusy] = useState(null)
 
   const items = pendingItems(kidPoints, requests)
 
   async function grant(item) {
+    setBusy(item.id)
     try {
-      await adjustTime(item.kidName, item.requestedMs)
-      await deleteRequest(item.id)
+      const granted = await grantRequest(item.id)
+      showNotice?.(granted ? `Added ${Math.round(granted.requestedMs / 60000)} minutes for ${granted.kidName}.` : 'That request was already handled.', 'success')
     } catch (e) {
       console.error(e)
       showNotice?.("Couldn't grant that request.", 'error')
-    }
+    } finally { setBusy(null) }
   }
   async function deny(item) {
+    setBusy(item.id)
     try {
       await deleteRequest(item.id)
       showNotice?.('Request denied.', 'success')
     } catch (e) {
       console.error(e)
       showNotice?.("Couldn't deny that request.", 'error')
-    }
+    } finally { setBusy(null) }
+  }
+  async function handleRedemption(item, approve) {
+    const key = `redeem-${item.kidName}-${item.idx}`
+    setBusy(key)
+    try {
+      const handled = await (approve ? approveRedemption(item.kidName, item.idx, item) : denyRedemption(item.kidName, item.idx, item))
+      showNotice?.(handled ? `Request ${approve ? 'approved' : 'denied'}.` : 'That request was already handled.', 'success')
+    } catch (e) {
+      console.error(e)
+      showNotice?.(`Couldn't ${approve ? 'approve' : 'deny'} that request.`, 'error')
+    } finally { setBusy(null) }
   }
 
   return (
@@ -47,10 +62,10 @@ export default function PendingModal({ onClose, showNotice }) {
             <div className="admin-req-text">
               🎁 <strong>{item.kidName}</strong> wants <strong>{item.name}</strong> · {item.cost} pts
             </div>
-            <button className="chip" onClick={() => approveRedemption(item.kidName, item.idx, item)}>
+            <button className="chip" disabled={busy !== null} onClick={() => handleRedemption(item, true)}>
               Approve
             </button>
-            <button className="chip" data-danger="true" onClick={() => denyRedemption(item.kidName, item.idx, item)}>
+            <button className="chip" data-danger="true" disabled={busy !== null} onClick={() => handleRedemption(item, false)}>
               Deny
             </button>
           </div>
@@ -59,10 +74,10 @@ export default function PendingModal({ onClose, showNotice }) {
             <div className="admin-req-text">
               ⏰ <strong>{item.kidName}</strong> asked for <strong>+{Math.round((item.requestedMs || 0) / 60000)} min</strong> of screen time
             </div>
-            <button className="chip" onClick={() => grant(item)}>
+            <button className="chip" disabled={busy !== null} onClick={() => grant(item)}>
               Grant
             </button>
-            <button className="chip" data-danger="true" onClick={() => deny(item)}>
+            <button className="chip" data-danger="true" disabled={busy !== null} onClick={() => deny(item)}>
               Deny
             </button>
           </div>

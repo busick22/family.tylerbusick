@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import {
-  collection, deleteDoc, doc, onSnapshot, setDoc, serverTimestamp, updateDoc,
+  collection, doc, onSnapshot, setDoc, serverTimestamp, writeBatch,
 } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
@@ -84,33 +84,24 @@ export function TodoListsProvider({ children }) {
       // Deletes a list; the caller is responsible for re-homing its tasks
       // (PlannerPage moves them to General first).
       async deleteList(id, impactedTodoIds) {
-        await Promise.all([
-          ...impactedTodoIds.map((todoId) =>
-            updateDoc(doc(db, 'todos', todoId), { listId: DEFAULT_TODO_LIST_ID }),
-          ),
-          deleteDoc(doc(db, 'todoLists', normalizedTodoListId(id))),
-        ])
+        const batch = writeBatch(db)
+        impactedTodoIds.forEach((todoId) => batch.update(doc(db, 'todos', todoId), { listId: DEFAULT_TODO_LIST_ID }))
+        batch.delete(doc(db, 'todoLists', normalizedTodoListId(id)))
+        await batch.commit()
       },
 
       async reorder(orderedIds) {
         const metaById = new Map(lists.map((l) => [l.id, l]))
-        await Promise.all(
-          orderedIds.map((id, index) => {
-            const list = metaById.get(id) || {
-              id,
-              name: id === DEFAULT_TODO_LIST_ID ? 'General' : id,
-            }
-            return setDoc(
-              doc(db, 'todoLists', id),
-              {
-                name: list.name || (id === DEFAULT_TODO_LIST_ID ? 'General' : 'Untitled'),
-                order: index,
-                updatedAt: serverTimestamp(),
-              },
-              { merge: true },
-            )
-          }),
-        )
+        const batch = writeBatch(db)
+        orderedIds.forEach((id, index) => {
+          const list = metaById.get(id) || { id, name: id === DEFAULT_TODO_LIST_ID ? 'General' : id }
+          batch.set(doc(db, 'todoLists', id), {
+            name: list.name || (id === DEFAULT_TODO_LIST_ID ? 'General' : 'Untitled'),
+            order: index,
+            updatedAt: serverTimestamp(),
+          }, { merge: true })
+        })
+        await batch.commit()
       },
     }
   }, [rawLists])

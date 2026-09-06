@@ -1,7 +1,7 @@
 // The family member list: settings/members → { list: string[] }.
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { doc, onSnapshot, runTransaction } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
 import { normalizeMemberList, normalizeMemberName, MEMBER_COLORS } from '../lib/family.js'
@@ -35,14 +35,24 @@ export function MembersProvider({ children }) {
 
       async addMember(name) {
         const canonical = normalizeMemberName(name)
-        if (!canonical || members.includes(canonical)) return false
-        await setDoc(doc(db, 'settings', 'members'), { list: [...members, canonical] })
-        return true
+        if (!canonical) return false
+        const ref = doc(db, 'settings', 'members')
+        return runTransaction(db, async (transaction) => {
+          const snap = await transaction.get(ref)
+          const current = normalizeMemberList((snap.exists() && snap.data().list) || [])
+          if (current.includes(canonical)) return false
+          transaction.set(ref, { list: [...current, canonical] })
+          return true
+        })
       },
 
-      async removeMember(index) {
-        await setDoc(doc(db, 'settings', 'members'), {
-          list: members.filter((_, i) => i !== index),
+      async removeMember(name) {
+        const canonical = normalizeMemberName(name)
+        const ref = doc(db, 'settings', 'members')
+        await runTransaction(db, async (transaction) => {
+          const snap = await transaction.get(ref)
+          const current = normalizeMemberList((snap.exists() && snap.data().list) || [])
+          transaction.set(ref, { list: current.filter((member) => member !== canonical) })
         })
       },
     }),

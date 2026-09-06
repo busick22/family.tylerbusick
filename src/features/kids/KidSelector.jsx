@@ -129,7 +129,7 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
 
       {!parentOnly && <Link className="kids-parent-entry" to="/parent"><strong>For the grown-ups</strong><span>Requests, points & screen time →</span></Link>}
       {parentOnly && <TurnControls showNotice={showNotice} />}
-      {openTile === 'members' && <MembersModal onClose={() => setOpenTile(null)} />}
+      {openTile === 'members' && <MembersModal onClose={() => setOpenTile(null)} showNotice={showNotice} />}
       {openTile === 'screen-time' && (
         <ScreenTimeAdminModal onClose={() => setOpenTile(null)} showNotice={showNotice} />
       )}

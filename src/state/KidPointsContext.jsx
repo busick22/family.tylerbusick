@@ -10,7 +10,7 @@
 // points that landed in between.
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { collection, doc, onSnapshot, runTransaction, setDoc } from 'firebase/firestore'
+import { collection, doc, onSnapshot, runTransaction, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
 import { todayStr } from '../lib/family.js'
@@ -120,11 +120,11 @@ export function KidPointsProvider({ children }) {
 
       // Wipes earned + redeemed history for the given kids.
       async resetKids(kidNames) {
-        await Promise.all(
-          kidNames.map((n) =>
-            setDoc(doc(db, 'kidPoints', n), { history: [], redeemed: [], pendingRedemptions: [] }),
-          ),
-        )
+        const batch = writeBatch(db)
+        kidNames.forEach((name) => {
+          batch.set(doc(db, 'kidPoints', name), { history: [], redeemed: [], pendingRedemptions: [] })
+        })
+        await batch.commit()
       },
 
       // Two parents approving from two devices can't double-apply: the
