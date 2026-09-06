@@ -118,12 +118,12 @@ still need an owner check. Automated browser checks used emulator sign-in.
 
 ## Published release
 
-- App code revision: `0083df6` (pushed to origin).
-- Preview release: `1788635566198000`.
-- Expires October 5, 2026 at 2:12 p.m. America/Chicago
-  (`2026-10-05T19:12:42.436637190Z`).
-- Served HTML and all eight referenced assets match the production build
-  byte-for-byte. The hosted sign-in page opens successfully.
+- App code revision: `fc44436`.
+- Preview release: `1788704852969000`.
+- Expires October 6, 2026 at 9:27 a.m. America/Chicago
+  (`2026-10-06T14:27:28.641635530Z`).
+- Served HTML matches the production build byte-for-byte. The hosted sign-in
+  page opens successfully with the updated copy and simplified styling.
 - Live release `1788392907305000` and prior preview release
   `1788399600838000` were verified unchanged after publication.
 - Working branch is backed up at
