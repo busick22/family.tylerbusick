@@ -144,13 +144,14 @@ still need an owner check. Automated browser checks used emulator sign-in.
 
 ## Published release
 
-- App code revision: `fc44436`.
-- Preview release: `1788704852969000`.
-- Expires October 6, 2026 at 9:27 a.m. America/Chicago
-  (`2026-10-06T14:27:28.641635530Z`).
-- Served HTML matches the production build byte-for-byte. The hosted sign-in
-  page opens successfully with the updated copy and simplified styling.
-- Live release `1788392907305000` and prior preview release
+- App code revision: `651be0d`.
+- Preview release: `1788709385273000`.
+- Expires October 6, 2026 at 10:43 a.m. America/Chicago
+  (`2026-10-06T15:43:02.934482735Z`).
+- A fresh browser session loaded the exact production-build assets
+  `index-BEGivziU.js` and `index-DU-BQZb6.css` from the preview and reached
+  the Family sign-in page successfully.
+- Live release `1788392907305000` and planning-first preview release
   `1788399600838000` were verified unchanged after publication.
 - Working branch is backed up at
   https://github.com/busick22/family.tylerbusick/tree/codex/family-home-redesign
