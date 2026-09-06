@@ -7,9 +7,7 @@
 .family-nav { display: grid; gap: var(--space-2); }
 .family-nav a { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); min-height: var(--workspace-row); border-radius: var(--radius-sm); color: var(--text-mid); transition: background var(--speed-fast); }
 .family-nav a > svg { flex: none; }
-.family-nav span { display: grid; gap: var(--space-1); }
 .family-nav strong { font-weight: 600; color: var(--text); }
-.family-nav small { font-size: var(--text-xs); }
 .family-nav a.active { background: var(--surface); box-shadow: var(--shadow-1); color: var(--accent); }
 .family-nav a.active strong { color: var(--accent); }
 .family-nav a:hover:not(.active), .rail-utility:hover { background: var(--accent-soft); }
@@ -21,9 +19,8 @@
 .family-location { color: var(--text-mid); font-size: var(--text-sm); }
 .family-topbar-actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
 .mobile-brand, .mobile-add, .mobile-settings { display: none; }
-.home-shell .page { max-width: var(--home-width); padding: var(--space-6) var(--page-pad) var(--space-7); }
+.home-shell .page { max-width: var(--home-width); padding: var(--space-6) max(var(--page-pad), env(safe-area-inset-right, 0px)) var(--space-7) max(var(--page-pad), env(safe-area-inset-left, 0px)); }
 .home-shell .workspace-title h1 { font-size: var(--home-title); letter-spacing: var(--letter-tight); }
-.page-intro { color: var(--text-mid); font-size: var(--text-sm); margin-top: var(--space-2); }
 .home-shell .workspace-surface { border-color: var(--border); border-radius: var(--radius-md); }
 .home-shell .btn { box-shadow: none; }
 .home-shell .btn-primary { background: var(--accent); color: var(--on-accent); }
@@ -45,7 +42,6 @@
 .home-shell .bottomnav-link.active { color: var(--accent); background: var(--accent-soft); }
 @media (max-width: 1100px) and (min-width: 801px) {
   .family-rail { width: calc(var(--rail-width) - var(--space-6)); padding-left: var(--space-2); padding-right: var(--space-2); }
-  .family-nav small { display: none; }
   .family-nav a { min-height: var(--capture-height); }
   .family-add { font-size: var(--text-xs); padding-left: var(--space-2); padding-right: var(--space-2); }
 }
@@ -53,9 +49,12 @@
   .family-rail, .family-location { display: none; }
   .mobile-brand { display: flex; align-items: center; gap: var(--space-2); }
   .mobile-add, .mobile-settings { display: flex; }
-  .family-topbar { padding-top: max(var(--space-2), env(safe-area-inset-top)); }
+  .family-topbar {
+    min-height: calc(var(--workspace-mobile-bar) + env(safe-area-inset-top, 0px));
+    padding: calc(var(--space-2) + env(safe-area-inset-top, 0px)) max(var(--page-pad), env(safe-area-inset-right, 0px)) var(--space-2) max(var(--page-pad), env(safe-area-inset-left, 0px));
+  }
   .family-topbar-actions { gap: 0; }
-  .home-shell .page { padding-top: var(--space-5); padding-bottom: var(--space-6); }
+  .home-shell .page { padding-top: var(--space-5); padding-bottom: var(--space-3); }
   .home-shell .workspace-title { gap: var(--space-3); }
   .home-shell .workspace-title h1 { font-size: var(--text-2xl); }
   .home-shell .section-nav { gap: var(--space-3); }

@@ -9,27 +9,14 @@
   background: var(--bg-deep);
 }
 
-.signin-scene {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(640px 420px at 20% 12%, var(--accent-glow), transparent 65%),
-    radial-gradient(560px 400px at 82% 88%, rgba(155, 93, 229, 0.16), transparent 65%),
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: auto, auto, 44px 44px, 44px 44px;
-  mask-image: radial-gradient(closest-side at 50% 50%, black, transparent 130%);
-}
-
 .signin-card {
   position: relative;
   width: min(400px, 100%);
   padding: 38px 32px 26px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-2);
-  backdrop-filter: blur(14px);
 }
 
 .signin-brand {

@@ -24,7 +24,7 @@ export default function MealsPage() {
   if (tab === 'grocery') return <Navigate to="/lists/groceries" replace />
   return <div className="page page-enter" data-page="meals">
     <Notice notice={notice} />
-    <header className="workspace-title"><div><h1>Meals</h1><p className="page-intro">Plan dinners and keep your favorite recipes.</p></div>
+    <header className="workspace-title"><h1>Meals</h1>
       {tab === 'recipes' && <button className="btn btn-primary" onClick={() => setEditRecipe(null)}><Plus size={18} aria-hidden="true" /> New recipe</button>}
     </header>
     <nav className="seg-tabs" aria-label="Meals sections">

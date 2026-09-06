@@ -31,7 +31,6 @@
 .home-section .work-edit small { font-size: var(--text-xs); }
 .home-section .work-owner { background: transparent; padding: var(--space-1); }
 .home-empty { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-5) 0; color: var(--text-mid); }
-.home-empty small { display: block; margin-top: var(--space-1); font-size: var(--text-sm); }
 .dinner-note { background: var(--dinner-bg); color: var(--dinner-text); border-radius: var(--radius-md); padding: var(--space-5); }
 .note-icon { display: inline-flex; margin-bottom: var(--space-4); }
 .dinner-note p { font: 500 var(--text-xl) var(--font-display); line-height: 1.3; margin: var(--space-3) 0 var(--space-5); overflow-wrap: anywhere; }

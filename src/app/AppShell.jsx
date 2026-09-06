@@ -22,10 +22,10 @@ export default function AppShell() {
       <Link to="/" className="family-brand" aria-label="Family home"><BrandMark size={32} /><BrandWordmark /></Link>
       <button className="btn btn-primary family-add" onClick={() => setAdding(true)}><Plus size={20} aria-hidden="true" /> Add something</button>
       <nav className="family-nav" aria-label="Main navigation">
-        {NAV_ITEMS.map(({ to, label, detail, icon: Icon }) => <NavLink key={to} to={to} end={to === '/'}><Icon size={22} aria-hidden="true" /><span><strong>{label}</strong><small>{detail}</small></span></NavLink>)}
+        {NAV_ITEMS.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} end={to === '/'}><Icon size={22} aria-hidden="true" /><strong>{label}</strong></NavLink>)}
       </nav>
       <div className="family-rail-bottom">
-        <button className="rail-utility" onClick={() => setHelp(true)}><CircleHelp size={19} aria-hidden="true" /> Find your way</button>
+        <button className="rail-utility" onClick={() => setHelp(true)}><CircleHelp size={19} aria-hidden="true" /> Help</button>
         <NavLink to="/parent" className="rail-utility"><Settings size={19} aria-hidden="true" /> Family settings</NavLink>
       </div>
     </aside>
@@ -43,6 +43,6 @@ export default function AppShell() {
     </div>
     <BottomNav />
     {adding && <CaptureMenu onClose={() => setAdding(false)} />}
-    {help && <Modal onClose={() => setHelp(false)}><button className="icon-btn modal-close" onClick={() => setHelp(false)} aria-label="Close"><X /></button><h2>Everything has a place.</h2><p className="empty-inline">Start at Home. Use Add something whenever a thought comes up.</p><nav className="wayfinding" aria-label="Find a feature">{NAV_ITEMS.map(({ to, label, detail, icon: Icon }) => <Link to={to} key={to} onClick={() => setHelp(false)}><Icon size={22} /><span><strong>{label}</strong><small>{detail}</small></span><ArrowRight size={18} /></Link>)}<Link to="/parent" onClick={() => setHelp(false)}><Settings size={22} /><span><strong>Family settings</strong><small>Members, requests, points & screen time</small></span><ArrowRight size={18} /></Link></nav></Modal>}
+    {help && <Modal onClose={() => setHelp(false)}><button className="icon-btn modal-close" onClick={() => setHelp(false)} aria-label="Close"><X /></button><h2>Where things are</h2><nav className="wayfinding" aria-label="Find a feature">{NAV_ITEMS.map(({ to, label, help: description, icon: Icon }) => <Link to={to} key={to} onClick={() => setHelp(false)}><Icon size={22} /><span><strong>{label}</strong><small>{description}</small></span><ArrowRight size={18} /></Link>)}<Link to="/parent" onClick={() => setHelp(false)}><Settings size={22} /><span><strong>Family settings</strong><small>Members, requests, points, and screen time</small></span><ArrowRight size={18} /></Link></nav></Modal>}
   </div>
 }

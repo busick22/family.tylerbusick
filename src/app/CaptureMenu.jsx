@@ -13,8 +13,8 @@ export default function CaptureMenu({ onClose }) {
   const [notice, showNotice] = useNotice()
   const navigate = useNavigate()
   return <><Notice notice={notice} />
-    {!kind && <Modal onClose={onClose}><button className="icon-btn modal-close" onClick={onClose} aria-label="Close"><X /></button><h2>What’s on your mind?</h2><p className="empty-inline">Give it a home. You can fill in the details later.</p><div className="wayfinding">
-      {[["task", 'A to-do', 'Something to do or remember', CheckCheck], ["event", 'An event', 'Somewhere to be, at a particular time', CalendarPlus], ["grocery", 'Something to buy', 'Add it to the shared grocery list', ShoppingBasket], ["dinner", 'A dinner plan', 'A recipe, leftovers, or eating out', UtensilsCrossed]].map(([value, label, description, Icon]) => <button key={value} onClick={() => { if (value === 'grocery') { navigate('/lists/groceries'); onClose() } else setKind(value) }}><Icon size={24} /><span><strong>{label}</strong><small>{description}</small></span><ArrowRight size={18} /></button>)}
+    {!kind && <Modal onClose={onClose}><button className="icon-btn modal-close" onClick={onClose} aria-label="Close"><X /></button><h2>Add something</h2><div className="wayfinding">
+      {[["task", 'To-do', 'Task or reminder', CheckCheck], ["event", 'Event', 'Date, time, and people', CalendarPlus], ["grocery", 'Grocery item', 'Add it to the shared list', ShoppingBasket], ["dinner", 'Dinner', 'Recipe or meal idea', UtensilsCrossed]].map(([value, label, description, Icon]) => <button key={value} onClick={() => { if (value === 'grocery') { navigate('/lists/groceries'); onClose() } else setKind(value) }}><Icon size={24} /><span><strong>{label}</strong><small>{description}</small></span><ArrowRight size={18} /></button>)}
     </div></Modal>}
     {kind === 'task' && <WorkEditModal item={{}} onClose={onClose} showNotice={showNotice} />}
     {kind === 'event' && <EventModal event={{ date: todayStr() }} onClose={onClose} showNotice={showNotice} />}

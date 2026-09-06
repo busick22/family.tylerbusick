@@ -19,8 +19,8 @@ export default function QuickCapture({ listId = 'general', assignee = '', onAdde
     finally { setBusy(false) }
   }
   return <section className={compact ? 'quick-capture compact' : 'quick-capture'} aria-label="Quickly add a to-do">
-    {!compact && <label htmlFor="capture-thought">Get it off your mind.</label>}
+    {!compact && <label htmlFor="capture-thought">Add a to-do</label>}
     <form onSubmit={save}><input id="capture-thought" disabled={busy} aria-label="New to-do" placeholder={compact ? 'Add a to-do…' : 'Remember to…'} value={text} onChange={e => setText(e.target.value)} maxLength={500} required /><button className="btn btn-primary" disabled={busy || loading || !!error || !text.trim()}><Plus size={20} aria-hidden="true" />{busy ? 'Saving…' : 'Add'}</button></form>
-    {status ? <p className="capture-status" role={failed ? 'alert' : 'status'}>{!failed && <Check size={15} aria-hidden="true" />}{status}</p> : !compact && <p>Saved as a to-do. No date or person needed.</p>}
+    {status && <p className="capture-status" role={failed ? 'alert' : 'status'}>{!failed && <Check size={15} aria-hidden="true" />}{status}</p>}
   </section>
 }

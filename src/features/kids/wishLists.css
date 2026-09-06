@@ -7,9 +7,10 @@
 .wish-actions { margin-top: var(--wish-gap-sm); }
 .wish-items { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--wish-gap); }
 .wish-item { padding: var(--wish-card-pad); min-width: 0; }
-.wish-item-heading { align-items: flex-start; flex-wrap: wrap; }
-.wish-item h3 { font-family: var(--font-display); font-size: var(--text-lg); overflow-wrap: anywhere; }
+.wish-item-heading { align-items: center; }
+.wish-item h3 { flex: 1; min-width: 0; font-family: var(--font-display); font-size: var(--text-lg); overflow-wrap: anywhere; }
 .wish-price { font-size: var(--text-md); font-weight: 700; white-space: nowrap; color: var(--text-mid); }
+.wish-edit { margin: calc(-1 * var(--wish-gap-sm)); }
 .wish-notes { color: var(--text-mid); white-space: pre-wrap; overflow-wrap: anywhere; margin-top: var(--wish-gap-sm); }
 .wish-list-button { width: 100%; display: flex; align-items: center; gap: var(--wish-gap); min-height: var(--tap); padding: var(--wish-card-pad); text-align: left; color: var(--text); cursor: pointer; }
 .wish-list-button > svg { color: var(--kc, var(--accent-kids)); flex-shrink: 0; }

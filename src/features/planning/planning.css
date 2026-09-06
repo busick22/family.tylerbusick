@@ -126,6 +126,7 @@
   .workspace-split > .workspace-footer-links, .workspace-split .week-column > .workspace-footer-links { order: 2; }
   .workspace-split .people-strip { order: 3; margin-top: 0; }
   .planning-shell .shell-main { margin: 0 0 calc(var(--dock-height) + var(--dock-inset)); }
+  .planning-shell .page { padding-bottom: var(--space-3); }
   .workspace-split { grid-template-columns: minmax(0, 1fr); }
   .workspace-title { flex-wrap: wrap; }
   .workspace-title h1 { font-size: var(--text-xl); }

@@ -70,7 +70,7 @@ export default function WishListsTab({ kid }) {
     </div>
     {loading && <p className="wish-hint" role="status">Loading your lists…</p>}
     {error && <p className="wish-error" role="alert">{error}</p>}
-    {!loading && !error && !mine.length && <div className="wish-empty card"><Gift aria-hidden="true" /><h3>A place for your big ideas</h3><p>Make a list for a birthday, a holiday, or just because.</p></div>}
+    {!loading && !error && !mine.length && <div className="wish-empty card"><Gift aria-hidden="true" /><h3>No wish lists yet</h3><p>Create one for a birthday or holiday.</p></div>}
     <ul className="wish-items">{mine.map((list) => <li key={list.id}>
       <button className="wish-list-button card" onClick={() => setSelectedId(list.id)}>
         <Gift aria-hidden="true" /><span><strong>{list.name}</strong><small>{list.shared ? 'Link sharing on' : 'Only in Family'}</small></span><ChevronRight aria-hidden="true" />

@@ -44,7 +44,7 @@ export default function AccountMenu({ onHelp }) {
       </button>
       {open && (
         <div className="menu account-dropdown" role="menu">
-          {onHelp && <button type="button" className="menu-item" role="menuitem" onClick={() => { setOpen(false); onHelp() }}><CircleHelp aria-hidden="true" />Find your way</button>}
+          {onHelp && <button type="button" className="menu-item" role="menuitem" onClick={() => { setOpen(false); onHelp() }}><CircleHelp aria-hidden="true" />Help</button>}
           <button type="button" className="menu-item" role="menuitem" onClick={toggleTheme}>
             {theme === 'dark' ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             {theme === 'dark' ? 'Light mode' : 'Dark mode'}

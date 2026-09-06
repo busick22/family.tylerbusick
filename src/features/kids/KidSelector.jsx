@@ -66,7 +66,6 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
 
       {section === 'kids' && (
         <div className="kid-select-shell">
-          <p className="kid-select-sub">Your day. Your things. Your own space.</p>
           <div className="kid-btns">
             {KIDS.map((name) => {
               const theme = kidTheme(name)
@@ -83,7 +82,6 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
                   <span className="kid-btn-emoji">{theme.emoji}</span>
                   <span className="kid-btn-info">
                     <span className="kid-btn-name">{name}</span>
-                    <span className="kid-btn-age">To-dos, screen time & wish lists</span>
                   </span>
                   {badge && <span className={`kid-btn-badge ${badge.cls}`}>{badge.text}</span>}
                 </button>

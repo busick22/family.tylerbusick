@@ -37,10 +37,10 @@ The new organizing principle is five familiar places with a stable Home:
 | Meals | A weekly dinner menu and recipe book |
 | Kids | Each child's checklist, screen time, wish lists, rewards and history |
 
-A persistent desktop/tablet rail explains each place. Phones use the same five
+A persistent desktop/tablet rail names each place. Phones use the same five
 names in a fixed bottom dock. Family settings is consistently available in
-the rail or phone header. A Find your way guide is available from the rail
-and account menu and links to real destinations.
+the rail or phone header. A Help guide is available from the rail and account
+menu and links to real destinations.
 
 ## What changed
 
@@ -75,6 +75,13 @@ and account menu and links to real destinations.
   dinner note, quiet borders and consistent type. Existing personal kid colors
   and familiar house mark remain. Light and dark themes both work; touch
   targets retain the 48px minimum baseline. Motion is limited to feedback.
+- September 6 polish removes generic subtitles, repeated helper sentences,
+  decorative grid/blur treatments and redundant per-row captions. Navigation
+  now relies on five plain labels, while Help keeps concise descriptions where
+  a first-time user may need them. Wish-item editing is an icon in the title
+  row. iOS safe-area spacing now treats the status inset and 64px top control
+  row separately, protects landscape side insets and removes the extra page
+  gap above the already-inset bottom dock.
 
 ## Data boundary
 

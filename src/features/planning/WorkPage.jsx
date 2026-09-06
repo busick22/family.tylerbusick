@@ -55,7 +55,7 @@ export default function WorkPage() {
   }
   return <div className="page page-enter">
     <Notice notice={notice} />
-    <header className="workspace-title"><div><h1>Lists</h1><p className="page-intro">To-dos and groceries, shared by everyone.</p></div>
+    <header className="workspace-title"><h1>Lists</h1>
       <button className="btn btn-primary" onClick={() => setEditing({ assignee: who, listId: list })}><Plus size={18} aria-hidden="true" /> Add with details</button></header>
     <ListsNav />
     <QuickCapture compact listId={list || 'general'} assignee={who} onAdded={() => setParams(previous => { const next = new URLSearchParams(previous); next.delete('view'); next.delete('q'); return next }, { replace: true })} />
@@ -67,7 +67,7 @@ export default function WorkPage() {
     <nav className="work-filters" aria-label="To-do views">{[['open', 'All open'], ['today', 'Due now'], ['repeat', 'Weekly chores'], ['done', 'Completed']].map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => change('view', value)}>{label}</button>)}</nav>
     {error && <p className="workspace-status" role="alert">{error}</p>}
     {loading && !error && <p className="workspace-status" role="status">Loading to-dos…</p>}
-    {!loading && !error && !visible.length && <div className="workspace-surface empty-workspace"><h2>{all.length ? 'Nothing in this view' : 'A place for everything that needs doing'}</h2><p>{all.length ? 'Try another person, list, or view.' : 'Add a to-do, choose who it is for, and repeat it if needed.'}</p><button className="btn" onClick={() => setEditing({})}>Add a to-do</button></div>}
+    {!loading && !error && !visible.length && <div className="workspace-surface empty-workspace"><h2>{all.length ? 'Nothing in this view' : 'No to-dos yet'}</h2>{all.length && <p>Try another person, list, or view.</p>}<button className="btn" onClick={() => setEditing({})}>Add a to-do</button></div>}
     {['Overdue', 'Earlier this week', 'Today', 'Upcoming', 'Anytime', 'Completed'].map(group => {
       const items = visible.filter(item => workGroup(item, today) === group)
       return items.length ? <section className="work-group" key={group}><h2>{group} · {items.length}</h2><div className="workspace-surface">{items.map(item => <WorkRow key={item.kind + item.id} item={item} onEdit={setEditing} showNotice={showNotice} />)}</div></section> : null

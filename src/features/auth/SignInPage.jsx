@@ -22,13 +22,11 @@ export default function SignInPage() {
 
   return (
     <div className="signin">
-      <div className="signin-scene" aria-hidden="true" />
-
       <div className="signin-card page-enter">
         <div className="signin-brand">
           <BrandMark size={48} />
           <h1>Family</h1>
-          <p>One home for everything your family needs to remember.</p>
+          <p>Plans, lists, meals, and chores for your family.</p>
         </div>
 
         <button className="btn signin-google" onClick={handleSignIn} disabled={busy}>

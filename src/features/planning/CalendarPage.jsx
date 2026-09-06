@@ -13,7 +13,7 @@ export default function CalendarPage() {
   const { loading, error } = useEvents()
   return <div className="page page-enter">
     <Notice notice={notice} />
-    <header className="workspace-title"><div><h1>Plan</h1><p className="page-intro">Make room for the week ahead.</p></div></header>
+    <header className="workspace-title"><h1>Plan</h1></header>
     <PlanNav />
     {error && <p className="workspace-status" role="alert">{error}</p>}
     {loading && <p className="workspace-status" role="status">Loading your calendar…</p>}

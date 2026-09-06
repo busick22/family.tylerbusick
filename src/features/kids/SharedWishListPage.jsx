@@ -12,10 +12,9 @@ function SharedWishes({ list }) {
   return <>
     <p className="wish-eyebrow">{list.kid}’s wish list</p>
     <h1>{list.name}</h1>
-    <p className="wish-hint">A few things {list.kid} is wishing for.</p>
     {loading && <p role="status">Loading wishes…</p>}
     {error && <p className="wish-error" role="alert">This list is unavailable. The owner may have turned off sharing.</p>}
-    {!loading && !error && !items.length && <div className="wish-empty card"><Gift aria-hidden="true" /><h2>Wishes on the way</h2><p>Check back soon for some ideas.</p></div>}
+    {!loading && !error && !items.length && <div className="wish-empty card"><Gift aria-hidden="true" /><h2>No wishes yet</h2><p>Check back later.</p></div>}
     <ul className="wish-items">{items.map((item) => <WishItemCard key={item.id} item={item} />)}</ul>
   </>
 }

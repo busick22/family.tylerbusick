@@ -46,12 +46,12 @@ export default function WeekPage() {
   return <div className="page page-enter" data-page="week">
     <Notice notice={notice} />
     <header className="workspace-title">
-      <div><h1>Plan</h1><p className="page-intro">Make room for the week ahead.</p></div>
+      <h1>Plan</h1>
       <WeekPicker date={date} onChange={setDate} />
     </header>
     <PlanNav />
     {error && <p className="workspace-status" role="alert">{error}</p>}
-    {loading && !error && <p className="workspace-status" role="status">Loading your family’s plans…</p>}
+    {loading && !error && <p className="workspace-status" role="status">Loading plans…</p>}
     <div className="workspace-split">
       <div className="week-column">
         <section className="workspace-surface week-surface" aria-label="Week overview">
@@ -71,7 +71,7 @@ export default function WeekPage() {
       <section className="workspace-surface day-detail" aria-label="Selected day">
         <h2>{dayLabel(date)}</h2>
         <div className="section-heading"><h2>Schedule</h2><button className="btn btn-ghost" onClick={() => setModal({ type: 'event', value: { date } })}><Plus size={16} aria-hidden="true" /> Event</button></div>
-        {!loading && !error && !dayEvents.length && <p className="empty-inline">An open day. Add a plan when you’re ready.</p>}
+        {!loading && !error && !dayEvents.length && <p className="empty-inline">Nothing scheduled.</p>}
         {dayEvents.map(event => <button className="agenda-row" key={event.id} onClick={() => setModal({ type: 'event', value: event })}>
           <CalendarDays size={18} aria-hidden="true" /><span><strong>{event.title}</strong><small>{[event.time ? formatTime(event.time) : 'All day', event.location, ...(event.who || [])].filter(Boolean).join(' · ')}</small></span><ArrowUpRight size={16} aria-hidden="true" />
         </button>)}
