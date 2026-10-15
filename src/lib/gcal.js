@@ -60,10 +60,7 @@ export async function addToGoogleCalendar(eventData) {
     const token = await requestCalendarAccess()
     const gcalEvent = {
       summary: eventData.title,
-      description: [
-        eventData.notes || '',
-        eventData.who?.length ? `Who: ${eventData.who.join(', ')}` : '',
-      ]
+      description: [eventData.notes || '', eventData.who?.length ? `Who: ${eventData.who.join(', ')}` : '']
         .filter(Boolean)
         .join('\n'),
       location: eventData.location || undefined,
@@ -81,8 +78,13 @@ export async function addToGoogleCalendar(eventData) {
     }
     // Map our palette onto Google Calendar's fixed color ids.
     const colorMap = {
-      '#2563eb': '9', '#7c3aed': '3', '#ea580c': '6',
-      '#16a34a': '2', '#db2777': '4', '#0891b2': '7', '#d97706': '5',
+      '#2563eb': '9',
+      '#7c3aed': '3',
+      '#ea580c': '6',
+      '#16a34a': '2',
+      '#db2777': '4',
+      '#0891b2': '7',
+      '#d97706': '5',
     }
     if (colorMap[eventData.color]) gcalEvent.colorId = colorMap[eventData.color]
 

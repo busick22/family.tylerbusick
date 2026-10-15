@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import Modal from '../../components/Modal.jsx'
 import { useTodoLists } from '../../state/TodoListsContext.jsx'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
-export default function TodoListModal({ onClose, showNotice }) {
+export default function TodoListModal({ onClose }) {
+  const showNotice = useNotice()
   const { createList } = useTodoLists()
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
@@ -39,7 +41,9 @@ export default function TodoListModal({ onClose, showNotice }) {
         <X aria-hidden="true" />
       </button>
       <h3>New Task List</h3>
-      <label className="field-label" htmlFor="list-name">List name *</label>
+      <label className="field-label" htmlFor="list-name">
+        List name *
+      </label>
       <input
         id="list-name"
         className="field"

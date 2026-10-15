@@ -5,8 +5,10 @@ import { X } from 'lucide-react'
 import Modal from '../../../components/Modal.jsx'
 import { useScreenTime } from '../../../state/ScreenTimeContext.jsx'
 import { DEFAULT_BUDGETS_MS, FALLBACK_DAILY_BUDGET_MS } from '../../../lib/screenTime.js'
+import { useNotice } from '../../../state/NoticeContext.jsx'
 
-export default function BudgetModal({ kidName, onClose, showNotice }) {
+export default function BudgetModal({ kidName, onClose }) {
+  const showNotice = useNotice()
   const { getFor, setBudget } = useScreenTime()
   const data = getFor(kidName)
   const [mins, setMins] = useState(
@@ -19,11 +21,11 @@ export default function BudgetModal({ kidName, onClose, showNotice }) {
     setBusy(true)
     try {
       await setBudget(kidName, value)
-      showNotice?.(`${kidName}'s budget set to ${value} min/day.`, 'success')
+      showNotice(`${kidName}'s budget set to ${value} min/day.`, 'success')
       onClose()
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't save the budget.", 'error')
+      showNotice("Couldn't save the budget.", 'error')
       setBusy(false)
     }
   }
@@ -35,10 +37,14 @@ export default function BudgetModal({ kidName, onClose, showNotice }) {
       </button>
       <h3>Set Daily Budget</h3>
 
-      <label className="field-label" htmlFor="budget-kid">Kid</label>
+      <label className="field-label" htmlFor="budget-kid">
+        Kid
+      </label>
       <input id="budget-kid" className="field" value={kidName} disabled />
 
-      <label className="field-label" htmlFor="budget-mins">Daily budget (minutes)</label>
+      <label className="field-label" htmlFor="budget-mins">
+        Daily budget (minutes)
+      </label>
       <input
         id="budget-mins"
         type="number"

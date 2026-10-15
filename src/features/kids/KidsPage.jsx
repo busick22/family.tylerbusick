@@ -21,7 +21,11 @@ export default function KidsPage() {
   }
 
   if (activeKid) {
-    return <WishListsProvider><KidDashboard key={activeKid} kid={activeKid} onSwitchKid={() => selectKid(null)} /></WishListsProvider>
+    return (
+      <WishListsProvider>
+        <KidDashboard key={activeKid} kid={activeKid} onSwitchKid={() => selectKid(null)} />
+      </WishListsProvider>
+    )
   }
   return <KidSelector onSelectKid={selectKid} />
 }

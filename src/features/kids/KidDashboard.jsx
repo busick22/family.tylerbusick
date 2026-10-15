@@ -5,7 +5,6 @@ import { useTick } from './useTick.js'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import Notice, { useNotice } from '../../components/Notice.jsx'
 import { kidTheme } from '../../lib/kidThemes.js'
 import { DAYS, MONTHS } from '../../lib/family.js'
 import { useKidActions } from './useKidActions.js'
@@ -28,10 +27,15 @@ export default function KidDashboard({ kid, onSwitchKid }) {
   useTick(60_000)
   const theme = kidTheme(kid)
   const actions = useKidActions(kid)
-  const [notice, showNotice] = useNotice()
   const [params, setParams] = useSearchParams()
-  const tab = TABS.some(t => t.id === params.get('tab')) ? params.get('tab') : 'today'
-  function setTab(value) { setParams(previous => { const next = new URLSearchParams(previous); next.set('tab', value); return next }) }
+  const tab = TABS.some((t) => t.id === params.get('tab')) ? params.get('tab') : 'today'
+  function setTab(value) {
+    setParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('tab', value)
+      return next
+    })
+  }
   const [editingTask, setEditingTask] = useState(undefined) // undefined=closed, null=new, obj=edit
   const [editingChore, setEditingChore] = useState(null)
   const [askingMoreTime, setAskingMoreTime] = useState(false)
@@ -41,8 +45,6 @@ export default function KidDashboard({ kid, onSwitchKid }) {
 
   return (
     <div className="kid-dash" style={{ '--kc': theme.color }}>
-      <Notice notice={notice} />
-
       <div className="kid-hdr">
         <div className="kid-hdr-left">
           <span className="kid-hdr-emoji">{theme.emoji}</span>
@@ -84,15 +86,12 @@ export default function KidDashboard({ kid, onSwitchKid }) {
         {tab === 'points' && <PointsTab kid={kid} />}
         {tab === 'history' && <HistoryTab kid={kid} />}
         {tab === 'wishes' && <WishListsTab kid={kid} />}
-
-
       </div>
 
       {editingTask !== undefined && (
         <KidTaskModal
           task={editingTask}
           onClose={() => setEditingTask(undefined)}
-          showNotice={showNotice}
           onSave={(text, dueDate) =>
             editingTask ? actions.editTask(editingTask.id, text, dueDate) : actions.addTask(text, dueDate)
           }
@@ -104,15 +103,12 @@ export default function KidDashboard({ kid, onSwitchKid }) {
         <KidChoreModal
           chore={editingChore}
           onClose={() => setEditingChore(null)}
-          showNotice={showNotice}
           onSave={(name, day) => actions.editChore(editingChore.id, name, day)}
           onDelete={() => actions.deleteChore(editingChore.id)}
         />
       )}
 
-      {askingMoreTime && (
-        <TimeRequestModal kid={kid} onClose={() => setAskingMoreTime(false)} showNotice={showNotice} />
-      )}
+      {askingMoreTime && <TimeRequestModal kid={kid} onClose={() => setAskingMoreTime(false)} />}
     </div>
   )
 }

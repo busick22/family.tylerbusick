@@ -10,7 +10,9 @@ if (current !== branch) {
 }
 const changes = execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim()
 if (changes) {
-  console.error('Commit the intended changes before publishing so the preview matches a saved branch revision.')
+  console.error(
+    'Commit the intended changes before publishing so the preview matches a saved branch revision.',
+  )
   process.exit(1)
 }
 
@@ -20,8 +22,20 @@ const steps = [
   ['npm', ['run', 'lint']],
   ['npm', ['test']],
   ['npm', ['run', 'build']],
-  ['firebase', ['hosting:channel:deploy', 'family-home', '--project', 'busick-recipes',
-    '--config', 'firebase.json', '--expires', '30d', '--no-authorized-domains']],
+  [
+    'firebase',
+    [
+      'hosting:channel:deploy',
+      'family-home',
+      '--project',
+      'busick-recipes',
+      '--config',
+      'firebase.json',
+      '--expires',
+      '30d',
+      '--no-authorized-domains',
+    ],
+  ],
 ]
 for (const [command, args] of steps) {
   const result = spawnSync(command, args, { cwd: root, stdio: 'inherit' })

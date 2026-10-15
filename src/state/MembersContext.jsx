@@ -1,32 +1,34 @@
 // The family member list: settings/members → { list: string[] }.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { doc, onSnapshot, runTransaction } from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { doc, runTransaction } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useDocument } from './useCollection.js'
 import { normalizeMemberList, normalizeMemberName, MEMBER_COLORS } from '../lib/family.js'
 
 const MembersContext = createContext(null)
 
 export function MembersProvider({ children }) {
   const { user } = useAuth()
-  const [members, setMembers] = useState([])
-
-  useEffect(() => {
-    if (!user) {
-      setMembers([])
-      return undefined
-    }
-    return onSnapshot(
-      doc(db, 'settings', 'members'),
-      (snap) => setMembers(normalizeMemberList((snap.exists() && snap.data().list) || [])),
-      (err) => console.error('Members listener failed:', err),
-    )
-  }, [user])
+  const {
+    data: members,
+    loading,
+    error,
+  } = useDocument(
+    user,
+    'settings',
+    'members',
+    'family members',
+    (snap) => normalizeMemberList((snap.exists() && snap.data().list) || []),
+    [],
+  )
 
   const value = useMemo(
     () => ({
       members,
+      loading,
+      error,
 
       memberColor(name) {
         const i = members.indexOf(normalizeMemberName(name))
@@ -56,7 +58,7 @@ export function MembersProvider({ children }) {
         })
       },
     }),
-    [members],
+    [members, loading, error],
   )
 
   return <MembersContext.Provider value={value}>{children}</MembersContext.Provider>

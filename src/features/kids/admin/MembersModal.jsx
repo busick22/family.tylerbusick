@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import Modal from '../../../components/Modal.jsx'
 import { useMembers } from '../../../state/MembersContext.jsx'
+import { useNotice } from '../../../state/NoticeContext.jsx'
 
-export default function MembersModal({ onClose, showNotice }) {
+export default function MembersModal({ onClose }) {
+  const showNotice = useNotice()
   const { members, memberColor, addMember, removeMember } = useMembers()
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
@@ -18,11 +20,13 @@ export default function MembersModal({ onClose, showNotice }) {
     try {
       const ok = await addMember(trimmed)
       if (ok) setName('')
-      else showNotice?.('That person is already in the family.', 'info')
+      else showNotice('That person is already in the family.', 'info')
     } catch (error) {
       console.error(error)
-      showNotice?.("Couldn't add that member.", 'error')
-    } finally { setBusy(false) }
+      showNotice("Couldn't add that member.", 'error')
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function remove(nameToRemove) {
@@ -31,8 +35,10 @@ export default function MembersModal({ onClose, showNotice }) {
       await removeMember(nameToRemove)
     } catch (error) {
       console.error(error)
-      showNotice?.("Couldn't remove that member.", 'error')
-    } finally { setBusy(false) }
+      showNotice("Couldn't remove that member.", 'error')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

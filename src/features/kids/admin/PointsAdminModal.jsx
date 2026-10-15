@@ -10,6 +10,7 @@ import { useChores } from '../../../state/ChoresContext.jsx'
 import { useRewards } from '../../../state/RewardsContext.jsx'
 import { useKidPoints } from '../../../state/KidPointsContext.jsx'
 import { KIDS, isKidStackAssignee } from '../../../lib/family.js'
+import { useNotice } from '../../../state/NoticeContext.jsx'
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
@@ -18,7 +19,8 @@ const TABS = [
   { id: 'rewards', label: 'Rewards' },
 ]
 
-export default function PointsAdminModal({ onClose, showNotice }) {
+export default function PointsAdminModal({ onClose }) {
+  const showNotice = useNotice()
   const { todos, updateTodo } = useTodos()
   const { chores, updateChore } = useChores()
   const { activeRewards, addReward, archiveReward } = useRewards()
@@ -34,12 +36,20 @@ export default function PointsAdminModal({ onClose, showNotice }) {
   const kidChores = chores.filter((c) => KIDS.includes(c.assignee))
 
   async function setTodoPoints(id, value) {
-    try { await updateTodo(id, { points: Math.max(0, parseInt(value, 10) || 0) }) }
-    catch (error) { console.error(error); showNotice?.("Couldn't update those points.", 'error') }
+    try {
+      await updateTodo(id, { points: Math.max(0, parseInt(value, 10) || 0) })
+    } catch (error) {
+      console.error(error)
+      showNotice("Couldn't update those points.", 'error')
+    }
   }
   async function setChorePoints(id, value) {
-    try { await updateChore(id, { points: Math.max(0, parseInt(value, 10) || 0) }) }
-    catch (error) { console.error(error); showNotice?.("Couldn't update those points.", 'error') }
+    try {
+      await updateChore(id, { points: Math.max(0, parseInt(value, 10) || 0) })
+    } catch (error) {
+      console.error(error)
+      showNotice("Couldn't update those points.", 'error')
+    }
   }
   async function confirmReset() {
     const targets = resetTarget === 'all' ? [...KIDS] : [resetTarget]
@@ -47,11 +57,13 @@ export default function PointsAdminModal({ onClose, showNotice }) {
     try {
       await resetKids(targets)
       setResetTarget(null)
-      showNotice?.('Points reset.', 'success')
+      showNotice('Points reset.', 'success')
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't reset points.", 'error')
-    } finally { setBusy(false) }
+      showNotice("Couldn't reset points.", 'error')
+    } finally {
+      setBusy(false)
+    }
   }
   async function addRewardEntry() {
     const name = rewardName.trim()
@@ -64,14 +76,21 @@ export default function PointsAdminModal({ onClose, showNotice }) {
       setRewardCost('')
     } catch (error) {
       console.error(error)
-      showNotice?.("Couldn't add that reward.", 'error')
-    } finally { setBusy(false) }
+      showNotice("Couldn't add that reward.", 'error')
+    } finally {
+      setBusy(false)
+    }
   }
   async function removeReward(id) {
     setBusy(true)
-    try { await archiveReward(id) }
-    catch (error) { console.error(error); showNotice?.("Couldn't remove that reward.", 'error') }
-    finally { setBusy(false) }
+    try {
+      await archiveReward(id)
+    } catch (error) {
+      console.error(error)
+      showNotice("Couldn't remove that reward.", 'error')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -159,7 +178,9 @@ export default function PointsAdminModal({ onClose, showNotice }) {
           {kidChores.map((c) => (
             <div className="admin-pts-row" key={c.id}>
               <span className="admin-pts-label">{c.name}</span>
-              <span className="admin-pts-meta">{c.assignee} · {c.day || ''}</span>
+              <span className="admin-pts-meta">
+                {c.assignee} · {c.day || ''}
+              </span>
               <input
                 type="number"
                 min="0"
@@ -211,7 +232,11 @@ export default function PointsAdminModal({ onClose, showNotice }) {
               onChange={(e) => setRewardCost(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addRewardEntry()}
             />
-            <button className="btn btn-primary" disabled={busy || !rewardName.trim()} onClick={addRewardEntry}>
+            <button
+              className="btn btn-primary"
+              disabled={busy || !rewardName.trim()}
+              onClick={addRewardEntry}
+            >
               ＋ Add
             </button>
           </div>

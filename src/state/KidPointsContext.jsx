@@ -9,10 +9,11 @@
 // the document, then write the whole thing back, silently discarding the
 // points that landed in between.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { collection, doc, onSnapshot, runTransaction, writeBatch } from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { doc, runTransaction, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useCollection } from './useCollection.js'
 import { todayStr } from '../lib/family.js'
 
 const KidPointsContext = createContext(null)
@@ -38,29 +39,17 @@ function findEntry(list, index, expected) {
 
 export function KidPointsProvider({ children }) {
   const { user } = useAuth()
-  const [kidPoints, setKidPoints] = useState({})
-
-  useEffect(() => {
-    if (!user) {
-      setKidPoints({})
-      return undefined
-    }
-    return onSnapshot(
-      collection(db, 'kidPoints'),
-      (snap) => {
-        const next = {}
-        snap.docs.forEach((d) => {
-          next[d.id] = d.data()
-        })
-        setKidPoints(next)
-      },
-      (err) => console.error('Kid points listener failed:', err),
-    )
-  }, [user])
+  const {
+    items: kidPoints,
+    loading,
+    error,
+  } = useCollection(user, 'kidPoints', 'points', { toMap: (d) => d.data() })
 
   const value = useMemo(
     () => ({
       kidPoints,
+      loading,
+      error,
 
       // Net balance: everything earned minus everything redeemed.
       getBalance(kidName) {
@@ -159,7 +148,7 @@ export function KidPointsProvider({ children }) {
         })
       },
     }),
-    [kidPoints],
+    [kidPoints, loading, error],
   )
 
   return <KidPointsContext.Provider value={value}>{children}</KidPointsContext.Provider>

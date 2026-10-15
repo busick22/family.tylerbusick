@@ -5,16 +5,7 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 
-export default function KidItemRow({
-  label,
-  meta,
-  checked,
-  points,
-  particles,
-  onToggle,
-  onEdit,
-  onDelete,
-}) {
+export default function KidItemRow({ label, meta, checked, points, particles, onToggle, onEdit, onDelete }) {
   const [confirming, setConfirming] = useState(false)
   const [bursting, setBursting] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -51,51 +42,58 @@ export default function KidItemRow({
   }
 
   return (
-    <div><div className={`k-row ${shown ? 'done' : ''} ${bursting ? 'k-row-burst' : ''}`}>
-      <label className="work-check">
-      <input
-        type="checkbox"
-        className="k-check"
-        checked={shown}
-        onChange={handleToggle}
-        disabled={busy}
-        aria-label={`Mark ${label} ${shown ? 'incomplete' : 'complete'}`}
-      />
-      </label>
-      {bursting && (
-        <span className="k-row-particles" aria-hidden="true">
-          {particles.map((p, i) => (
-            <span key={i} className="k-row-particle" style={{ '--i': i }}>
-              {p}
-            </span>
+    <div>
+      <div className={`k-row ${shown ? 'done' : ''} ${bursting ? 'k-row-burst' : ''}`}>
+        <label className="work-check">
+          <input
+            type="checkbox"
+            className="k-check"
+            checked={shown}
+            onChange={handleToggle}
+            disabled={busy}
+            aria-label={`Mark ${label} ${shown ? 'incomplete' : 'complete'}`}
+          />
+        </label>
+        {bursting && (
+          <span className="k-row-particles" aria-hidden="true">
+            {particles.map((p, i) => (
+              <span key={i} className="k-row-particle" style={{ '--i': i }}>
+                {p}
+              </span>
+            ))}
+          </span>
+        )}
+        <button type="button" className="k-row-main" onClick={() => onEdit?.()}>
+          <span className="k-row-label">{label}</span>
+          {meta && <span className="k-meta">{meta}</span>}
+        </button>
+        {typeof points === 'number' && points > 0 && <span className="task-points-chip">{points} pts</span>}
+        {onDelete &&
+          (confirming ? (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm"
+              onClick={() => onDelete()}
+              onBlur={() => setConfirming(false)}
+            >
+              Really?
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setConfirming(true)}
+              aria-label={`Delete ${label}`}
+            >
+              <X aria-hidden="true" size={15} />
+            </button>
           ))}
-        </span>
+      </div>
+      {error && (
+        <p className="kid-row-error" role="alert">
+          {error}
+        </p>
       )}
-      <button type="button" className="k-row-main" onClick={() => onEdit?.()}>
-        <span className="k-row-label">{label}</span>
-        {meta && <span className="k-meta">{meta}</span>}
-      </button>
-      {typeof points === 'number' && points > 0 && <span className="task-points-chip">{points} pts</span>}
-      {onDelete &&
-        (confirming ? (
-          <button
-            type="button"
-            className="btn btn-danger btn-sm"
-            onClick={() => onDelete()}
-            onBlur={() => setConfirming(false)}
-          >
-            Really?
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={() => setConfirming(true)}
-            aria-label={`Delete ${label}`}
-          >
-            <X aria-hidden="true" size={15} />
-          </button>
-        ))}
-    </div>{error && <p className="kid-row-error" role="alert">{error}</p>}</div>
+    </div>
   )
 }

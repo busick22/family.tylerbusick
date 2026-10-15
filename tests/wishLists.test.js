@@ -4,7 +4,13 @@ import { safeStoreLink, storeLink, wishFields, wishListName, wishPrice } from '.
 
 test('store links accept pasted hostnames and block executable schemes and credentials', () => {
   assert.equal(storeLink('example.com/toy'), 'https://example.com/toy')
-  for (const link of ['javascript:alert(1)', 'data:text/html,hello', 'file:///etc/passwd', 'https://user:pass@example.com/', 'not a link']) {
+  for (const link of [
+    'javascript:alert(1)',
+    'data:text/html,hello',
+    'file:///etc/passwd',
+    'https://user:pass@example.com/',
+    'not a link',
+  ]) {
     assert.equal(safeStoreLink(link), '')
     assert.throws(() => storeLink(link))
   }
@@ -19,9 +25,22 @@ test('optional prices distinguish zero from blank and reject negative/infinite v
 })
 
 test('wish data contains only public fields, normalizes whitespace, and bounds content', () => {
-  assert.deepEqual(wishFields({ name: ' Bike ', notes: ' Blue ', link: '', price: '', purchasedBy: 'Grandma', purchased: true }), {
-    name: 'Bike', notes: 'Blue', link: '', price: null,
-  })
+  assert.deepEqual(
+    wishFields({
+      name: ' Bike ',
+      notes: ' Blue ',
+      link: '',
+      price: '',
+      purchasedBy: 'Grandma',
+      purchased: true,
+    }),
+    {
+      name: 'Bike',
+      notes: 'Blue',
+      link: '',
+      price: null,
+    },
+  )
   assert.equal(wishListName(' Christmas '), 'Christmas')
   assert.throws(() => wishListName('   '))
   assert.throws(() => wishListName('a'.repeat(81)))

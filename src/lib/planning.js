@@ -1,7 +1,11 @@
 import { DAYS } from './family.js'
 
 export function dateKey(date) {
-  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-')
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-')
 }
 export function validDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false
@@ -23,8 +27,13 @@ export function dayLabel(key, options = { weekday: 'long', month: 'short', day: 
 export function workItems(todos, chores, today) {
   const week = weekDates(today)
   return [
-    ...todos.map(item => ({ ...item, kind: 'task', title: item.text, date: item.dueDate || null })),
-    ...chores.map(item => ({ ...item, kind: 'chore', title: item.name, date: week[DAYS.indexOf(item.day)] || null })),
+    ...todos.map((item) => ({ ...item, kind: 'task', title: item.text, date: item.dueDate || null })),
+    ...chores.map((item) => ({
+      ...item,
+      kind: 'chore',
+      title: item.name,
+      date: week[DAYS.indexOf(item.day)] || null,
+    })),
   ]
 }
 // A weekly chore is pinned to its weekday, so an unchecked Monday chore looks

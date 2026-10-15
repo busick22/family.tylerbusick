@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import Modal from '../../components/Modal.jsx'
 import { DAYS } from '../../lib/family.js'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
-export default function KidChoreModal({ chore, onClose, onSave, onDelete, showNotice }) {
+export default function KidChoreModal({ chore, onClose, onSave, onDelete }) {
+  const showNotice = useNotice()
   const [name, setName] = useState(chore.name || '')
   const [day, setDay] = useState(chore.day || DAYS[0])
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -15,7 +17,7 @@ export default function KidChoreModal({ chore, onClose, onSave, onDelete, showNo
   async function save() {
     const trimmed = name.trim()
     if (!trimmed) {
-      showNotice?.('Add a chore name first.', 'error')
+      showNotice('Add a chore name first.', 'error')
       return
     }
     setBusy(true)
@@ -24,7 +26,7 @@ export default function KidChoreModal({ chore, onClose, onSave, onDelete, showNo
       onClose()
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't update that chore.", 'error')
+      showNotice("Couldn't update that chore.", 'error')
       setBusy(false)
     }
   }
@@ -40,7 +42,7 @@ export default function KidChoreModal({ chore, onClose, onSave, onDelete, showNo
       onClose()
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't delete that chore.", 'error')
+      showNotice("Couldn't delete that chore.", 'error')
       setBusy(false)
     }
   }
@@ -52,7 +54,9 @@ export default function KidChoreModal({ chore, onClose, onSave, onDelete, showNo
       </button>
       <h3>Edit Chore</h3>
 
-      <label className="field-label" htmlFor="kid-chore-name">Chore</label>
+      <label className="field-label" htmlFor="kid-chore-name">
+        Chore
+      </label>
       <input
         id="kid-chore-name"
         className="field"
@@ -62,8 +66,15 @@ export default function KidChoreModal({ chore, onClose, onSave, onDelete, showNo
         autoFocus
       />
 
-      <label className="field-label" htmlFor="kid-chore-day">Day</label>
-      <select id="kid-chore-day" className="field select-field" value={day} onChange={(e) => setDay(e.target.value)}>
+      <label className="field-label" htmlFor="kid-chore-day">
+        Day
+      </label>
+      <select
+        id="kid-chore-day"
+        className="field select-field"
+        value={day}
+        onChange={(e) => setDay(e.target.value)}
+      >
         {DAYS.map((d) => (
           <option key={d} value={d}>
             {d}

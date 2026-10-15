@@ -6,12 +6,15 @@ import HomePage from './features/home/HomePage.jsx'
 import ListsPage from './features/planning/ListsPage.jsx'
 import WeekPage from './features/planning/WeekPage.jsx'
 import CalendarPage from './features/planning/CalendarPage.jsx'
-import KidSelector from './features/kids/KidSelector.jsx'
+import FamilySettingsPage from './features/kids/FamilySettingsPage.jsx'
 import MealsPage from './features/meals/MealsPage.jsx'
 import KidsPage from './features/kids/KidsPage.jsx'
 import SharedWishListPage from './features/kids/SharedWishListPage.jsx'
 import FamilyDataProviders from './state/FamilyDataProviders.jsx'
 
+// Old bookmarks from before the Home/Plan/Lists/Meals/Kids rename. Each one
+// lands on its new home in a single hop; /tasks keeps its query string so a
+// saved filter still opens the same view.
 function LegacyTasks() {
   const { search } = useLocation()
   return <Navigate to={'/lists' + search} replace />
@@ -47,12 +50,12 @@ function PrivateApp() {
           <Route path="plan/month" element={<CalendarPage />} />
           <Route path="lists" element={<ListsPage />} />
           <Route path="lists/groceries" element={<ListsPage grocery />} />
+          <Route path="meals" element={<MealsPage />} />
+          <Route path="kids" element={<KidsPage />} />
+          <Route path="parent" element={<FamilySettingsPage />} />
           <Route path="calendar" element={<Navigate to="/plan/month" replace />} />
           <Route path="tasks" element={<LegacyTasks />} />
-          <Route path="parent" element={<KidSelector parentOnly />} />
-          <Route path="meals" element={<MealsPage />} />
-          <Route path="planner" element={<Navigate to="/tasks" replace />} />
-          <Route path="kids" element={<KidsPage />} />
+          <Route path="planner" element={<LegacyTasks />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
@@ -61,8 +64,10 @@ function PrivateApp() {
 }
 
 export default function App() {
-  return <Routes>
-    <Route path="wish-lists/:listId" element={<SharedWishListPage />} />
-    <Route path="*" element={<PrivateApp />} />
-  </Routes>
+  return (
+    <Routes>
+      <Route path="wish-lists/:listId" element={<SharedWishListPage />} />
+      <Route path="*" element={<PrivateApp />} />
+    </Routes>
+  )
 }

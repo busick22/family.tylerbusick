@@ -7,8 +7,10 @@ import Modal from '../../../components/Modal.jsx'
 import { useKidPoints } from '../../../state/KidPointsContext.jsx'
 import { useScreenTime } from '../../../state/ScreenTimeContext.jsx'
 import { pendingItems } from '../kidsUtils.js'
+import { useNotice } from '../../../state/NoticeContext.jsx'
 
-export default function PendingModal({ onClose, showNotice }) {
+export default function PendingModal({ onClose }) {
+  const showNotice = useNotice()
   const { kidPoints, approveRedemption, denyRedemption } = useKidPoints()
   const { requests, grantRequest, deleteRequest } = useScreenTime()
   const [busy, setBusy] = useState(null)
@@ -19,32 +21,48 @@ export default function PendingModal({ onClose, showNotice }) {
     setBusy(item.id)
     try {
       const granted = await grantRequest(item.id)
-      showNotice?.(granted ? `Added ${Math.round(granted.requestedMs / 60000)} minutes for ${granted.kidName}.` : 'That request was already handled.', 'success')
+      showNotice(
+        granted
+          ? `Added ${Math.round(granted.requestedMs / 60000)} minutes for ${granted.kidName}.`
+          : 'That request was already handled.',
+        'success',
+      )
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't grant that request.", 'error')
-    } finally { setBusy(null) }
+      showNotice("Couldn't grant that request.", 'error')
+    } finally {
+      setBusy(null)
+    }
   }
   async function deny(item) {
     setBusy(item.id)
     try {
       await deleteRequest(item.id)
-      showNotice?.('Request denied.', 'success')
+      showNotice('Request denied.', 'success')
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't deny that request.", 'error')
-    } finally { setBusy(null) }
+      showNotice("Couldn't deny that request.", 'error')
+    } finally {
+      setBusy(null)
+    }
   }
   async function handleRedemption(item, approve) {
     const key = `redeem-${item.kidName}-${item.idx}`
     setBusy(key)
     try {
-      const handled = await (approve ? approveRedemption(item.kidName, item.idx, item) : denyRedemption(item.kidName, item.idx, item))
-      showNotice?.(handled ? `Request ${approve ? 'approved' : 'denied'}.` : 'That request was already handled.', 'success')
+      const handled = await (approve
+        ? approveRedemption(item.kidName, item.idx, item)
+        : denyRedemption(item.kidName, item.idx, item))
+      showNotice(
+        handled ? `Request ${approve ? 'approved' : 'denied'}.` : 'That request was already handled.',
+        'success',
+      )
     } catch (e) {
       console.error(e)
-      showNotice?.(`Couldn't ${approve ? 'approve' : 'deny'} that request.`, 'error')
-    } finally { setBusy(null) }
+      showNotice(`Couldn't ${approve ? 'approve' : 'deny'} that request.`, 'error')
+    } finally {
+      setBusy(null)
+    }
   }
 
   return (
@@ -65,14 +83,20 @@ export default function PendingModal({ onClose, showNotice }) {
             <button className="chip" disabled={busy !== null} onClick={() => handleRedemption(item, true)}>
               Approve
             </button>
-            <button className="chip" data-danger="true" disabled={busy !== null} onClick={() => handleRedemption(item, false)}>
+            <button
+              className="chip"
+              data-danger="true"
+              disabled={busy !== null}
+              onClick={() => handleRedemption(item, false)}
+            >
               Deny
             </button>
           </div>
         ) : (
           <div className="admin-req-row" key={`time-${item.id}`}>
             <div className="admin-req-text">
-              ⏰ <strong>{item.kidName}</strong> asked for <strong>+{Math.round((item.requestedMs || 0) / 60000)} min</strong> of screen time
+              ⏰ <strong>{item.kidName}</strong> asked for{' '}
+              <strong>+{Math.round((item.requestedMs || 0) / 60000)} min</strong> of screen time
             </div>
             <button className="chip" disabled={busy !== null} onClick={() => grant(item)}>
               Grant

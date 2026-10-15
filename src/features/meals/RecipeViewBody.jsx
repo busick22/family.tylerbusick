@@ -36,7 +36,9 @@ export default function RecipeViewBody({ recipe }) {
       {(recipe.tags || []).length > 0 && (
         <div className="recipe-view-tags">
           {recipe.tags.map((t) => (
-            <span className="tag-pill" key={t}>{t}</span>
+            <span className="tag-pill" key={t}>
+              {t}
+            </span>
           ))}
         </div>
       )}

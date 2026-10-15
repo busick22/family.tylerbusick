@@ -2,42 +2,31 @@
 // Shape: { name, assignee, day ('Sunday'...), points, done, completedAt,
 // completedBy }.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import {
-  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, writeBatch,
-} from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { collection, addDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { setWorkCompletion } from '../lib/workCompletion.js'
 import { useAuth } from './AuthContext.jsx'
+import { useCollection } from './useCollection.js'
 import { normalizeAssignment } from '../lib/family.js'
 
 const ChoresContext = createContext(null)
 
 export function ChoresProvider({ children }) {
   const { user } = useAuth()
-  const [chores, setChores] = useState([])
-
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    setLoading(true)
-    setError('')
-    if (!user) {
-      setChores([])
-      setLoading(false)
-      return undefined
-    }
-    return onSnapshot(
-      collection(db, 'chores'),
-      (snap) => { setChores(snap.docs.map((d) => normalizeAssignment({ id: d.id, ...d.data() }))); setLoading(false) },
-      (err) => { console.error('weekly chores listener failed:', err); setLoading(false); setError('Could not load your weekly chores. Check your connection or sign in again.') },
-    )
-  }, [user])
+  const {
+    items: chores,
+    loading,
+    error,
+  } = useCollection(user, 'chores', 'your weekly chores', {
+    map: (d) => normalizeAssignment({ id: d.id, ...d.data() }),
+  })
 
   const value = useMemo(
     () => ({
-      chores, loading, error,
+      chores,
+      loading,
+      error,
 
       async addChore(data) {
         await addDoc(collection(db, 'chores'), {
@@ -63,7 +52,9 @@ export function ChoresProvider({ children }) {
       // Sunday-morning ritual: uncheck everything for a fresh week.
       async resetWeek() {
         const batch = writeBatch(db)
-        chores.forEach((c) => batch.update(doc(db, 'chores', c.id), { done: false, completedAt: null, completedBy: '' }))
+        chores.forEach((c) =>
+          batch.update(doc(db, 'chores', c.id), { done: false, completedAt: null, completedBy: '' }),
+        )
         await batch.commit()
       },
     }),

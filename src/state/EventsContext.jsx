@@ -2,48 +2,33 @@
 // ('YYYY-MM-DD'), time ('HH:MM'|null), location, notes, color, who[],
 // gcalEventId (set when synced to Google Calendar), createdAt }.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import {
-  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp,
-} from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useCollection } from './useCollection.js'
 import { normalizeMemberList } from '../lib/family.js'
 
 const EventsContext = createContext(null)
 
 export function EventsProvider({ children }) {
   const { user } = useAuth()
-  const [events, setEvents] = useState([])
-
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    setLoading(true)
-    setError('')
-    if (!user) {
-      setEvents([])
-      setLoading(false)
-      return undefined
-    }
-    return onSnapshot(
-      collection(db, 'events'),
-      (snap) => {
-        setEvents(
-          snap.docs.map((d) => {
-            const data = { id: d.id, ...d.data() }
-            return { ...data, who: normalizeMemberList(data.who) }
-          }),
-        ); setLoading(false)
-      },
-      (err) => { console.error('calendar listener failed:', err); setLoading(false); setError('Could not load your calendar. Check your connection or sign in again.') },
-    )
-  }, [user])
+  const {
+    items: events,
+    loading,
+    error,
+  } = useCollection(user, 'events', 'your calendar', {
+    map: (d) => {
+      const data = { id: d.id, ...d.data() }
+      return { ...data, who: normalizeMemberList(data.who) }
+    },
+  })
 
   const value = useMemo(
     () => ({
-      events, loading, error,
+      events,
+      loading,
+      error,
 
       async addEvent(data) {
         const ref = await addDoc(collection(db, 'events'), {

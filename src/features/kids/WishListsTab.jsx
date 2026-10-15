@@ -17,33 +17,78 @@ function WishListDetail({ list, onBack }) {
   const [modal, setModal] = useState(null)
   const close = () => setModal(null)
 
-  return <section className="wish-section" aria-label={list.name}>
-    <button className="btn btn-ghost" onClick={onBack}><ArrowLeft size={16} aria-hidden="true" /> All my lists</button>
-    <div className="wish-heading">
-      <h2>{list.name}</h2>
-      <button className="icon-btn" onClick={() => setModal({ kind: 'list' })} aria-label="Edit list"><Pencil size={18} aria-hidden="true" /></button>
-    </div>
-    <div className="wish-toolbar">
-      <button className="btn btn-primary" onClick={() => setModal({ kind: 'item', value: null })}><Plus size={18} aria-hidden="true" /> Add wish</button>
-      <button className="btn" onClick={() => setModal({ kind: 'share' })}><Share2 size={18} aria-hidden="true" /> Share list</button>
-    </div>
-    {loading && <p className="wish-hint" role="status">Loading wishes…</p>}
-    {error && <p className="wish-error" role="alert">{error}</p>}
-    {!loading && !error && !items.length && <div className="wish-empty card">
-      <Gift aria-hidden="true" /><h3>What are you wishing for?</h3><p>Add your first wish to this list.</p>
-    </div>}
-    <ul className="wish-items">{items.map((item) => <WishItemCard key={item.id} item={item} onEdit={() => setModal({ kind: 'item', value: item })} />)}</ul>
-    {isParentAccount(user) && <button className="btn btn-ghost wish-parent" onClick={() => setModal({ kind: 'purchases' })} disabled={loading || Boolean(error)}>
-      <LockKeyhole size={16} aria-hidden="true" /> Parent gift tracking
-    </button>}
-    {modal?.kind === 'list' && <WishEditModal kind="list" value={list} onClose={close}
-      onSave={(name) => actions.renameList(list.id, name)} onDelete={() => actions.removeList(list.id)} />}
-    {modal?.kind === 'item' && <WishEditModal kind="item" value={modal.value} onClose={close}
-      onSave={(fields) => actions.saveWish(list.id, modal.value?.id, fields)}
-      onDelete={modal.value ? () => actions.removeWish(list.id, modal.value.id) : undefined} />}
-    {modal?.kind === 'share' && <WishShareModal list={list} onClose={close} />}
-    {modal?.kind === 'purchases' && <WishPurchasesModal list={list} items={items} onClose={close} />}
-  </section>
+  return (
+    <section className="wish-section" aria-label={list.name}>
+      <button className="btn btn-ghost" onClick={onBack}>
+        <ArrowLeft size={16} aria-hidden="true" /> All my lists
+      </button>
+      <div className="wish-heading">
+        <h2>{list.name}</h2>
+        <button className="icon-btn" onClick={() => setModal({ kind: 'list' })} aria-label="Edit list">
+          <Pencil size={18} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="wish-toolbar">
+        <button className="btn btn-primary" onClick={() => setModal({ kind: 'item', value: null })}>
+          <Plus size={18} aria-hidden="true" /> Add wish
+        </button>
+        <button className="btn" onClick={() => setModal({ kind: 'share' })}>
+          <Share2 size={18} aria-hidden="true" /> Share list
+        </button>
+      </div>
+      {loading && (
+        <p className="wish-hint" role="status">
+          Loading wishes…
+        </p>
+      )}
+      {error && (
+        <p className="wish-error" role="alert">
+          {error}
+        </p>
+      )}
+      {!loading && !error && !items.length && (
+        <div className="wish-empty card">
+          <Gift aria-hidden="true" />
+          <h3>What are you wishing for?</h3>
+          <p>Add your first wish to this list.</p>
+        </div>
+      )}
+      <ul className="wish-items">
+        {items.map((item) => (
+          <WishItemCard key={item.id} item={item} onEdit={() => setModal({ kind: 'item', value: item })} />
+        ))}
+      </ul>
+      {isParentAccount(user) && (
+        <button
+          className="btn btn-ghost wish-parent"
+          onClick={() => setModal({ kind: 'purchases' })}
+          disabled={loading || Boolean(error)}
+        >
+          <LockKeyhole size={16} aria-hidden="true" /> Parent gift tracking
+        </button>
+      )}
+      {modal?.kind === 'list' && (
+        <WishEditModal
+          kind="list"
+          value={list}
+          onClose={close}
+          onSave={(name) => actions.renameList(list.id, name)}
+          onDelete={() => actions.removeList(list.id)}
+        />
+      )}
+      {modal?.kind === 'item' && (
+        <WishEditModal
+          kind="item"
+          value={modal.value}
+          onClose={close}
+          onSave={(fields) => actions.saveWish(list.id, modal.value?.id, fields)}
+          onDelete={modal.value ? () => actions.removeWish(list.id, modal.value.id) : undefined}
+        />
+      )}
+      {modal?.kind === 'share' && <WishShareModal list={list} onClose={close} />}
+      {modal?.kind === 'purchases' && <WishPurchasesModal list={list} items={items} onClose={close} />}
+    </section>
+  )
 }
 
 export default function WishListsTab({ kid }) {
@@ -51,7 +96,7 @@ export default function WishListsTab({ kid }) {
   const [params, setParams] = useSearchParams()
   const selectedId = params.get('list')
   function setSelectedId(id) {
-    setParams(previous => {
+    setParams((previous) => {
       const next = new URLSearchParams(previous)
       if (id) next.set('list', id)
       else next.delete('list')
@@ -64,21 +109,59 @@ export default function WishListsTab({ kid }) {
 
   if (selected) return <WishListDetail key={selected.id} list={selected} onBack={() => setSelectedId(null)} />
 
-  return <section className="wish-section" aria-label="My wish lists">
-    <div className="wish-heading"><h2>My wish lists</h2>
-      <button className="btn btn-primary" onClick={() => setCreating(true)} disabled={loading || Boolean(error)}><Plus size={18} aria-hidden="true" /> New list</button>
-    </div>
-    {loading && <p className="wish-hint" role="status">Loading your lists…</p>}
-    {error && <p className="wish-error" role="alert">{error}</p>}
-    {!loading && !error && !mine.length && <div className="wish-empty card"><Gift aria-hidden="true" /><h3>No wish lists yet</h3><p>Create one for a birthday or holiday.</p></div>}
-    <ul className="wish-items">{mine.map((list) => <li key={list.id}>
-      <button className="wish-list-button card" onClick={() => setSelectedId(list.id)}>
-        <Gift aria-hidden="true" /><span><strong>{list.name}</strong><small>{list.shared ? 'Link sharing on' : 'Only in Family'}</small></span><ChevronRight aria-hidden="true" />
-      </button>
-    </li>)}</ul>
-    {creating && <WishEditModal kind="list" onClose={() => setCreating(false)} onSave={async (name) => {
-      const id = await createList(kid, name)
-      setSelectedId(id)
-    }} />}
-  </section>
+  return (
+    <section className="wish-section" aria-label="My wish lists">
+      <div className="wish-heading">
+        <h2>My wish lists</h2>
+        <button
+          className="btn btn-primary"
+          onClick={() => setCreating(true)}
+          disabled={loading || Boolean(error)}
+        >
+          <Plus size={18} aria-hidden="true" /> New list
+        </button>
+      </div>
+      {loading && (
+        <p className="wish-hint" role="status">
+          Loading your lists…
+        </p>
+      )}
+      {error && (
+        <p className="wish-error" role="alert">
+          {error}
+        </p>
+      )}
+      {!loading && !error && !mine.length && (
+        <div className="wish-empty card">
+          <Gift aria-hidden="true" />
+          <h3>No wish lists yet</h3>
+          <p>Create one for a birthday or holiday.</p>
+        </div>
+      )}
+      <ul className="wish-items">
+        {mine.map((list) => (
+          <li key={list.id}>
+            <button className="wish-list-button card" onClick={() => setSelectedId(list.id)}>
+              <Gift aria-hidden="true" />
+              <span>
+                <strong>{list.name}</strong>
+                <small>{list.shared ? 'Link sharing on' : 'Only in Family'}</small>
+              </span>
+              <ChevronRight aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
+      {creating && (
+        <WishEditModal
+          kind="list"
+          onClose={() => setCreating(false)}
+          onSave={async (name) => {
+            const id = await createList(kid, name)
+            setSelectedId(id)
+          }}
+        />
+      )}
+    </section>
+  )
 }

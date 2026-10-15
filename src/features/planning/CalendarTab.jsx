@@ -29,8 +29,14 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
   function changeMonth(dir) {
     let m = calMonth + dir
     let y = calYear
-    if (m > 11) { m = 0; y += 1 }
-    if (m < 0) { m = 11; y -= 1 }
+    if (m > 11) {
+      m = 0
+      y += 1
+    }
+    if (m < 0) {
+      m = 11
+      y -= 1
+    }
     setSelectedDate(dateKeyOf(y, m, 1))
   }
 
@@ -91,12 +97,16 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
           <button className="icon-btn" onClick={() => changeMonth(-1)} aria-label="Previous month">
             <ChevronLeft aria-hidden="true" />
           </button>
-          <button className="btn btn-sm" onClick={goToday}>Today</button>
+          <button className="btn btn-sm" onClick={goToday}>
+            Today
+          </button>
           <button className="icon-btn" onClick={() => changeMonth(1)} aria-label="Next month">
             <ChevronRight aria-hidden="true" />
           </button>
         </div>
-        <h2 className="cal-month-label">{MONTHS[calMonth]} {calYear}</h2>
+        <h2 className="cal-month-label">
+          {MONTHS[calMonth]} {calYear}
+        </h2>
         <button className="btn btn-sm" onClick={() => onAddEvent()}>
           <Plus aria-hidden="true" size={15} /> Event
         </button>
@@ -120,16 +130,27 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
                 data-other={!cell.cur}
                 data-today={dk === today}
                 key={`${dk}-${index}`}
-                onClick={() => { setSelectedDate(dk); setExpandedDay(dk) }}
+                onClick={() => {
+                  setSelectedDate(dk)
+                  setExpandedDay(dk)
+                }}
               >
                 <button
                   type="button"
                   className="planner-month-day-open"
-                  onClick={(e) => { e.stopPropagation(); setSelectedDate(dk); setExpandedDay(dk) }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedDate(dk)
+                    setExpandedDay(dk)
+                  }}
                   aria-label={`${longDayLabel(dk)}, ${dayEvents.length} ${dayEvents.length === 1 ? 'event' : 'events'}. View day`}
                 >
                   <span className="planner-month-date">{cell.day}</span>
-                  <span className="planner-month-day-dot" data-events={dayEvents.length > 0} aria-hidden="true" />
+                  <span
+                    className="planner-month-day-dot"
+                    data-events={dayEvents.length > 0}
+                    aria-hidden="true"
+                  />
                 </button>
                 <span className="planner-month-events">
                   {visible.map((event) => (
@@ -172,7 +193,9 @@ export default function CalendarTab({ onAddEvent, onEditEvent }) {
             <X aria-hidden="true" />
           </button>
           <h3>{longDayLabel(expandedDay)}</h3>
-          {!(eventsByDate.get(expandedDay) || []).length && <p className="empty-inline">No events planned.</p>}
+          {!(eventsByDate.get(expandedDay) || []).length && (
+            <p className="empty-inline">No events planned.</p>
+          )}
           <div className="calendar-day-list">
             {(eventsByDate.get(expandedDay) || []).map((event) => (
               <button

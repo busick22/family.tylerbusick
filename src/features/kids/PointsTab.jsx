@@ -21,7 +21,9 @@ export default function PointsTab({ kid }) {
         <div>
           <div className="points-label">Total Points</div>
           <div className="points-sub">
-            {net === 0 ? 'Complete tasks and chores to earn more!' : `${earned} earned · ${redeemedTotal} redeemed`}
+            {net === 0
+              ? 'Complete tasks and chores to earn more!'
+              : `${earned} earned · ${redeemedTotal} redeemed`}
           </div>
         </div>
       </div>
@@ -38,7 +40,9 @@ export default function PointsTab({ kid }) {
         ))}
       </div>
 
-      <div className="section-lbl" style={{ marginTop: '1rem' }}>🏷️ Redeemed</div>
+      <div className="section-lbl" style={{ marginTop: '1rem' }}>
+        🏷️ Redeemed
+      </div>
       <div className="kid-panel">
         {redeemedList.length === 0 && <div className="k-empty">Nothing redeemed yet.</div>}
         {redeemedList.map((r, i) => (

@@ -6,8 +6,10 @@ import { useState } from 'react'
 import { X, Plus } from 'lucide-react'
 import Modal from '../../components/Modal.jsx'
 import { useRecipes } from '../../state/RecipesContext.jsx'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
-export default function RecipeModal({ recipe, onClose, showNotice }) {
+export default function RecipeModal({ recipe, onClose }) {
+  const showNotice = useNotice()
   const { addRecipe, updateRecipe, deleteRecipe } = useRecipes()
   const editing = Boolean(recipe?.id)
 
@@ -19,9 +21,7 @@ export default function RecipeModal({ recipe, onClose, showNotice }) {
   const [tags, setTags] = useState(recipe?.tags ? [...recipe.tags] : [])
   const [tagDraft, setTagDraft] = useState('')
   const [ingredients, setIngredients] = useState(
-    recipe?.ingredients?.length
-      ? recipe.ingredients.map((i) => ({ ...i }))
-      : [{ amount: '', name: '' }],
+    recipe?.ingredients?.length ? recipe.ingredients.map((i) => ({ ...i })) : [{ amount: '', name: '' }],
   )
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -100,7 +100,9 @@ export default function RecipeModal({ recipe, onClose, showNotice }) {
       </button>
       <h3>{editing ? 'Edit Recipe' : 'Add Recipe'}</h3>
 
-      <label className="field-label" htmlFor="recipe-name">Recipe name *</label>
+      <label className="field-label" htmlFor="recipe-name">
+        Recipe name *
+      </label>
       <input
         id="recipe-name"
         className="field"
@@ -111,7 +113,9 @@ export default function RecipeModal({ recipe, onClose, showNotice }) {
 
       <div className="form-2col">
         <div>
-          <label className="field-label" htmlFor="recipe-prep">Prep time</label>
+          <label className="field-label" htmlFor="recipe-prep">
+            Prep time
+          </label>
           <input
             id="recipe-prep"
             className="field"
@@ -121,7 +125,9 @@ export default function RecipeModal({ recipe, onClose, showNotice }) {
           />
         </div>
         <div>
-          <label className="field-label" htmlFor="recipe-cook">Cook time</label>
+          <label className="field-label" htmlFor="recipe-cook">
+            Cook time
+          </label>
           <input
             id="recipe-cook"
             className="field"
@@ -169,7 +175,9 @@ export default function RecipeModal({ recipe, onClose, showNotice }) {
         <Plus aria-hidden="true" size={15} /> Add ingredient
       </button>
 
-      <label className="field-label" htmlFor="recipe-tags" style={{ marginTop: 14 }}>Tags</label>
+      <label className="field-label" htmlFor="recipe-tags" style={{ marginTop: 14 }}>
+        Tags
+      </label>
       <div className="tag-editor">
         {tags.map((t) => (
           <span className="tag-pill tag-pill-edit" key={t}>
@@ -195,15 +203,13 @@ export default function RecipeModal({ recipe, onClose, showNotice }) {
       </div>
 
       <label className="check-row">
-        <input
-          type="checkbox"
-          checked={favorite}
-          onChange={(e) => setFavorite(e.target.checked)}
-        />
+        <input type="checkbox" checked={favorite} onChange={(e) => setFavorite(e.target.checked)} />
         Favorite family staple
       </label>
 
-      <label className="field-label" htmlFor="recipe-notes">Notes / instructions</label>
+      <label className="field-label" htmlFor="recipe-notes">
+        Notes / instructions
+      </label>
       <textarea
         id="recipe-notes"
         className="field recipe-notes-field"

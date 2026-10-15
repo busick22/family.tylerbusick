@@ -2,10 +2,11 @@
 // grocery list groups itself the way the family actually shops. Doc id is
 // the normalized ingredient name; data is { aisle, name }.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { doc, setDoc } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useCollection } from './useCollection.js'
 
 const AislesContext = createContext(null)
 
@@ -15,28 +16,17 @@ function aisleKey(name) {
 
 export function AislesProvider({ children }) {
   const { user } = useAuth()
-  const [aisles, setAisles] = useState({})
-
-  useEffect(() => {
-    if (!user) {
-      setAisles({})
-      return undefined
-    }
-    return onSnapshot(
-      collection(db, 'aisles'),
-      (snap) => {
-        const next = {}
-        snap.docs.forEach((d) => {
-          next[d.id] = d.data().aisle
-        })
-        setAisles(next)
-      },
-      (err) => console.error('Aisles listener failed:', err),
-    )
-  }, [user])
+  const {
+    items: aisles,
+    loading,
+    error,
+  } = useCollection(user, 'aisles', 'store aisles', { toMap: (d) => d.data().aisle })
 
   const value = useMemo(
     () => ({
+      loading,
+      error,
+
       getAisle(name) {
         return aisles[aisleKey(name)] || ''
       },
@@ -47,7 +37,7 @@ export function AislesProvider({ children }) {
         await setDoc(doc(db, 'aisles', aisleKey(name)), { aisle, name })
       },
     }),
-    [aisles],
+    [aisles, loading, error],
   )
 
   return <AislesContext.Provider value={value}>{children}</AislesContext.Provider>

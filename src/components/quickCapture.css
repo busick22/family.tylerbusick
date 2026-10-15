@@ -1,0 +1,71 @@
+/* Quick capture — the one-line "add a to-do" box shared by Home and Lists.
+   Lives with the component in src/components/ because both pages use it. */
+
+.quick-capture {
+  padding: var(--space-5);
+  background: var(--accent-soft);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-6);
+}
+.quick-capture > label {
+  display: block;
+  font: 600 var(--text-lg) var(--font-display);
+  margin-bottom: var(--space-3);
+}
+.quick-capture form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--surface);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  min-height: var(--capture-height);
+}
+.quick-capture input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: var(--space-3);
+  font-size: var(--text-md);
+  color: var(--text);
+}
+.quick-capture input::placeholder {
+  color: var(--text-mid);
+}
+.quick-capture input:focus {
+  outline-offset: 0;
+}
+.quick-capture form .btn {
+  flex: none;
+}
+.quick-capture > p {
+  color: var(--text-mid);
+  font-size: var(--text-xs);
+  margin-top: var(--space-2);
+}
+.quick-capture .capture-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.quick-capture [role='alert'] {
+  color: var(--danger);
+}
+.quick-capture.compact {
+  padding: 0;
+  background: transparent;
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: 800px) {
+  .quick-capture {
+    padding: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+  .quick-capture input {
+    font-size: var(--text-sm);
+    padding: var(--space-2);
+  }
+}

@@ -43,14 +43,19 @@ body {
   touch-action: manipulation;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0;
 }
 
-p { margin: 0; }
+p {
+  margin: 0;
+}
 
 button {
   font: inherit;
@@ -81,12 +86,17 @@ a {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) transparent;
 }
-*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 *::-webkit-scrollbar-thumb {
   background: var(--border-strong);
   border-radius: var(--radius-full);
 }
-*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -124,9 +134,18 @@ a {
     border-color var(--speed-fast) var(--ease-out),
     transform var(--speed-fast) var(--ease-out);
 }
-.btn:hover { background: var(--surface-3); border-color: var(--border-strong); }
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.5; cursor: default; pointer-events: none; }
+.btn:hover {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
 
 .btn-primary {
   background: var(--accent);
@@ -148,14 +167,20 @@ a {
   background: transparent;
   border-color: transparent;
 }
-.btn-ghost:hover { background: var(--surface-2); border-color: transparent; }
+.btn-ghost:hover {
+  background: var(--surface-2);
+  border-color: transparent;
+}
 
 .btn-danger {
   background: var(--danger-soft);
   border-color: transparent;
   color: var(--danger);
 }
-.btn-danger:hover { background: var(--danger-soft); filter: brightness(1.08); }
+.btn-danger:hover {
+  background: var(--danger-soft);
+  filter: brightness(1.08);
+}
 
 /* Square icon-only button — sized for a fingertip, not a cursor. */
 .icon-btn {
@@ -171,8 +196,14 @@ a {
     background var(--speed-fast) var(--ease-out),
     color var(--speed-fast) var(--ease-out);
 }
-.icon-btn:hover { background: var(--surface-2); color: var(--text); }
-.icon-btn[data-active='true'] { color: var(--accent); background: var(--accent-soft); }
+.icon-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.icon-btn[data-active='true'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
 
 /* --- Inputs ----------------------------------------------------------------- */
 
@@ -185,10 +216,13 @@ a {
   background: var(--surface);
   color: var(--text);
   font-size: var(--text-md);
-  transition: border-color var(--speed-fast) var(--ease-out),
+  transition:
+    border-color var(--speed-fast) var(--ease-out),
     box-shadow var(--speed-fast) var(--ease-out);
 }
-.field::placeholder { color: var(--text-dim); }
+.field::placeholder {
+  color: var(--text-dim);
+}
 .field:focus {
   outline: none;
   border-color: var(--accent);
@@ -213,19 +247,6 @@ a {
   border-radius: var(--radius-lg);
 }
 
-.panel-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-}
-.panel-title svg { width: 14px; height: 14px; }
-
 /* --- Chips -------------------------------------------------------------------- */
 
 .chip {
@@ -246,7 +267,10 @@ a {
     color var(--speed-fast) var(--ease-out),
     border-color var(--speed-fast) var(--ease-out);
 }
-.chip:hover { color: var(--text); border-color: var(--border-strong); }
+.chip:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
 .chip[data-active='true'] {
   background: var(--accent-soft);
   border-color: transparent;
@@ -277,10 +301,20 @@ a {
   color: var(--text);
   text-align: left;
 }
-.menu-item:hover { background: var(--surface-3); }
-.menu-item svg { width: 16px; height: 16px; color: var(--text-mid); }
-.menu-item[data-danger='true'] { color: var(--danger); }
-.menu-item[data-danger='true'] svg { color: var(--danger); }
+.menu-item:hover {
+  background: var(--surface-3);
+}
+.menu-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-mid);
+}
+.menu-item[data-danger='true'] {
+  color: var(--danger);
+}
+.menu-item[data-danger='true'] svg {
+  color: var(--danger);
+}
 
 .modal-backdrop {
   position: fixed;
@@ -289,7 +323,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  padding: max(20px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px))
+    max(20px, env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
   background: var(--backdrop);
   backdrop-filter: blur(6px);
   animation: fade-in var(--speed-fast) ease-out;
@@ -298,7 +333,10 @@ a {
 .modal {
   position: relative;
   width: min(460px, 100%);
-  max-height: min(660px, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px));
+  max-height: min(
+    660px,
+    calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px)
+  );
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -365,11 +403,10 @@ a {
   font-size: var(--text-sm);
   text-align: center;
 }
-.empty-state svg { width: 24px; height: 24px; opacity: 0.6; }
-
-.page-scroll > .empty-state {
-  min-height: min(360px, 70%);
-  justify-content: center;
+.empty-state svg {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
 }
 
 .error-note {
@@ -402,19 +439,29 @@ a {
 /* --- Animations ------------------------------------------------------------------- */
 
 @keyframes fade-in {
-  from { opacity: 0; }
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(14px); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
 }
 
 @keyframes pop-in {
-  from { opacity: 0; transform: scale(0.96); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .page-enter {
@@ -451,7 +498,9 @@ a {
     background var(--speed-fast) var(--ease-out),
     color var(--speed-fast) var(--ease-out);
 }
-.seg-tab:hover { color: var(--text); }
+.seg-tab:hover {
+  color: var(--text);
+}
 .seg-tab[data-active='true'] {
   background: var(--page-accent, var(--accent));
   color: #fff;
@@ -464,36 +513,6 @@ a {
   .seg-tab {
     flex: 1;
     padding: 8px 10px;
-  }
-}
-
-/* --- Floating action button ----------------------------------------------------------- */
-
-.fab {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 55;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  border-radius: var(--radius-full);
-  background: var(--page-accent, var(--accent));
-  color: #fff;
-  box-shadow: var(--shadow-2);
-  transition: transform var(--speed-fast) var(--ease-out), box-shadow var(--speed-fast) var(--ease-out);
-}
-.fab:hover { transform: scale(1.05); box-shadow: var(--shadow-pop); }
-.fab:active { transform: scale(0.96); }
-.fab svg { width: 26px; height: 26px; }
-
-@media (max-width: 800px) {
-  /* Sit above the floating dock. */
-  .fab {
-    bottom: calc(var(--dock-inset) + var(--dock-height) + 14px);
-    right: 16px;
   }
 }
 
@@ -556,5 +575,258 @@ a {
   box-shadow: var(--shadow-pop);
   animation: rise-in var(--speed-fast) var(--ease-out);
 }
-.page-notice-success { background: var(--accent-soft); border-color: transparent; color: var(--ok); }
-.page-notice-error { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
+.page-notice-success {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--ok);
+}
+.page-notice-error {
+  background: var(--danger-soft);
+  border-color: transparent;
+  color: var(--danger);
+}
+
+/* Calendar month header — shared by the Plan calendar and the Meals schedule. */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cal-month-label {
+  font-size: var(--text-lg);
+}
+
+/* ---------------------------------------------------------------------------
+   Workspace primitives — the surfaces, headings, empty states and checkable
+   rows shared by Home, Plan, Lists and Kids. These began life inside the
+   planning feature; they live here now because four features render them.
+--------------------------------------------------------------------------- */
+
+.workspace-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.workspace-title h1 {
+  font-size: var(--text-2xl);
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+.workspace-eyebrow {
+  color: var(--text-mid);
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-2);
+}
+.workspace-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.workspace-actions .btn,
+.workspace-actions .icon-btn {
+  flex-shrink: 0;
+}
+.workspace-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(var(--workspace-rail), 0.85fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.workspace-surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  min-width: 0;
+}
+.surface-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+.surface-heading h2,
+.section-heading h2 {
+  font: 600 var(--text-lg) var(--font-display);
+  margin: 0;
+}
+.surface-heading small,
+.muted-copy {
+  color: var(--text-mid);
+  font-size: var(--text-sm);
+}
+.workspace-status {
+  border: 1px solid var(--border);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-4);
+  background: var(--surface);
+  color: var(--text-mid);
+}
+.workspace-status[role='alert'] {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 var(--space-2);
+}
+.section-heading:first-child {
+  margin-top: 0;
+}
+.section-heading .btn {
+  padding: var(--space-2);
+}
+.agenda-row {
+  width: 100%;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--tap);
+  text-align: left;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+.agenda-row > svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.agenda-row > span {
+  flex: 1;
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.agenda-row strong {
+  font-weight: 550;
+}
+.agenda-row small {
+  font-size: var(--text-xs);
+  color: var(--text-mid);
+}
+.agenda-row:hover strong {
+  color: var(--accent);
+}
+.agenda-row[data-done='true'] strong {
+  text-decoration: line-through;
+  color: var(--text-mid);
+}
+.empty-inline {
+  color: var(--text-mid);
+  font-size: var(--text-sm);
+  padding: var(--space-3) 0;
+}
+.empty-workspace {
+  text-align: center;
+  padding: var(--space-6);
+  color: var(--text-mid);
+}
+.empty-workspace h2 {
+  color: var(--text);
+  margin-bottom: var(--space-2);
+}
+.empty-workspace .btn {
+  margin-top: var(--space-4);
+}
+.workspace-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  font-size: var(--text-sm);
+  color: var(--accent);
+}
+.work-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+}
+.work-row:last-child {
+  border-bottom: 0;
+}
+.work-check {
+  display: flex;
+  width: var(--tap);
+  height: var(--tap);
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.work-check input {
+  width: var(--space-5);
+  height: var(--space-5);
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.work-edit {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  min-height: var(--tap);
+  display: grid;
+  align-content: center;
+  gap: var(--space-1);
+}
+.work-edit strong {
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.work-edit small {
+  color: var(--text-mid);
+  font-size: var(--text-xs);
+}
+.work-row[data-done='true'] .work-edit strong {
+  text-decoration: line-through;
+  color: var(--text-mid);
+}
+.work-owner {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  background: var(--surface-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+}
+@media (max-width: 800px) {
+  .workspace-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace-title {
+    flex-wrap: wrap;
+  }
+  .workspace-title h1 {
+    font-size: var(--text-xl);
+  }
+  .workspace-title > .workspace-actions {
+    width: 100%;
+  }
+  .work-owner {
+    max-width: var(--workspace-row);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.section-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: -1px;
+  border-bottom: var(--indicator-width) solid transparent;
+  font-size: var(--text-sm);
+  color: var(--text-mid);
+}

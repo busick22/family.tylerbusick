@@ -6,9 +6,9 @@
  * their components were removed rather than left as reference.
  *
  * The redesign's own tweaks to these rules used to sit in planning.css behind
- * a `.planning-shell` prefix. Since every signed-in page renders inside that
- * shell, the prefix never selected anything extra — the rules are merged in
- * here so there is one place to change the calendar's appearance.
+ * a shell-scoped prefix. Since every signed-in page renders inside the shell,
+ * the prefix never selected anything extra — the rules are merged in here so
+ * there is one place to change the calendar's appearance.
  */
 
 .calendar-tab {
@@ -77,10 +77,18 @@
   cursor: pointer;
   transition: background var(--speed-fast) var(--ease-out);
 }
-.planner-month-cell:nth-child(7n) { border-right: none; }
-.planner-month-cell:nth-last-child(-n + 7) { border-bottom: none; }
-.planner-month-cell:hover { background: var(--surface-2); }
-.planner-month-cell[data-other='true'] { opacity: 0.45; }
+.planner-month-cell:nth-child(7n) {
+  border-right: none;
+}
+.planner-month-cell:nth-last-child(-n + 7) {
+  border-bottom: none;
+}
+.planner-month-cell:hover {
+  background: var(--surface-2);
+}
+.planner-month-cell[data-other='true'] {
+  opacity: 0.45;
+}
 
 /* The cell's own header row: date number, plus a dot when the day has events
    (the dot carries the signal on phones, where chips are hidden). */
@@ -96,7 +104,9 @@
   height: var(--space-1);
   border-radius: var(--radius-full);
 }
-.planner-month-day-dot[data-events='true'] { background: var(--accent); }
+.planner-month-day-dot[data-events='true'] {
+  background: var(--accent);
+}
 .planner-month-date {
   display: inline-flex;
   align-items: center;
@@ -202,9 +212,13 @@
   height: 34px;
   border-radius: var(--radius-full);
   border: 3px solid transparent;
-  transition: transform var(--speed-fast) var(--ease-out), border-color var(--speed-fast) var(--ease-out);
+  transition:
+    transform var(--speed-fast) var(--ease-out),
+    border-color var(--speed-fast) var(--ease-out);
 }
-.color-dot:hover { transform: scale(1.1); }
+.color-dot:hover {
+  transform: scale(1.1);
+}
 .color-dot[data-selected='true'] {
   border-color: var(--text);
   transform: scale(1.1);

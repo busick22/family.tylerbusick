@@ -8,14 +8,14 @@ import { useEvents } from '../../state/EventsContext.jsx'
 import { useMembers } from '../../state/MembersContext.jsx'
 import { normalizeMemberList, todayStr } from '../../lib/family.js'
 import { addToGoogleCalendar, deleteFromGoogleCalendar } from '../../lib/gcal.js'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
 // The event colour swatches. Lived in plannerUtils.js until the planning
 // redesign retired that file's other helpers along with the old Planner page.
-const EVENT_COLORS = [
-  '#2563eb', '#7c3aed', '#ea580c', '#16a34a', '#db2777', '#0891b2', '#d97706',
-]
+const EVENT_COLORS = ['#2563eb', '#7c3aed', '#ea580c', '#16a34a', '#db2777', '#0891b2', '#d97706']
 
-export default function EventModal({ event, onClose, showNotice }) {
+export default function EventModal({ event, onClose }) {
+  const showNotice = useNotice()
   const { addEvent, updateEvent, deleteEvent } = useEvents()
   const { members } = useMembers()
   const editing = Boolean(event?.id)
@@ -101,7 +101,9 @@ export default function EventModal({ event, onClose, showNotice }) {
       </button>
       <h3>{editing ? 'Edit event' : 'Add an event'}</h3>
 
-      <label className="field-label" htmlFor="ev-title">What’s happening?</label>
+      <label className="field-label" htmlFor="ev-title">
+        What’s happening?
+      </label>
       <input
         id="ev-title"
         className="field"
@@ -113,7 +115,9 @@ export default function EventModal({ event, onClose, showNotice }) {
 
       <div className="form-2col">
         <div>
-          <label className="field-label" htmlFor="ev-date">Date</label>
+          <label className="field-label" htmlFor="ev-date">
+            Date
+          </label>
           <input
             id="ev-date"
             type="date"
@@ -123,7 +127,9 @@ export default function EventModal({ event, onClose, showNotice }) {
           />
         </div>
         <div>
-          <label className="field-label" htmlFor="ev-time">Time · optional</label>
+          <label className="field-label" htmlFor="ev-time">
+            Time · optional
+          </label>
           <input
             id="ev-time"
             type="time"
@@ -134,7 +140,9 @@ export default function EventModal({ event, onClose, showNotice }) {
         </div>
       </div>
 
-      <label className="field-label" htmlFor="ev-location">Location</label>
+      <label className="field-label" htmlFor="ev-location">
+        Location
+      </label>
       <input
         id="ev-location"
         className="field"
@@ -165,38 +173,40 @@ export default function EventModal({ event, onClose, showNotice }) {
         </p>
       )}
 
-      <details className="work-options"><summary>Notes, color & Google Calendar</summary>
-      <label className="field-label" htmlFor="ev-notes">Notes</label>
-      <textarea
-        id="ev-notes"
-        className="field event-notes-field"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        placeholder="Optional"
-      />
+      <details className="work-options">
+        <summary>Notes, color & Google Calendar</summary>
+        <label className="field-label" htmlFor="ev-notes">
+          Notes
+        </label>
+        <textarea
+          id="ev-notes"
+          className="field event-notes-field"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Optional"
+        />
 
-      <label className="check-row">
-        <input type="checkbox" checked={syncGcal} onChange={(e) => setSyncGcal(e.target.checked)} />
-        Also add to the family Google Calendar
-      </label>
+        <label className="check-row">
+          <input type="checkbox" checked={syncGcal} onChange={(e) => setSyncGcal(e.target.checked)} />
+          Also add to the family Google Calendar
+        </label>
 
-      <span className="field-label">Color</span>
-      <div className="color-picker" role="radiogroup" aria-label="Event color">
-        {EVENT_COLORS.map((c) => (
-          <button
-            type="button"
-            key={c}
-            className="color-dot"
-            data-selected={color === c}
-            style={{ background: c }}
-            onClick={() => setColor(c)}
-            role="radio"
-            aria-checked={color === c}
-            aria-label={`Color ${c}`}
-          />
-        ))}
-      </div>
-
+        <span className="field-label">Color</span>
+        <div className="color-picker" role="radiogroup" aria-label="Event color">
+          {EVENT_COLORS.map((c) => (
+            <button
+              type="button"
+              key={c}
+              className="color-dot"
+              data-selected={color === c}
+              style={{ background: c }}
+              onClick={() => setColor(c)}
+              role="radio"
+              aria-checked={color === c}
+              aria-label={`Color ${c}`}
+            />
+          ))}
+        </div>
       </details>
 
       <div className="modal-actions">

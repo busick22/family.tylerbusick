@@ -50,7 +50,6 @@
   --space-8: 48px;
   --letter-tight: -0.045em;
   --capture-height: 60px;
-  --rail-icon: 22px;
 
   --indicator-width: 3px;
 
@@ -75,7 +74,6 @@
   --space-5: 24px;
   --space-6: 32px;
   --workspace-width: 1440px;
-  --workspace-bar: 76px;
   --workspace-rail: 320px;
   --workspace-row: 68px;
   --workspace-detail: 520px;
@@ -92,7 +90,6 @@
   --wish-empty-icon: 36px;
   --wish-checkbox-size: 20px;
   --wish-page-width: 640px;
-
 }
 
 /* --- Light (default) -------------------------------------------------------- */
@@ -133,7 +130,6 @@
   --shadow-pop: 0 18px 48px rgba(60, 40, 20, 0.16);
 
   --backdrop: rgba(40, 26, 14, 0.4);
-
 }
 
 /* --- Dark ----------------------------------------------------------------- */
@@ -173,5 +169,4 @@
   --shadow-pop: 0 18px 48px rgba(0, 0, 0, 0.55);
 
   --backdrop: rgba(8, 6, 4, 0.62);
-
 }

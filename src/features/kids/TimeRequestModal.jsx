@@ -5,10 +5,12 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import Modal from '../../components/Modal.jsx'
 import { useScreenTime } from '../../state/ScreenTimeContext.jsx'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
 const OPTIONS_MIN = [5, 10, 15, 30]
 
-export default function TimeRequestModal({ kid, onClose, showNotice }) {
+export default function TimeRequestModal({ kid, onClose }) {
+  const showNotice = useNotice()
   const { addRequest } = useScreenTime()
   const [mins, setMins] = useState(10)
   const [busy, setBusy] = useState(false)
@@ -17,11 +19,11 @@ export default function TimeRequestModal({ kid, onClose, showNotice }) {
     setBusy(true)
     try {
       await addRequest(kid, mins * 60000)
-      showNotice?.(`Sent a request for ${mins} more minutes.`, 'success')
+      showNotice(`Sent a request for ${mins} more minutes.`, 'success')
       onClose()
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't send that request.", 'error')
+      showNotice("Couldn't send that request.", 'error')
       setBusy(false)
     }
   }
@@ -36,13 +38,7 @@ export default function TimeRequestModal({ kid, onClose, showNotice }) {
       <label className="field-label">How much extra time?</label>
       <div className="time-pick-row">
         {OPTIONS_MIN.map((m) => (
-          <button
-            key={m}
-            type="button"
-            className="chip"
-            data-active={mins === m}
-            onClick={() => setMins(m)}
-          >
+          <button key={m} type="button" className="chip" data-active={mins === m} onClick={() => setMins(m)}>
             +{m} min
           </button>
         ))}

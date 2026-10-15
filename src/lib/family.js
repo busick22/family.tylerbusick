@@ -3,19 +3,36 @@
 // escapes text automatically); everything else is a straight port so the
 // data shapes stay compatible with the existing Firestore documents.
 
-export const DAYS = [
-  'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-  'Thursday', 'Friday', 'Saturday',
-]
+export const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 export const DAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 export const MONTHS_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ]
 
 // Canonical list of kids — single source of truth.
@@ -25,40 +42,25 @@ export const KIDS = ['Liam', 'Livi', 'Spencer']
 export const MOVIE_TURN_ORDER = ['Livi', 'Spencer', 'Liam', 'Parents']
 export const DOG_FEED_TURN_ORDER = ['Livi', 'Spencer', 'Liam']
 
-// Default human-readable status shown on the home kid cards.
-export const KID_DEFAULT_STATUS = { Liam: 'Age 10', Livi: 'Age 8', Spencer: 'Age 5' }
-
 // Emoji avatar shown on the home kid cards (was hard-coded in index.html).
 export const KID_EMOJI = { Liam: '🧑‍🦰', Livi: '👩‍🦰', Spencer: '👦🏼' }
 
 // "Kids" is the assignee value meaning "any kid" — used by the planner's
 // kid-task stacks alongside the three individual kids.
 export const ANY_KID_ASSIGNEE = 'Kids'
-export const KID_STACK_ASSIGNEES = [...KIDS, ANY_KID_ASSIGNEE]
-export const KID_STACK_EMOJI = { ...KID_EMOJI, Kids: '👪' }
-export const KID_STACK_LABEL = { Liam: 'Liam', Livi: 'Livi', Spencer: 'Spencer', Kids: 'Any kid' }
+const KID_STACK_ASSIGNEES = [...KIDS, ANY_KID_ASSIGNEE]
 
 // Tasks assigned to a kid stack stay off the parent task board.
 export function isKidStackAssignee(name) {
   return KID_STACK_ASSIGNEES.includes(normalizeMemberName(name))
 }
 
-export const MEMBER_COLORS = [
-  '#4a7c59', '#3a6ea5', '#c9622f', '#7c4fa0',
-  '#b5732a', '#2a7c7c', '#a04f4f',
-]
+export const MEMBER_COLORS = ['#4a7c59', '#3a6ea5', '#c9622f', '#7c4fa0', '#b5732a', '#2a7c7c', '#a04f4f']
 
 /* ── DATES ─────────────────────────────────────────────── */
 export function todayStr() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-export function greeting(date = new Date()) {
-  const h = date.getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
 }
 
 export function formatTime(timeStr) {
@@ -99,7 +101,7 @@ export function normalizeAssignment(item) {
 }
 
 /* ── TURN INDEXING ─────────────────────────────────────── */
-export function normalizeTurnIndex(value, order) {
+function normalizeTurnIndex(value, order) {
   const n = Number(value)
   if (!Number.isFinite(n)) return 0
   const idx = Math.trunc(n)

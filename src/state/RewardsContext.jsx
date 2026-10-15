@@ -2,34 +2,23 @@
 // cost, archived, createdAt }. Removal archives instead of deleting so
 // past redemptions keep their history.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import {
-  collection, addDoc, updateDoc, doc, onSnapshot, serverTimestamp,
-} from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useCollection } from './useCollection.js'
 
 const RewardsContext = createContext(null)
 
 export function RewardsProvider({ children }) {
   const { user } = useAuth()
-  const [rewards, setRewards] = useState([])
-
-  useEffect(() => {
-    if (!user) {
-      setRewards([])
-      return undefined
-    }
-    return onSnapshot(
-      collection(db, 'rewards'),
-      (snap) => setRewards(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-      (err) => console.error('Rewards listener failed:', err),
-    )
-  }, [user])
+  const { items: rewards, loading, error } = useCollection(user, 'rewards', 'rewards')
 
   const value = useMemo(
     () => ({
       rewards,
+      loading,
+      error,
       activeRewards: rewards.filter((r) => !r.archived),
 
       async addReward(name, cost) {
@@ -45,7 +34,7 @@ export function RewardsProvider({ children }) {
         await updateDoc(doc(db, 'rewards', id), { archived: true })
       },
     }),
-    [rewards],
+    [rewards, loading, error],
   )
 
   return <RewardsContext.Provider value={value}>{children}</RewardsContext.Provider>

@@ -2,45 +2,34 @@
 // settings/movieTurn and settings/dogFeedTurn, each { currentIndex, order,
 // updatedAt, updatedBy }.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { doc, onSnapshot, runTransaction, serverTimestamp } from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { doc, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useDocument } from './useCollection.js'
 import { MOVIE_TURN_ORDER, DOG_FEED_TURN_ORDER, resolveTurnIndex } from '../lib/family.js'
 
 const TurnsContext = createContext(null)
 
 export function TurnsProvider({ children }) {
   const { user } = useAuth()
-  const [movieTurnIndex, setMovieTurnIndex] = useState(0)
-  const [dogFeedTurnIndex, setDogFeedTurnIndex] = useState(0)
-
-  useEffect(() => {
-    if (!user) {
-      setMovieTurnIndex(0)
-      setDogFeedTurnIndex(0)
-      return undefined
-    }
-    const unsubMovie = onSnapshot(
-      doc(db, 'settings', 'movieTurn'),
-      (snap) => setMovieTurnIndex(resolveTurnIndex(snap.exists() ? snap.data() : null, MOVIE_TURN_ORDER)),
-      (err) => console.error('Movie turn listener failed:', err),
-    )
-    const unsubDog = onSnapshot(
-      doc(db, 'settings', 'dogFeedTurn'),
-      (snap) => setDogFeedTurnIndex(resolveTurnIndex(snap.exists() ? snap.data() : null, DOG_FEED_TURN_ORDER)),
-      (err) => console.error('Dog-feed turn listener failed:', err),
-    )
-    return () => {
-      unsubMovie()
-      unsubDog()
-    }
-  }, [user])
+  const movie = useDocument(user, 'settings', 'movieTurn', 'the movie-night turn', (snap) =>
+    resolveTurnIndex(snap.exists() ? snap.data() : null, MOVIE_TURN_ORDER),
+  )
+  const dog = useDocument(user, 'settings', 'dogFeedTurn', 'the dog-feeding turn', (snap) =>
+    resolveTurnIndex(snap.exists() ? snap.data() : null, DOG_FEED_TURN_ORDER),
+  )
+  const movieTurnIndex = movie.data ?? 0
+  const dogFeedTurnIndex = dog.data ?? 0
+  const loading = movie.loading || dog.loading
+  const error = movie.error || dog.error
 
   const value = useMemo(
     () => ({
       movieTurnIndex,
       dogFeedTurnIndex,
+      loading,
+      error,
       moviePicker: MOVIE_TURN_ORDER[movieTurnIndex] || MOVIE_TURN_ORDER[0],
       dogFeeder: DOG_FEED_TURN_ORDER[dogFeedTurnIndex] || DOG_FEED_TURN_ORDER[0],
 
@@ -51,7 +40,16 @@ export function TurnsProvider({ children }) {
           const snap = await transaction.get(ref)
           const current = resolveTurnIndex(snap.exists() ? snap.data() : null, MOVIE_TURN_ORDER)
           const nextIndex = (current + 1) % MOVIE_TURN_ORDER.length
-          transaction.set(ref, { currentIndex: nextIndex, order: MOVIE_TURN_ORDER, updatedAt: serverTimestamp(), updatedBy: who }, { merge: true })
+          transaction.set(
+            ref,
+            {
+              currentIndex: nextIndex,
+              order: MOVIE_TURN_ORDER,
+              updatedAt: serverTimestamp(),
+              updatedBy: who,
+            },
+            { merge: true },
+          )
           return MOVIE_TURN_ORDER[nextIndex]
         })
       },
@@ -63,12 +61,21 @@ export function TurnsProvider({ children }) {
           const snap = await transaction.get(ref)
           const current = resolveTurnIndex(snap.exists() ? snap.data() : null, DOG_FEED_TURN_ORDER)
           const nextIndex = (current + 1) % DOG_FEED_TURN_ORDER.length
-          transaction.set(ref, { currentIndex: nextIndex, order: DOG_FEED_TURN_ORDER, updatedAt: serverTimestamp(), updatedBy: who }, { merge: true })
+          transaction.set(
+            ref,
+            {
+              currentIndex: nextIndex,
+              order: DOG_FEED_TURN_ORDER,
+              updatedAt: serverTimestamp(),
+              updatedBy: who,
+            },
+            { merge: true },
+          )
           return DOG_FEED_TURN_ORDER[nextIndex]
         })
       },
     }),
-    [movieTurnIndex, dogFeedTurnIndex, user],
+    [movieTurnIndex, dogFeedTurnIndex, user, loading, error],
   )
 
   return <TurnsContext.Provider value={value}>{children}</TurnsContext.Provider>

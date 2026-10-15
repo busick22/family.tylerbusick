@@ -1,42 +1,30 @@
-// "Who are you?" — kid picker plus a Parent tab with a 4-tile admin
-// dashboard (Members, Screen Time, Points, Pending requests).
+// "Who are you?" — the kid picker. Each card shows how much that child has
+// left to do today.
+//
+// This used to be two pages in one file, switched by a `parentOnly` prop:
+// the picker, and the grown-ups' settings screen. They shared no logic, only
+// a file, and each one paid to compute the other's data on every render.
+// Family settings is now FamilySettingsPage.jsx.
 
-import { Link, useSearchParams } from 'react-router-dom'
-import { useState } from 'react'
-import { Users, Clock, Star, Inbox } from 'lucide-react'
-import Notice, { useNotice } from '../../components/Notice.jsx'
+import { Link } from 'react-router-dom'
 import { useChores } from '../../state/ChoresContext.jsx'
 import { useTodos } from '../../state/TodosContext.jsx'
-import { useMembers } from '../../state/MembersContext.jsx'
-import { useKidPoints } from '../../state/KidPointsContext.jsx'
-import { useScreenTime } from '../../state/ScreenTimeContext.jsx'
-import { DAYS, KIDS, formatMs } from '../../lib/family.js'
-import './kids.css'
+import { DAYS, KIDS } from '../../lib/family.js'
 import { kidTheme } from '../../lib/kidThemes.js'
-import { assignedOpenTasksFor, isOverdueChore, kidBalance, pendingItems } from './kidsUtils.js'
-import MembersModal from './admin/MembersModal.jsx'
-import ScreenTimeAdminModal from './admin/ScreenTimeAdminModal.jsx'
-import PointsAdminModal from './admin/PointsAdminModal.jsx'
-import PendingModal from './admin/PendingModal.jsx'
-import TurnControls from '../planning/TurnControls.jsx'
+import { assignedOpenTasksFor, isOverdueChore } from './kidsUtils.js'
+import './kids.css'
 
-export default function KidSelector({ onSelectKid, parentOnly = false }) {
-  const section = parentOnly ? 'parent' : 'kids'
-  const [notice, showNotice] = useNotice()
-  const [params] = useSearchParams()
-  const [openTile, setOpenTile] = useState(parentOnly && params.get('open') === 'pending' ? 'pending' : null)
-
+export default function KidSelector({ onSelectKid }) {
   const { chores } = useChores()
   const { todos } = useTodos()
-  const { members } = useMembers()
-  const { kidPoints } = useKidPoints()
-  const { requests, viewFor } = useScreenTime()
 
-  const dayName = DAYS[new Date().getDay()]
   const todayIndex = new Date().getDay()
+  const dayName = DAYS[todayIndex]
 
   function badgeFor(name) {
-    const myChores = chores.filter((c) => c.assignee === name && (c.day === dayName || isOverdueChore(c, todayIndex)))
+    const myChores = chores.filter(
+      (c) => c.assignee === name && (c.day === dayName || isOverdueChore(c, todayIndex)),
+    )
     const myTasks = assignedOpenTasksFor(todos, name)
     const openChores = myChores.filter((c) => !c.done)
     const total = openChores.length + myTasks.length
@@ -46,95 +34,41 @@ export default function KidSelector({ onSelectKid, parentOnly = false }) {
     return null
   }
 
-  const pendingCount = pendingItems(kidPoints, requests).length
-  const screenTimeSummary = (() => {
-    const running = KIDS.map((n) => ({ name: n, view: viewFor(n) })).find((s) => s.view.running)
-    if (running) return `${running.name}: ${formatMs(Math.max(0, running.view.remaining))} left`
-    const expired = KIDS.map((n) => ({ name: n, view: viewFor(n) })).find((s) => s.view.remaining <= 0)
-    if (expired) return `${expired.name}: time's up`
-    const totalMin = KIDS.reduce((s, n) => s + Math.round(Math.max(0, viewFor(n).remaining) / 60000), 0)
-    return `${totalMin} min left across kids`
-  })()
-
   return (
-    <div className="page page-enter" data-page="kids">
-      <Notice notice={notice} />
+    <div className="page page-enter">
       <header className="page-head">
-        <h1 className="page-title">{parentOnly ? 'Family settings' : 'Kids'}</h1>
+        <h1 className="page-title">Kids</h1>
       </header>
 
-
-      {section === 'kids' && (
-        <div className="kid-select-shell">
-          <div className="kid-btns">
-            {KIDS.map((name) => {
-              const theme = kidTheme(name)
-              const badge = badgeFor(name)
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  className="kid-btn"
-                  style={{ '--kid-accent': theme.color }}
-                  onClick={() => onSelectKid(name)}
-                  aria-label={`Open ${name}'s dashboard`}
-                >
-                  <span className="kid-btn-emoji">{theme.emoji}</span>
-                  <span className="kid-btn-info">
-                    <span className="kid-btn-name">{name}</span>
-                  </span>
-                  {badge && <span className={`kid-btn-badge ${badge.cls}`}>{badge.text}</span>}
-                </button>
-              )
-            })}
-          </div>
+      <div className="kid-select-shell">
+        <div className="kid-btns">
+          {KIDS.map((name) => {
+            const theme = kidTheme(name)
+            const badge = badgeFor(name)
+            return (
+              <button
+                key={name}
+                type="button"
+                className="kid-btn"
+                style={{ '--kid-accent': theme.color }}
+                onClick={() => onSelectKid(name)}
+                aria-label={`Open ${name}'s dashboard`}
+              >
+                <span className="kid-btn-emoji">{theme.emoji}</span>
+                <span className="kid-btn-info">
+                  <span className="kid-btn-name">{name}</span>
+                </span>
+                {badge && <span className={`kid-btn-badge ${badge.cls}`}>{badge.text}</span>}
+              </button>
+            )
+          })}
         </div>
-      )}
+      </div>
 
-      {section === 'parent' && (
-        <div className="parent-tile-grid">
-          <button type="button" className="parent-tile" onClick={() => setOpenTile('members')}>
-            <Users aria-hidden="true" className="parent-tile-icon" />
-            <span className="parent-tile-name">Members</span>
-            <span className="parent-tile-stat">
-              {members.length ? `${members.length} ${members.length === 1 ? 'member' : 'members'}` : 'Add first member'}
-            </span>
-          </button>
-          <button type="button" className="parent-tile" onClick={() => setOpenTile('screen-time')}>
-            <Clock aria-hidden="true" className="parent-tile-icon" />
-            <span className="parent-tile-name">Screen Time</span>
-            <span className="parent-tile-stat">{screenTimeSummary}</span>
-          </button>
-          <button type="button" className="parent-tile" onClick={() => setOpenTile('points')}>
-            <Star aria-hidden="true" className="parent-tile-icon" />
-            <span className="parent-tile-name">Points</span>
-            <span className="parent-tile-stat">
-              {KIDS.map((n) => `${n}: ${kidBalance(kidPoints, n)}`).join(' · ')}
-            </span>
-          </button>
-          <button
-            type="button"
-            className="parent-tile"
-            data-urgent={pendingCount > 0}
-            onClick={() => setOpenTile('pending')}
-          >
-            <Inbox aria-hidden="true" className="parent-tile-icon" />
-            <span className="parent-tile-name">Requests</span>
-            <span className="parent-tile-stat">
-              {pendingCount ? `${pendingCount} ${pendingCount === 1 ? 'request' : 'requests'} waiting` : 'No requests'}
-            </span>
-          </button>
-        </div>
-      )}
-
-      {!parentOnly && <Link className="kids-parent-entry" to="/parent"><strong>For the grown-ups</strong><span>Requests, points & screen time →</span></Link>}
-      {parentOnly && <TurnControls showNotice={showNotice} />}
-      {openTile === 'members' && <MembersModal onClose={() => setOpenTile(null)} showNotice={showNotice} />}
-      {openTile === 'screen-time' && (
-        <ScreenTimeAdminModal onClose={() => setOpenTile(null)} showNotice={showNotice} />
-      )}
-      {openTile === 'points' && <PointsAdminModal onClose={() => setOpenTile(null)} showNotice={showNotice} />}
-      {openTile === 'pending' && <PendingModal onClose={() => setOpenTile(null)} showNotice={showNotice} />}
+      <Link className="kids-parent-entry" to="/parent">
+        <strong>For the grown-ups</strong>
+        <span>Requests, points & screen time →</span>
+      </Link>
     </div>
   )
 }

@@ -31,9 +31,15 @@ const firebaseConfig = {
 
 // Local verification only: demo IDs prevent tests from touching family data.
 const useEmulators = import.meta.env.DEV && import.meta.env.VITE_FIREBASE_EMULATORS === 'true'
-const app = initializeApp(useEmulators ? {
-  apiKey: 'demo-family-wishes', projectId: 'demo-family-wishes', authDomain: 'localhost',
-} : firebaseConfig)
+const app = initializeApp(
+  useEmulators
+    ? {
+        apiKey: 'demo-family-wishes',
+        projectId: 'demo-family-wishes',
+        authDomain: 'localhost',
+      }
+    : firebaseConfig,
+)
 
 export const auth = getAuth(app)
 export const db = getFirestore(app)

@@ -1,0 +1,10 @@
+dist
+dev-dist
+node_modules
+package-lock.json
+public/minecraftia
+*.rules
+
+# Docs are hand-wrapped at ~76 columns for readability in a terminal.
+# Let Prettier own code, not prose.
+*.md

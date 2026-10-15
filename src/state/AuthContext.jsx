@@ -16,8 +16,7 @@ const AuthContext = createContext(null)
 
 const FRIENDLY_ERRORS = {
   'auth/popup-closed-by-user': 'The Google window closed before finishing.',
-  'auth/popup-blocked':
-    'The Google window was blocked. Allow popups for this site, then try again.',
+  'auth/popup-blocked': 'The Google window was blocked. Allow popups for this site, then try again.',
   'auth/operation-not-allowed':
     'Google sign-in isn’t enabled yet (Firebase Console → Authentication → Sign-in method).',
 }

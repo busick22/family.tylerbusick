@@ -64,26 +64,43 @@ Kids: `Liam` (10), `Livi` (8), `Spencer` (5) — see `src/lib/family.js`.
 - `src/firebase.js` — the only file with the Firebase config.
 - `src/state/` — one context per concern: `AuthContext` (Google sign-in),
   `SettingsContext` (theme — **localStorage only**, not per-user Firestore,
-  since it's a device preference for the shared tablet), and one context per
-  Firestore collection (`MembersContext`, `MealsContext`, `TodosContext`,
-  `ChoresContext`, `EventsContext`, `GroceryContext`, `TurnsContext`).
+  since it's a device preference for the shared tablet), `NoticeContext` (the
+  app's single toast — call `useNotice()` anywhere, never pass `showNotice`
+  as a prop), and one context per Firestore collection (`MembersContext`,
+  `MealsContext`, `TodosContext`, `ChoresContext`, `EventsContext`,
+  `GroceryContext`, `TurnsContext`, ...).
+- **`src/state/useCollection.js` — the only place that opens an
+  `onSnapshot`.** `useCollection` / `useDocument` / `useLiveData` handle the
+  signed-out case, the mapping and the failure message. **Every context
+  returns `{ ...data, loading, error }`** — `error` is always a string, `''`
+  when fine. A new context copies an existing one; it should never hand-roll
+  a listener, and it should never report a failure only to the console (a
+  silent failure is indistinguishable from an empty list).
 - `src/lib/family.js` — shared constants (`KIDS`, turn orders, colors) and
   helpers (dates, names, turn-index math) — ported from the old
   `shared-utils.js`.
 - `src/lib/errorReporter.js` — ported `window.onerror` → Firestore reporter.
-- `src/app/` — the shell: `AppShell.jsx` (a top app bar on tablet/desktop,
-  top bar + bottom tab dock on phones, switched by CSS media query, never JS
-  resize logic), `BottomNav.jsx`, `AccountMenu.jsx`, `Brand.jsx`, `nav.js`
-  (the five destinations). The old desktop `Sidebar.jsx` was removed by the
-  planning redesign.
-- `src/features/<area>/` — `auth` (SignInPage), `planning` (Week, Calendar,
-  To-dos — the redesign's own pages), `meals`, `kids`, and `planner`, which
-  is now only the shared calendar/event/assignee components the planning
-  pages reuse, not a page of its own.
+- `src/app/` — the shell: `AppShell.jsx` (a rail on tablet/desktop, top bar +
+  bottom tab dock on phones, switched by CSS media query, never JS resize
+  logic), `BottomNav.jsx`, `AccountMenu.jsx`, `Brand.jsx`, `CaptureMenu.jsx`,
+  `nav.js` (the five destinations), and `shell.css`. **`shell.css` is the one
+  app-frame stylesheet** — it replaced three stacked files whose rules each
+  overrode the previous via a separate class (`shell planning-shell
+  home-shell`) on the same element. There is one `.shell` scope now; don't
+  add a second.
+- `src/features/<area>/` — `auth` (SignInPage), `home`, `planning` (Week,
+  Month, To-dos, plus the calendar/event/assignee components they share),
+  `meals`, `kids`. The old `planner/` folder was folded into `planning/`;
+  `planner.css` became `planning/calendar.css`.
 - `src/styles/tokens.css` + `base.css` — every color/size/timing, plus the
-  shared component kit (`.btn`, `.card`, `.modal`, `.chip`, ...).
-- `src/components/` — small shared pieces: `Modal.jsx`, `Notice.jsx`
-  (toast), `ComingSoon.jsx`.
+  shared component kit (`.btn`, `.card`, `.modal`, `.chip`, ...) and the
+  workspace primitives (`.workspace-surface`, `.work-row`, `.section-nav`,
+  the empty states) that four features render.
+- `src/components/` — pieces shared across features: `Modal.jsx` (dialog +
+  focus trap), `QuickCapture.jsx` + `quickCapture.css`.
+- **A feature's stylesheet is imported by that feature, never by another
+  one.** If two features need the same rule, it moves to `base.css`. There
+  are currently zero cross-feature CSS imports; keep it that way.
 - `public/` — **only** true static passthrough assets now: `icons/`,
   `favicon.ico`, `images/`, `minecraftia/` (a pixel font used by the old
   kids page's Minecraft theme — still needed once Kids is ported),
@@ -104,25 +121,37 @@ kid-facing app:
 
 - **Light theme by default** (Accomplish/Budget default dark) — reads
   bright and cheerful on a counter-mounted tablet, not like a nighttime
-  dashboard. Dark theme is fully built too (toggle in the sidebar / mobile
-  account menu), just not the default.
+  dashboard. Dark theme is fully built too (toggle in the account menu), just
+  not the default.
 - **Bigger everything:** type scale, radii, and a `--tap: 48px` minimum
-  touch-target size used throughout (buttons, icon buttons, fields, sidebar
+  touch-target size used throughout (buttons, icon buttons, fields, nav
   links) — kids tap this, nothing should be fiddly.
-- **Per-area accents** instead of one brand color: the planning surfaces
-  (Week / Calendar / To-dos) share the base `--accent` because they are one
-  place, and only Meals (tomato red) and Kids (purple) get their own. The
-  base accent is a deep brick `#a4482b` rather than the original bright
-  orange, which failed contrast for text on white.
-- Warm brown/cream palette (vs. Accomplish's navy/cyan, Budget's forest/
-  green) — closest to the old static site's terracotta identity, just
-  reorganized into the token architecture.
+- **One evergreen action color, with two per-area exceptions.** Home, Plan
+  and Lists all share the base `--accent`, an evergreen `#35634c`, because
+  they are one place. Only Meals (`--accent-meals`, a warm brown `#8a5327`)
+  and Kids (`--accent-kids`, purple `#6f5594`) keep their own. The dinner
+  note has its own warm cream pair (`--dinner-bg` / `--dinner-text`).
+- Green-and-white palette on light warm neutrals (vs. Accomplish's
+  navy/cyan, Budget's forest/green). **This replaced the earlier terracotta
+  identity** — the app was warm brown/cream with a brick `#a4482b` accent
+  until the 2026-09-05 home redesign. If you find a doc or comment that
+  still says "brick", "terracotta", or "tomato red", it is stale; the tokens
+  in `tokens.css` are the source of truth.
 
 ## Commands
 
 - `npm install` then `npm run dev` → http://localhost:5175
 - `npm run lint` → check code style
-- `npm test` → unit tests (dates, work grouping, grocery merge, wish lists)
+- `npm run format` → **Prettier, the formatter of record.** Run it before
+  committing. Config is `.prettierrc` (no semicolons, single quotes, 110
+  columns) chosen to match what the codebase already did.
+  `npm run format:check` just reports.
+- `npm test` → everything below except the rules suite
+  - `npm run test:unit` → pure functions (dates, work grouping, grocery
+    merge, wish lists), under `node --test`
+  - `npm run test:components` → Vitest + Testing Library in jsdom
+    (`tests/*.test.jsx`): the dialog focus trap, WorkRow's optimistic
+    completion and rollback, the Lists empty/loading/error states
 - `npm run test:rules` → Firestore rules + transaction tests against a local
   emulator (never against family data)
 - `npm run build` → produce `dist/`
@@ -141,18 +170,81 @@ kid-facing app:
   a `<Area>Page.jsx` that reads from the relevant `state/*Context.jsx`
   hook(s), plus a co-located `<area>.css`.
 - New Firestore collections need a matching `state/*Context.jsx` (copy an
-  existing one — `onSnapshot`, gate on `user`, normalize on read).
+  existing one — `useCollection`/`useDocument` from `state/useCollection.js`,
+  then expose `loading` and `error` on the value object). Never write a bare
+  `onSnapshot` in a context.
 - **New colors/sizes only via `tokens.css` variables** — that's what keeps
   both themes and the page accents working everywhere.
-- **Each feature's stylesheet owns that feature's whole appearance.** Don't
-  reach into another feature from `planning.css`; the only rules scoped to
-  `.planning-shell` are deliberate overrides of *shared* component classes
-  (`.card`, `.seg-tabs`, `.page-head`), scoped so sign-in and the public
-  wish-list page keep the original styling.
+- **Each feature's stylesheet owns that feature's whole appearance**, and is
+  imported by that feature's own components. A rule two features need belongs
+  in `base.css`. The shell's overrides of shared component classes (`.card`,
+  `.seg-tabs`, `.page-head`) are scoped to `.shell` so sign-in and the public
+  wish-list page — which render outside it — keep the original styling.
+- **Toasts:** `const showNotice = useNotice()` from
+  `state/NoticeContext.jsx`. Don't render a toast component per page and
+  don't pass `showNotice` down as a prop.
 - `firestore.rules` is untouched and should stay that way unless the data
   model genuinely changes — it's shared, tested against real family data.
 
 ## Current focus
+
+- **2026-09-07 — AI-slop cleanup pass on `codex/family-home-redesign`.**
+  Front end, docs and tooling only. **No Firestore schema, rules, Auth, or
+  data changes**, and nothing was deployed. The redesign's behavior is
+  unchanged; this removed the residue of three redesigns stacked on each
+  other. Verified: lint clean, 8 unit + 15 component tests pass, production
+  build succeeds. **Not verified — needs you:** none of this ran against real
+  family data or a real Google sign-in. Worth a click-through on the preview,
+  especially anything visual, since the CSS was heavily reorganized.
+
+  1. **Fixed a visible bug.** The Lists empty state rendered a stray `0`
+     (`{all.length && …}` renders the number 0, since 0 is falsy but is still
+     a valid React child). A test now fails if it comes back.
+  2. **Corrected the palette facts above.** This doc still described a brick
+     `#a4482b` / warm-brown identity; the app has been evergreen `#35634c`
+     on green-and-white since the home redesign.
+  3. **Added Prettier** (`.prettierrc`, `npm run format`) and ran it once.
+     The newest files had been golfed onto single lines up to 692 characters,
+     while older ones were normally formatted; longest line is now ~138.
+     This is what made the `0` bug invisible.
+  4. **Deleted dead code:** 56 orphaned CSS rules (~40 classes), 2 dead
+     tokens, 6 unused JS exports, and 14 of 20 per-kid `KID_THEMES` fields
+     (see the note in `lib/kidThemes.js` — restoring that voice is a design
+     decision, not a revert).
+  5. **Collapsed the structure.** `features/planner/` folded into
+     `features/planning/`; the three stacked shell stylesheets became one
+     `app/shell.css` with a single `.shell` scope; all five cross-feature CSS
+     imports removed (`QuickCapture` moved to `components/`, shared calendar
+     and turn rules moved to where they belong); `/planner` no longer
+     redirects to a redirect.
+  6. **One listener implementation.** `state/useCollection.js` replaced 14
+     hand-rolled `onSnapshot` blocks, and **every context now reports
+     `loading` and `error`** — five did before, so a failure in any of the
+     other nine looked exactly like an empty list. Home now watches all seven
+     contexts it reads instead of five. ScreenTime went from four listeners
+     to two. The provider staircase is a list now, not 13 levels of nesting.
+     *This supersedes the stashed `useCollection` refactor noted in the
+     2026-08-02 entry below* — that stash targets `main`, references the
+     deleted `Sidebar.jsx`, and has no loading/error. It can be dropped.
+  7. **Split `KidSelector`**, which was the kid picker and the Family
+     settings page in one file behind a `parentOnly` flag, each computing the
+     other's data on every render. Family settings is now
+     `features/kids/FamilySettingsPage.jsx`. Added `NoticeContext`: one
+     toast for the app instead of 10 per-page copies (all `position: fixed`
+     at the same coordinates) and `showNotice` threaded through 29 files.
+  8. **Added component tests** — Vitest + Testing Library, 15 tests over the
+     dialog focus trap, WorkRow's optimistic completion/rollback, and the
+     Lists empty/loading/error states. `tests/setup.js` shims
+     `getClientRects` because jsdom has no layout engine; that means the
+     focus trap's *visibility* filtering is still only verifiable in a
+     browser.
+
+  **Still open, deliberately not done:** ~300 hardcoded px/rem values remain
+  in `kids.css` and `meals.css` (convert opportunistically); four dead
+  `className` strings remain on structural wrappers (`recipe-view`,
+  `kid-day-aside`, `ppt-name`, `ppt-val`); and `docs/family-home-redesign.md`
+  still overlaps this section.
+
 
 - **2026-09-05 — Family home redesign, separate preview.** Owner requested a
   complete rethink without preference questions. Work is on

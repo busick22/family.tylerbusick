@@ -2,7 +2,19 @@ import { readFileSync } from 'node:fs'
 import { after, before, beforeEach, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing'
-import { collection, collectionGroup, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from 'firebase/firestore'
+import {
+  collection,
+  collectionGroup,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+  writeBatch,
+} from 'firebase/firestore'
 
 const SHARED = 'a'.repeat(20)
 const PRIVATE = 'b'.repeat(20)
@@ -12,8 +24,22 @@ let parent
 let visitor
 let stranger
 
-const listData = (extra = {}) => ({ kid: 'Liam', name: 'Birthday', shared: false, archived: false, createdAt: serverTimestamp(), ...extra })
-const itemData = (extra = {}) => ({ name: 'Building set', link: 'https://example.com/toy', notes: 'Blue', price: 19.99, createdAt: serverTimestamp(), ...extra })
+const listData = (extra = {}) => ({
+  kid: 'Liam',
+  name: 'Birthday',
+  shared: false,
+  archived: false,
+  createdAt: serverTimestamp(),
+  ...extra,
+})
+const itemData = (extra = {}) => ({
+  name: 'Building set',
+  link: 'https://example.com/toy',
+  notes: 'Blue',
+  price: 19.99,
+  createdAt: serverTimestamp(),
+  ...extra,
+})
 const list = (db, id = SHARED) => doc(db, 'wishLists', id)
 const item = (db, id = SHARED, itemId = 'toy') => doc(db, 'wishLists', id, 'items', itemId)
 const purchase = (db, id = SHARED, itemId = 'toy') => doc(db, 'wishLists', id, 'purchases', itemId)
@@ -21,21 +47,37 @@ const purchase = (db, id = SHARED, itemId = 'toy') => doc(db, 'wishLists', id, '
 before(async () => {
   env = await initializeTestEnvironment({
     projectId: 'demo-family-wishes',
-    firestore: { host: '127.0.0.1', port: 8088, rules: readFileSync(new URL('../firestore.shared.rules', import.meta.url), 'utf8') },
+    firestore: {
+      host: '127.0.0.1',
+      port: 8088,
+      rules: readFileSync(new URL('../firestore.shared.rules', import.meta.url), 'utf8'),
+    },
   })
-  parent = env.authenticatedContext('parent', { email: 'busick22@gmail.com', email_verified: true }).firestore()
+  parent = env
+    .authenticatedContext('parent', { email: 'busick22@gmail.com', email_verified: true })
+    .firestore()
   visitor = env.unauthenticatedContext().firestore()
-  stranger = env.authenticatedContext('stranger', { email: 'other@example.com', email_verified: true }).firestore()
+  stranger = env
+    .authenticatedContext('stranger', { email: 'other@example.com', email_verified: true })
+    .firestore()
 })
 
 beforeEach(async () => {
   await env.clearFirestore()
   await env.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore()
-    for (const [id, extra] of [[SHARED, { shared: true }], [PRIVATE, {}], [REMOVED, { archived: true }]]) {
+    for (const [id, extra] of [
+      [SHARED, { shared: true }],
+      [PRIVATE, {}],
+      [REMOVED, { archived: true }],
+    ]) {
       await setDoc(list(db, id), listData(extra))
       await setDoc(item(db, id), itemData())
-      await setDoc(purchase(db, id), { purchased: true, purchasedBy: 'Grandma', updatedAt: serverTimestamp() })
+      await setDoc(purchase(db, id), {
+        purchased: true,
+        purchasedBy: 'Grandma',
+        updatedAt: serverTimestamp(),
+      })
     }
     await setDoc(doc(db, 'todos', 'family-task'), { text: 'Private task' })
     await setDoc(doc(db, 'users', 'parent', 'tasks', 'one'), { text: 'Dashboard task' })
@@ -55,7 +97,11 @@ test('a signed-out relative can open one enabled list and its public items', asy
 
 test('public visitors cannot enumerate lists, even filtering for shared lists', async () => {
   await assertFails(getDocs(collection(visitor, 'wishLists')))
-  await assertFails(getDocs(query(collection(visitor, 'wishLists'), where('shared', '==', true), where('archived', '==', false))))
+  await assertFails(
+    getDocs(
+      query(collection(visitor, 'wishLists'), where('shared', '==', true), where('archived', '==', false)),
+    ),
+  )
   await assertFails(getDocs(collectionGroup(visitor, 'items')))
 })
 
@@ -92,7 +138,9 @@ test('family can create named lists, rename them, and add/edit wishes', async ()
   await assertSucceeds(updateDoc(list(parent, id), { name: 'Christmas ideas' }))
   await assertSucceeds(setDoc(item(parent, id), itemData({ price: null })))
   await assertSucceeds(updateDoc(item(parent, id), { price: 0, notes: 'Favorite color: red' }))
-  const result = await assertSucceeds(getDocs(query(collection(parent, 'wishLists'), where('archived', '==', false))))
+  const result = await assertSucceeds(
+    getDocs(query(collection(parent, 'wishLists'), where('archived', '==', false))),
+  )
   assert.equal(result.size, 3)
 })
 
@@ -108,7 +156,9 @@ test('public documents reject purchase fields and malformed content', async () =
 })
 
 test('unverified parent email cannot access private wishes or purchases', async () => {
-  const unverified = env.authenticatedContext('unverified', { email: 'busick22@gmail.com', email_verified: false }).firestore()
+  const unverified = env
+    .authenticatedContext('unverified', { email: 'busick22@gmail.com', email_verified: false })
+    .firestore()
   await assertFails(getDoc(list(unverified, PRIVATE)))
   await assertFails(getDoc(purchase(unverified)))
   await assertFails(updateDoc(item(unverified), { name: 'Oops' }))
@@ -132,9 +182,19 @@ test('removing a list disables sharing and rejects late edits or reopening', asy
 })
 
 test('parents can privately mark, attribute, and clear purchases', async () => {
-  await assertSucceeds(setDoc(purchase(parent), { purchased: true, purchasedBy: 'Aunt Amy', updatedAt: serverTimestamp() }))
-  await assertSucceeds(setDoc(purchase(parent), { purchased: false, purchasedBy: '', updatedAt: serverTimestamp() }))
-  await assertFails(setDoc(purchase(parent, SHARED, 'missing'), { purchased: true, purchasedBy: 'Grandma', updatedAt: serverTimestamp() }))
+  await assertSucceeds(
+    setDoc(purchase(parent), { purchased: true, purchasedBy: 'Aunt Amy', updatedAt: serverTimestamp() }),
+  )
+  await assertSucceeds(
+    setDoc(purchase(parent), { purchased: false, purchasedBy: '', updatedAt: serverTimestamp() }),
+  )
+  await assertFails(
+    setDoc(purchase(parent, SHARED, 'missing'), {
+      purchased: true,
+      purchasedBy: 'Grandma',
+      updatedAt: serverTimestamp(),
+    }),
+  )
 })
 
 test('wish removal atomically clears its purchase note', async () => {

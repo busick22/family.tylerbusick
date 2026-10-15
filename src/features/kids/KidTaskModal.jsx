@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import Modal from '../../components/Modal.jsx'
 import { todayStr } from '../../lib/family.js'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
-export default function KidTaskModal({ task, onClose, onSave, onDelete, showNotice }) {
+export default function KidTaskModal({ task, onClose, onSave, onDelete }) {
+  const showNotice = useNotice()
   const editing = Boolean(task?.id)
   const [text, setText] = useState(task?.text || '')
   const [dueDate, setDueDate] = useState(task?.dueDate || todayStr())
@@ -16,7 +18,7 @@ export default function KidTaskModal({ task, onClose, onSave, onDelete, showNoti
   async function save() {
     const trimmed = text.trim()
     if (!trimmed) {
-      showNotice?.('Add a task first.', 'error')
+      showNotice('Add a task first.', 'error')
       return
     }
     setBusy(true)
@@ -25,7 +27,7 @@ export default function KidTaskModal({ task, onClose, onSave, onDelete, showNoti
       onClose()
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't save that task.", 'error')
+      showNotice("Couldn't save that task.", 'error')
       setBusy(false)
     }
   }
@@ -41,7 +43,7 @@ export default function KidTaskModal({ task, onClose, onSave, onDelete, showNoti
       onClose()
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't delete that task.", 'error')
+      showNotice("Couldn't delete that task.", 'error')
       setBusy(false)
     }
   }
@@ -53,7 +55,9 @@ export default function KidTaskModal({ task, onClose, onSave, onDelete, showNoti
       </button>
       <h3>{editing ? 'Edit Task' : 'Add Task'}</h3>
 
-      <label className="field-label" htmlFor="kid-task-text">Task</label>
+      <label className="field-label" htmlFor="kid-task-text">
+        Task
+      </label>
       <input
         id="kid-task-text"
         className="field"
@@ -64,7 +68,9 @@ export default function KidTaskModal({ task, onClose, onSave, onDelete, showNoti
         onKeyDown={(e) => e.key === 'Enter' && save()}
       />
 
-      <label className="field-label" htmlFor="kid-task-due">Show On</label>
+      <label className="field-label" htmlFor="kid-task-due">
+        Show On
+      </label>
       <input
         id="kid-task-due"
         type="date"

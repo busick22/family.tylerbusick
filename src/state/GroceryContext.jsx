@@ -3,10 +3,11 @@
 // doc is rewritten on every change (same as the old app — the list is
 // small and this keeps every device in sync via the snapshot listener).
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useDocument } from './useCollection.js'
 
 const GroceryContext = createContext(null)
 
@@ -14,36 +15,30 @@ const EMPTY = { items: [], selectedDays: [] }
 
 export function GroceryProvider({ children }) {
   const { user } = useAuth()
-  const [grocery, setGrocery] = useState(EMPTY)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    setLoading(true)
-    setError('')
-    if (!user) {
-      setGrocery(EMPTY)
-      setLoading(false)
-      return undefined
-    }
-    return onSnapshot(
-      doc(db, 'grocery', 'current'),
-      (snap) => {
-        const data = snap.exists() ? snap.data() : EMPTY
-        setLoading(false)
-        setGrocery({
-          items: Array.isArray(data.items) ? data.items : [],
-          selectedDays: Array.isArray(data.selectedDays) ? data.selectedDays : [],
-        })
-      },
-      (err) => { console.error('Grocery listener failed:', err); setLoading(false); setError('Could not load groceries. Check your connection or sign in again.') },
-    )
-  }, [user])
+  const {
+    data: grocery,
+    loading,
+    error,
+  } = useDocument(
+    user,
+    'grocery',
+    'current',
+    'groceries',
+    (snap) => {
+      const data = snap.exists() ? snap.data() : EMPTY
+      return {
+        items: Array.isArray(data.items) ? data.items : [],
+        selectedDays: Array.isArray(data.selectedDays) ? data.selectedDays : [],
+      }
+    },
+    EMPTY,
+  )
 
   const value = useMemo(
     () => ({
       items: grocery.items,
-      loading, error,
+      loading,
+      error,
       selectedDays: grocery.selectedDays,
 
       async save(nextItems, nextSelectedDays) {

@@ -1,20 +1,48 @@
 import { useState } from 'react'
 import { useTurns } from '../../state/TurnsContext.jsx'
-// .parent-turns lives with the rest of the parent-page styling.
-import '../kids/kids.css'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
-export default function TurnControls({ showNotice }) {
+export default function TurnControls() {
+  const showNotice = useNotice()
   const turns = useTurns()
   const [confirm, setConfirm] = useState(null)
   const [busy, setBusy] = useState(false)
   async function advance(kind) {
     if (confirm !== kind) return setConfirm(kind)
     setBusy(true)
-    try { await (kind === 'movie' ? turns.advanceMovieTurn() : turns.advanceDogTurn()); setConfirm(null) }
-    catch { showNotice('Could not change the turn.', 'error') }
-    finally { setBusy(false) }
+    try {
+      await (kind === 'movie' ? turns.advanceMovieTurn() : turns.advanceDogTurn())
+      setConfirm(null)
+    } catch {
+      showNotice('Could not change the turn.', 'error')
+    } finally {
+      setBusy(false)
+    }
   }
-  return <section className="workspace-surface parent-turns"><div className="surface-heading"><h2>Whose turn?</h2></div>
-    {[['movie', 'Movie night', turns.moviePicker], ['dog', 'Dog feeding', turns.dogFeeder]].map(([kind, label, who]) => <div className="work-row" key={kind}><div className="work-edit"><strong>{label}</strong><small>{who}</small></div><button className="btn" disabled={busy} onClick={() => advance(kind)}>{confirm === kind ? 'Confirm next person' : 'Next person'}</button>{confirm === kind && <button className="btn btn-ghost" onClick={() => setConfirm(null)}>Cancel</button>}</div>)}
-  </section>
+  return (
+    <section className="workspace-surface parent-turns">
+      <div className="surface-heading">
+        <h2>Whose turn?</h2>
+      </div>
+      {[
+        ['movie', 'Movie night', turns.moviePicker],
+        ['dog', 'Dog feeding', turns.dogFeeder],
+      ].map(([kind, label, who]) => (
+        <div className="work-row" key={kind}>
+          <div className="work-edit">
+            <strong>{label}</strong>
+            <small>{who}</small>
+          </div>
+          <button className="btn" disabled={busy} onClick={() => advance(kind)}>
+            {confirm === kind ? 'Confirm next person' : 'Next person'}
+          </button>
+          {confirm === kind && (
+            <button className="btn btn-ghost" onClick={() => setConfirm(null)}>
+              Cancel
+            </button>
+          )}
+        </div>
+      ))}
+    </section>
+  )
 }

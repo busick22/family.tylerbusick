@@ -1,12 +1,11 @@
 // The `todoLists` collection — user-defined task lists ("General" always
 // exists as a virtual default). Shape: { name, order }.
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import {
-  collection, doc, onSnapshot, setDoc, serverTimestamp, writeBatch,
-} from 'firebase/firestore'
+import { createContext, useContext, useMemo } from 'react'
+import { doc, setDoc, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { useAuth } from './AuthContext.jsx'
+import { useCollection } from './useCollection.js'
 
 const TodoListsContext = createContext(null)
 
@@ -30,19 +29,7 @@ function todoListIdFromName(name) {
 
 export function TodoListsProvider({ children }) {
   const { user } = useAuth()
-  const [rawLists, setRawLists] = useState([])
-
-  useEffect(() => {
-    if (!user) {
-      setRawLists([])
-      return undefined
-    }
-    return onSnapshot(
-      collection(db, 'todoLists'),
-      (snap) => setRawLists(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-      (err) => console.error('Todo lists listener failed:', err),
-    )
-  }, [user])
+  const { items: rawLists, loading, error } = useCollection(user, 'todoLists', 'your lists')
 
   const value = useMemo(() => {
     // "General" always exists even if no doc backs it yet.
@@ -59,6 +46,8 @@ export function TodoListsProvider({ children }) {
 
     return {
       lists,
+      loading,
+      error,
 
       listName(id) {
         return lists.find((l) => l.id === normalizedTodoListId(id))?.name || 'General'
@@ -73,11 +62,7 @@ export function TodoListsProvider({ children }) {
         let n = 2
         while (lists.some((l) => l.id === id)) id = `${todoListIdFromName(name)}-${n++}`
         const order = Math.max(0, ...lists.map((l) => (Number.isFinite(l.order) ? l.order : 0))) + 1
-        await setDoc(
-          doc(db, 'todoLists', id),
-          { name, order, createdAt: serverTimestamp() },
-          { merge: true },
-        )
+        await setDoc(doc(db, 'todoLists', id), { name, order, createdAt: serverTimestamp() }, { merge: true })
         return null
       },
 
@@ -85,7 +70,9 @@ export function TodoListsProvider({ children }) {
       // (PlannerPage moves them to General first).
       async deleteList(id, impactedTodoIds) {
         const batch = writeBatch(db)
-        impactedTodoIds.forEach((todoId) => batch.update(doc(db, 'todos', todoId), { listId: DEFAULT_TODO_LIST_ID }))
+        impactedTodoIds.forEach((todoId) =>
+          batch.update(doc(db, 'todos', todoId), { listId: DEFAULT_TODO_LIST_ID }),
+        )
         batch.delete(doc(db, 'todoLists', normalizedTodoListId(id)))
         await batch.commit()
       },
@@ -95,16 +82,20 @@ export function TodoListsProvider({ children }) {
         const batch = writeBatch(db)
         orderedIds.forEach((id, index) => {
           const list = metaById.get(id) || { id, name: id === DEFAULT_TODO_LIST_ID ? 'General' : id }
-          batch.set(doc(db, 'todoLists', id), {
-            name: list.name || (id === DEFAULT_TODO_LIST_ID ? 'General' : 'Untitled'),
-            order: index,
-            updatedAt: serverTimestamp(),
-          }, { merge: true })
+          batch.set(
+            doc(db, 'todoLists', id),
+            {
+              name: list.name || (id === DEFAULT_TODO_LIST_ID ? 'General' : 'Untitled'),
+              order: index,
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true },
+          )
         })
         await batch.commit()
       },
     }
-  }, [rawLists])
+  }, [rawLists, loading, error])
 
   return <TodoListsContext.Provider value={value}>{children}</TodoListsContext.Provider>
 }

@@ -58,8 +58,7 @@
 @media (max-width: 520px) {
   .signin {
     align-items: stretch;
-    padding: max(env(safe-area-inset-top, 0px), 16px) 16px
-      max(env(safe-area-inset-bottom, 0px), 16px);
+    padding: max(env(safe-area-inset-top, 0px), 16px) 16px max(env(safe-area-inset-bottom, 0px), 16px);
     overflow-y: auto;
   }
 

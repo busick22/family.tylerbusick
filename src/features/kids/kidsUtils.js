@@ -4,12 +4,6 @@
 
 import { DAYS, todayStr } from '../../lib/family.js'
 
-const TASK_COMPLETE_DELAY_MS = 60 * 60 * 1000 // 1hr undo window after checking a task off
-
-export function taskCompleteDelayMs() {
-  return TASK_COMPLETE_DELAY_MS
-}
-
 function pendingDoneMs(task) {
   if (!task?.pendingDoneUntil) return null
   if (typeof task.pendingDoneUntil === 'number') return task.pendingDoneUntil
@@ -32,11 +26,11 @@ export function isTaskChecked(task) {
   return !!task?.done || (!task?.done && isTaskInUndoWindow(task))
 }
 
-export function isTaskVisible(task) {
+function isTaskVisible(task) {
   return !task?.done || isTaskInUndoWindow(task)
 }
 
-export function taskShowsOn(task, date = todayStr()) {
+function taskShowsOn(task, date = todayStr()) {
   return !task?.dueDate || task.dueDate <= date
 }
 
@@ -48,7 +42,8 @@ export function isOverdueChore(chore, todayIndex = new Date().getDay()) {
 export function taskShowLabel(dateStr) {
   if (!dateStr) return ''
   const dt = new Date(`${dateStr}T12:00`)
-  if (dateStr < todayStr()) return `Overdue from ${dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+  if (dateStr < todayStr())
+    return `Overdue from ${dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
   if (dateStr === todayStr()) return 'Shows today'
   return `Shows ${dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
 }
@@ -63,10 +58,6 @@ export function assignedOpenTasksFor(todos, kidName) {
 
 export function everyoneTasks(todos) {
   return todos.filter((t) => t.assignee === 'Kids' && isTaskVisible(t) && (!t.dueDate || taskShowsOn(t)))
-}
-
-export function openEveryoneTasks(todos) {
-  return todos.filter((t) => t.assignee === 'Kids' && !isTaskChecked(t) && (!t.dueDate || taskShowsOn(t)))
 }
 
 export function sortKidTasks(taskList) {
@@ -91,7 +82,13 @@ export function pendingItems(kidPoints, screenTimeRequests) {
     )
   })
   screenTimeRequests.forEach((r) =>
-    items.push({ kind: 'time', id: r.id, kidName: r.kidName, requestedMs: r.requestedMs, createdAt: r.createdAt }),
+    items.push({
+      kind: 'time',
+      id: r.id,
+      kidName: r.kidName,
+      requestedMs: r.requestedMs,
+      createdAt: r.createdAt,
+    }),
   )
   return items
 }

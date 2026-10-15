@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useMeals } from '../../state/MealsContext.jsx'
 import { MONTHS, MONTHS_SHORT, DAYS_SHORT } from '../../lib/family.js'
+import { useNotice } from '../../state/NoticeContext.jsx'
 
 function dateKeyOf(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false, selectedDate, onNavigateDate }) {
+export default function ScheduleTab({ onPickDay, monthOnly = false, selectedDate, onNavigateDate }) {
+  const showNotice = useNotice()
   const { meals, clearMeal } = useMeals()
   const now = new Date()
   const selected = selectedDate ? new Date(selectedDate + 'T12:00:00') : now
@@ -29,8 +31,14 @@ export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false, 
   function changeMonth(dir) {
     let m = calMonth + dir
     let y = calYear
-    if (m > 11) { m = 0; y++ }
-    if (m < 0) { m = 11; y-- }
+    if (m > 11) {
+      m = 0
+      y++
+    }
+    if (m < 0) {
+      m = 11
+      y--
+    }
     onNavigateDate?.(dateKeyOf(y, m, 1))
   }
 
@@ -86,18 +94,24 @@ export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false, 
           <button className="icon-btn" onClick={() => changeMonth(-1)} aria-label="Previous month">
             <ChevronLeft aria-hidden="true" />
           </button>
-          <button className="btn btn-sm" onClick={goToday}>Today</button>
+          <button className="btn btn-sm" onClick={goToday}>
+            Today
+          </button>
           <button className="icon-btn" onClick={() => changeMonth(1)} aria-label="Next month">
             <ChevronRight aria-hidden="true" />
           </button>
         </div>
-        <h2 className="cal-month-label">{MONTHS[calMonth]} {calYear}</h2>
+        <h2 className="cal-month-label">
+          {MONTHS[calMonth]} {calYear}
+        </h2>
       </div>
 
       <div className="card cal-card">
         <div className="cal-dow-row">
           {DAYS_SHORT.map((d) => (
-            <div className="cal-dow" key={d}>{d}</div>
+            <div className="cal-dow" key={d}>
+              {d}
+            </div>
           ))}
         </div>
         <div className="cal-days">
@@ -105,20 +119,23 @@ export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false, 
             const dk = dateKeyOf(c.year, c.month, c.day)
             const meal = meals[dk]
             const isToday =
-              c.cur &&
-              c.day === now.getDate() &&
-              c.month === now.getMonth() &&
-              c.year === now.getFullYear()
+              c.cur && c.day === now.getDate() && c.month === now.getMonth() && c.year === now.getFullYear()
             return (
-              <div
-                key={i}
-                className="cal-day"
-                data-other={!c.cur}
-                data-today={isToday}
-              >
-                <button type="button" className="cal-day-pick" onClick={() => onPickDay(dk)} aria-label={`${dk}${meal ? ` — ${meal.recipeName}` : ''}`}>
+              <div key={i} className="cal-day" data-other={!c.cur} data-today={isToday}>
+                <button
+                  type="button"
+                  className="cal-day-pick"
+                  onClick={() => onPickDay(dk)}
+                  aria-label={`${dk}${meal ? ` — ${meal.recipeName}` : ''}`}
+                >
                   <span className="cal-day-num">{c.day}</span>
-                  {meal ? <span className="cal-meal-chip"><span className="cal-meal-chip-name">{meal.recipeName}</span></span> : <span className="cal-add-hint">+ dinner</span>}
+                  {meal ? (
+                    <span className="cal-meal-chip">
+                      <span className="cal-meal-chip-name">{meal.recipeName}</span>
+                    </span>
+                  ) : (
+                    <span className="cal-add-hint">+ dinner</span>
+                  )}
                 </button>
               </div>
             )
@@ -126,38 +143,64 @@ export default function ScheduleTab({ onPickDay, showNotice, monthOnly = false, 
         </div>
       </div>
 
-      {!monthOnly && <div className="card week-list">
-        <div className="week-list-head">
-          <span className="week-label">
-            {MONTHS_SHORT[weekStart.getMonth()]} {weekStart.getDate()} –{' '}
-            {MONTHS_SHORT[weekEnd.getMonth()]} {weekEnd.getDate()}, {weekEnd.getFullYear()}
-          </span>
-          <div className="cal-nav">
-            <button className="icon-btn" onClick={() => setWeekOffset((o) => o - 1)} aria-label="Previous week">
-              <ChevronLeft aria-hidden="true" />
-            </button>
-            <button className="btn btn-sm" onClick={() => setWeekOffset(0)}>Today</button>
-            <button className="icon-btn" onClick={() => setWeekOffset((o) => o + 1)} aria-label="Next week">
-              <ChevronRight aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-        {weekDays.map((d) => {
-          const dk = dateKeyOf(d.getFullYear(), d.getMonth(), d.getDate())
-          const meal = meals[dk]
-          const isToday = d.getTime() === todayMidnight.getTime()
-          return (
-            <div className="week-row" data-today={isToday} key={dk}>
-              <button type="button" className="week-row-main" onClick={() => onPickDay(dk)} aria-label={`Plan dinner for ${dk}`}>
-                <span className="week-dayname">{DAYS_SHORT[d.getDay()]}</span>
-                <span className="week-datenum">{d.getDate()}</span>
-                {meal ? <span className="week-meal">{meal.recipeName}</span> : <span className="week-empty">Tap to plan dinner</span>}
+      {!monthOnly && (
+        <div className="card week-list">
+          <div className="week-list-head">
+            <span className="week-label">
+              {MONTHS_SHORT[weekStart.getMonth()]} {weekStart.getDate()} – {MONTHS_SHORT[weekEnd.getMonth()]}{' '}
+              {weekEnd.getDate()}, {weekEnd.getFullYear()}
+            </span>
+            <div className="cal-nav">
+              <button
+                className="icon-btn"
+                onClick={() => setWeekOffset((o) => o - 1)}
+                aria-label="Previous week"
+              >
+                <ChevronLeft aria-hidden="true" />
               </button>
-              {meal && <button type="button" className="icon-btn" aria-label={`Clear dinner for ${dk}`} onClick={() => clearDay(dk)}><X aria-hidden="true" size={15} /></button>}
+              <button className="btn btn-sm" onClick={() => setWeekOffset(0)}>
+                Today
+              </button>
+              <button className="icon-btn" onClick={() => setWeekOffset((o) => o + 1)} aria-label="Next week">
+                <ChevronRight aria-hidden="true" />
+              </button>
             </div>
-          )
-        })}
-      </div>}
+          </div>
+          {weekDays.map((d) => {
+            const dk = dateKeyOf(d.getFullYear(), d.getMonth(), d.getDate())
+            const meal = meals[dk]
+            const isToday = d.getTime() === todayMidnight.getTime()
+            return (
+              <div className="week-row" data-today={isToday} key={dk}>
+                <button
+                  type="button"
+                  className="week-row-main"
+                  onClick={() => onPickDay(dk)}
+                  aria-label={`Plan dinner for ${dk}`}
+                >
+                  <span className="week-dayname">{DAYS_SHORT[d.getDay()]}</span>
+                  <span className="week-datenum">{d.getDate()}</span>
+                  {meal ? (
+                    <span className="week-meal">{meal.recipeName}</span>
+                  ) : (
+                    <span className="week-empty">Tap to plan dinner</span>
+                  )}
+                </button>
+                {meal && (
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    aria-label={`Clear dinner for ${dk}`}
+                    onClick={() => clearDay(dk)}
+                  >
+                    <X aria-hidden="true" size={15} />
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

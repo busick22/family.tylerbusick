@@ -36,7 +36,11 @@ export default function HistoryTab({ kid }) {
       const d = new Date(`${dateKey}T12:00`)
       const dayOfWeek = DAYS[d.getDay()]
       const dayChores = chores.filter((c) => c.assignee === kid && c.day === dayOfWeek)
-      return { dateKey, dayChores, label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) }
+      return {
+        dateKey,
+        dayChores,
+        label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+      }
     })
     .filter((g) => g.dayChores.length)
 
@@ -45,14 +49,20 @@ export default function HistoryTab({ kid }) {
       const d = new Date(`${dateKey}T12:00`)
       const isToday = dateKey === today
       const dayOfWeek = DAYS[d.getDay()]
-      const dayHistory = historyEntries.map((e, idx) => ({ ...e, _idx: idx })).filter((e) => e.date === dateKey)
+      const dayHistory = historyEntries
+        .map((e, idx) => ({ ...e, _idx: idx }))
+        .filter((e) => e.date === dateKey)
       const dayChores = chores.filter((c) => c.assignee === kid && c.day === dayOfWeek)
       const completedRefIds = new Set(dayHistory.filter((e) => e.type === 'chore').map((e) => e.refId))
-      const missedChores = isToday ? [] : dayChores.filter((c) => !completedRefIds.has(c.id) && !c.done && dateKey < today)
+      const missedChores = isToday
+        ? []
+        : dayChores.filter((c) => !completedRefIds.has(c.id) && !c.done && dateKey < today)
       return {
         dateKey,
         isToday,
-        label: isToday ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+        label: isToday
+          ? 'Today'
+          : d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
         dayHistory,
         missedChores,
         dayPts: dayHistory.reduce((s, e) => s + (e.points || 0), 0),
@@ -65,16 +75,23 @@ export default function HistoryTab({ kid }) {
   async function runAction(key, action) {
     setBusy(key)
     setError('')
-    try { await action() }
-    catch (actionError) {
+    try {
+      await action()
+    } catch (actionError) {
       console.error(actionError)
       setError('Could not update that item. Please try again.')
-    } finally { setBusy(null) }
+    } finally {
+      setBusy(null)
+    }
   }
 
   return (
     <div>
-      {error && <p className="kid-row-error" role="alert">{error}</p>}
+      {error && (
+        <p className="kid-row-error" role="alert">
+          {error}
+        </p>
+      )}
       {isEmpty && <div className="k-empty">No history yet — complete some tasks!</div>}
 
       {upcomingGroups.length > 0 && (
@@ -103,26 +120,32 @@ export default function HistoryTab({ kid }) {
           </div>
           {g.dayHistory.map((e) => {
             const actionKey = `history-${e.ts ?? e.requestedAt ?? e._idx}`
-            return <div className="hist-item" key={actionKey}>
-              <span className="hist-status">✅</span>
-              <span className="hist-name">{e.label}</span>
-              {e.points ? <span className="hist-pts">+{e.points}pts</span> : null}
-              <button
-                className="hist-del"
-                disabled={busy !== null}
-                onClick={() => runAction(actionKey, () => deleteHistoryEntry(kid, e._idx, e))}
-                aria-label={`Remove ${e.label}`}
-              >
-                ✕
-              </button>
-            </div>
+            return (
+              <div className="hist-item" key={actionKey}>
+                <span className="hist-status">✅</span>
+                <span className="hist-name">{e.label}</span>
+                {e.points ? <span className="hist-pts">+{e.points}pts</span> : null}
+                <button
+                  className="hist-del"
+                  disabled={busy !== null}
+                  onClick={() => runAction(actionKey, () => deleteHistoryEntry(kid, e._idx, e))}
+                  aria-label={`Remove ${e.label}`}
+                >
+                  ✕
+                </button>
+              </div>
+            )
           })}
           {g.missedChores.map((c) => (
             <div className="hist-item" key={c.id}>
               <span className="hist-status">❌</span>
               <span className="hist-name hist-missed">{c.name}</span>
               {c.points ? <span className="hist-pts">{c.points}pts</span> : null}
-              <button className="hist-complete-btn" disabled={busy !== null} onClick={() => runAction(`chore-${c.id}`, () => actions.completeChoreNow(c.id))}>
+              <button
+                className="hist-complete-btn"
+                disabled={busy !== null}
+                onClick={() => runAction(`chore-${c.id}`, () => actions.completeChoreNow(c.id))}
+              >
                 {busy === `chore-${c.id}` ? 'Saving…' : 'Complete now'}
               </button>
             </div>

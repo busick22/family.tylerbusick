@@ -8,8 +8,10 @@ import { useScreenTime } from '../../../state/ScreenTimeContext.jsx'
 import { KIDS, formatMs } from '../../../lib/family.js'
 import { useTick } from '../useTick.js'
 import BudgetModal from './BudgetModal.jsx'
+import { useNotice } from '../../../state/NoticeContext.jsx'
 
-export default function ScreenTimeAdminModal({ onClose, showNotice }) {
+export default function ScreenTimeAdminModal({ onClose }) {
+  const showNotice = useNotice()
   const { viewFor, adjustTime, resetToday } = useScreenTime()
   const [budgetKid, setBudgetKid] = useState(null)
   useTick(1000)
@@ -17,10 +19,10 @@ export default function ScreenTimeAdminModal({ onClose, showNotice }) {
   async function adjust(kidName, deltaMs) {
     try {
       await adjustTime(kidName, deltaMs)
-      showNotice?.(`${deltaMs > 0 ? '+' : ''}${Math.round(deltaMs / 60000)} min for ${kidName}.`, 'success')
+      showNotice(`${deltaMs > 0 ? '+' : ''}${Math.round(deltaMs / 60000)} min for ${kidName}.`, 'success')
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't adjust time.", 'error')
+      showNotice("Couldn't adjust time.", 'error')
     }
   }
 
@@ -29,7 +31,7 @@ export default function ScreenTimeAdminModal({ onClose, showNotice }) {
       await resetToday(kidName)
     } catch (e) {
       console.error(e)
-      showNotice?.("Couldn't reset.", 'error')
+      showNotice("Couldn't reset.", 'error')
     }
   }
 
@@ -59,15 +61,29 @@ export default function ScreenTimeAdminModal({ onClose, showNotice }) {
                   <span className={`admin-st-time ${statusCls}`}>
                     {formatMs(Math.max(0, view.remaining))} · {status}
                   </span>
-                  <span>{usedMin} of {budgetMin} min used today</span>
+                  <span>
+                    {usedMin} of {budgetMin} min used today
+                  </span>
                 </div>
                 <div className="admin-st-actions">
-                  <button className="chip" onClick={() => adjust(name, 5 * 60000)}>+5</button>
-                  <button className="chip" onClick={() => adjust(name, 10 * 60000)}>+10</button>
-                  <button className="chip" onClick={() => adjust(name, -10 * 60000)}>−10</button>
-                  <button className="chip" onClick={() => adjust(name, -15 * 60000)}>−15</button>
-                  <button className="chip" onClick={() => reset(name)}>Reset</button>
-                  <button className="chip" onClick={() => setBudgetKid(name)}>Budget…</button>
+                  <button className="chip" onClick={() => adjust(name, 5 * 60000)}>
+                    +5
+                  </button>
+                  <button className="chip" onClick={() => adjust(name, 10 * 60000)}>
+                    +10
+                  </button>
+                  <button className="chip" onClick={() => adjust(name, -10 * 60000)}>
+                    −10
+                  </button>
+                  <button className="chip" onClick={() => adjust(name, -15 * 60000)}>
+                    −15
+                  </button>
+                  <button className="chip" onClick={() => reset(name)}>
+                    Reset
+                  </button>
+                  <button className="chip" onClick={() => setBudgetKid(name)}>
+                    Budget…
+                  </button>
                 </div>
               </div>
             )
@@ -81,9 +97,7 @@ export default function ScreenTimeAdminModal({ onClose, showNotice }) {
         </div>
       </Modal>
 
-      {budgetKid && (
-        <BudgetModal kidName={budgetKid} onClose={() => setBudgetKid(null)} showNotice={showNotice} />
-      )}
+      {budgetKid && <BudgetModal kidName={budgetKid} onClose={() => setBudgetKid(null)} />}
     </>
   )
 }

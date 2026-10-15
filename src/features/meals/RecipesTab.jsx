@@ -9,10 +9,7 @@ export default function RecipesTab({ onView, onAdd }) {
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState(null)
 
-  const allTags = useMemo(
-    () => [...new Set(recipes.flatMap((r) => r.tags || []))].sort(),
-    [recipes],
-  )
+  const allTags = useMemo(() => [...new Set(recipes.flatMap((r) => r.tags || []))].sort(), [recipes])
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -67,7 +64,9 @@ export default function RecipesTab({ onView, onAdd }) {
           >
             <option value="">All recipes</option>
             {allTags.map((t) => (
-              <option value={t} key={t}>{t}</option>
+              <option value={t} key={t}>
+                {t}
+              </option>
             ))}
           </select>
         </div>
@@ -77,7 +76,10 @@ export default function RecipesTab({ onView, onAdd }) {
         <div className="recipe-grid">
           {filtered.map((r) => {
             const last = r.lastCooked
-              ? new Date(r.lastCooked + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              ? new Date(r.lastCooked + 'T00:00').toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })
               : ''
             return (
               <button
@@ -107,7 +109,9 @@ export default function RecipesTab({ onView, onAdd }) {
                 {(r.tags || []).length > 0 && (
                   <span className="recipe-card-tags">
                     {r.tags.map((t) => (
-                      <span className="tag-pill" key={t}>{t}</span>
+                      <span className="tag-pill" key={t}>
+                        {t}
+                      </span>
                     ))}
                   </span>
                 )}

@@ -1,3 +1,14 @@
+/* The app frame: the desktop/tablet rail, the phone top bar and dock, and the
+ * page scaffolding every screen sits inside.
+ *
+ * This file replaced three stacked stylesheets (shell.css + planning.css's
+ * shell rules + home-shell.css), which each overrode the one before it via a
+ * separate `.shell` / `.shell` class on the same element. There
+ * is now one `.shell` scope. Because sign-in and the public wish-list page
+ * render outside AppShell, that scope still keeps the shared component classes
+ * (.card, .btn, .seg-tabs) at their default styling on those two pages.
+ */
+
 /* The signed-in frame's shared pieces: the page background, the main scroll
    area, the mobile bottom tab bar, and the account menu.
    The desktop sidebar this file used to style was replaced by the planning
@@ -5,8 +16,12 @@
 
 .shell {
   display: flex;
+  /* Rail beside the content on tablet/desktop; the rail hides itself and this
+     becomes a single column on phones (see the max-width: 800px block). */
+  flex-direction: row;
   height: 100%;
   background: var(--bg);
+  --page-accent: var(--accent);
 }
 .shell-main {
   flex: 1;
@@ -79,10 +94,10 @@
 /* --- Responsive switch ---------------------------------------------------------- */
 
 @media (max-width: 800px) {
-.bottomnav {
+  .bottomnav {
     display: flex;
   }
-.shell-main {
+  .shell-main {
     height: calc(100% - var(--dock-height) - var(--dock-inset));
     margin-top: calc(52px + env(safe-area-inset-top, 0px));
   }
@@ -102,7 +117,7 @@
   overflow: hidden;
 }
 @media (max-width: 800px) {
-.page {
+  .page {
     padding-top: 16px;
     padding-bottom: 12px;
   }
@@ -122,25 +137,25 @@
   min-width: 0;
 }
 @media (max-width: 640px) {
-.seg-tabs {
+  .seg-tabs {
     width: 100%;
     max-width: 100%;
     gap: 4px;
     padding: 4px;
     overflow: hidden;
   }
-.seg-tab {
+  .seg-tab {
     min-width: 0;
     gap: 4px;
     padding: 8px 6px;
     font-size: clamp(0.68rem, 2.8vw, var(--text-xs));
   }
-.seg-tab svg {
+  .seg-tab svg {
     width: 15px;
     height: 15px;
     flex: none;
   }
-.page-head {
+  .page-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
@@ -148,15 +163,15 @@
     row-gap: 10px;
     margin-bottom: 16px;
   }
-.page-head > .page-title {
+  .page-head > .page-title {
     grid-column: 1;
     margin-right: 0;
   }
-.page-head > :not(.page-title) {
+  .page-head > :not(.page-title) {
     grid-column: 1 / -1;
     width: 100%;
   }
-/* Icon-only buttons (e.g. Planner's settings gear) stay beside the title
+  /* Icon-only buttons (e.g. Planner's settings gear) stay beside the title
      instead of dropping to a stretched full-width row of their own. */
   .page-head > .icon-btn {
     grid-column: 2;
@@ -164,5 +179,417 @@
     width: var(--tap);
     justify-self: end;
     align-self: center;
+  }
+}
+
+/* --- Rail, top bar and wayfinding ---------------------------------------- */
+
+.family-rail {
+  width: var(--rail-width);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-4) var(--space-5);
+  background: var(--rail-bg);
+  border-right: 1px solid var(--border);
+}
+
+.family-brand {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-7);
+}
+
+.family-brand > span {
+  font-size: var(--text-xl) !important;
+  letter-spacing: var(--letter-tight) !important;
+}
+
+.family-add {
+  width: 100%;
+  margin-bottom: var(--space-5);
+}
+
+.family-nav {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.family-nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  min-height: var(--workspace-row);
+  border-radius: var(--radius-sm);
+  color: var(--text-mid);
+  transition: background var(--speed-fast);
+}
+
+.family-nav a > svg {
+  flex: none;
+}
+
+.family-nav strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.family-nav a.active {
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  color: var(--accent);
+}
+
+.family-nav a.active strong {
+  color: var(--accent);
+}
+
+.family-nav a:hover:not(.active),
+.rail-utility:hover {
+  background: var(--accent-soft);
+}
+
+.family-rail-bottom {
+  margin-top: auto;
+  padding-top: var(--space-6);
+}
+
+.rail-utility {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-mid);
+  border-radius: var(--radius-sm);
+}
+
+.rail-utility.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.family-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.family-topbar {
+  min-height: var(--workspace-mobile-bar);
+  padding: var(--space-2) var(--page-pad);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  z-index: var(--z-navigation);
+  background: var(--bg);
+}
+
+.family-location {
+  color: var(--text-mid);
+  font-size: var(--text-sm);
+}
+
+.family-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.mobile-brand,
+.mobile-add,
+.mobile-settings {
+  display: none;
+}
+
+.shell .page {
+  max-width: var(--home-width);
+  padding: var(--space-6) max(var(--page-pad), env(safe-area-inset-right, 0px)) var(--space-7)
+    max(var(--page-pad), env(safe-area-inset-left, 0px));
+}
+
+.shell .workspace-title h1 {
+  font-size: var(--home-title);
+  letter-spacing: var(--letter-tight);
+}
+
+.shell .workspace-surface {
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+}
+
+.shell .btn {
+  box-shadow: none;
+}
+
+.shell .btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.shell .btn-primary:hover {
+  background: var(--accent-strong);
+}
+
+.shell button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.shell .page-enter {
+  animation: none;
+}
+
+.shell .section-nav {
+  display: flex;
+  gap: var(--space-5);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-5);
+}
+
+.section-nav a.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.wayfinding {
+  display: grid;
+  margin-top: var(--space-3);
+}
+
+.wayfinding > a,
+.wayfinding > button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: left;
+  padding: var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--border);
+  min-height: var(--workspace-row);
+}
+
+.wayfinding > :hover {
+  background: var(--surface-2);
+}
+
+.wayfinding > :last-child {
+  border: 0;
+}
+
+.wayfinding svg {
+  flex: none;
+  color: var(--accent);
+}
+
+.wayfinding span {
+  display: grid;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.wayfinding strong {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.wayfinding small {
+  font-size: var(--text-sm);
+  color: var(--text-mid);
+}
+
+.shell .bottomnav {
+  background: var(--surface);
+  backdrop-filter: none;
+}
+
+.shell .bottomnav-link.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+@media (max-width: 1100px) and (min-width: 801px) {
+  .family-rail {
+    width: calc(var(--rail-width) - var(--space-6));
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .family-nav a {
+    min-height: var(--capture-height);
+  }
+
+  .family-add {
+    font-size: var(--text-xs);
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+}
+
+@media (max-width: 800px) {
+  .family-rail,
+  .family-location {
+    display: none;
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--tap);
+  }
+
+  .mobile-add,
+  .mobile-settings {
+    display: flex;
+  }
+
+  .family-topbar {
+    min-height: calc(var(--workspace-mobile-bar) + env(safe-area-inset-top, 0px));
+    padding: calc(var(--space-2) + env(safe-area-inset-top, 0px))
+      max(var(--page-pad), env(safe-area-inset-right, 0px)) var(--space-2)
+      max(var(--page-pad), env(safe-area-inset-left, 0px));
+  }
+
+  .family-topbar-actions {
+    gap: 0;
+  }
+
+  .shell .page {
+    padding-top: var(--space-5);
+    padding-bottom: var(--space-3);
+  }
+
+  .shell .workspace-title {
+    gap: var(--space-3);
+  }
+
+  .shell .workspace-title h1 {
+    font-size: var(--text-2xl);
+  }
+
+  .shell .section-nav {
+    gap: var(--space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell *,
+  .shell *::before,
+  .shell *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.account-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.shell .field-label {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* --- Page scaffolding and shared-component overrides --------------------- */
+
+/* The planning workspace: the app bar, the week/day split, and the To-dos list.
+ *
+ * This file owns only what the planning redesign introduced, plus a short list
+ * of deliberate overrides to SHARED component classes (.card, .seg-tabs,
+ * .page-head, .bottomnav-link). Those keep the `.shell` prefix on
+ * purpose — the sign-in screen and the public wish-list page use the same
+ * component classes and must not inherit the workspace's flatter styling.
+ *
+ * Overrides that targeted a single feature (the calendar, Kids, Meals) used to
+ * live here too. They now sit in that feature's own stylesheet, so there is one
+ * place to change how each page looks.
+ */
+
+.shell .shell-main {
+  height: auto;
+  min-height: 0;
+  margin: 0;
+}
+/* --- App bar -------------------------------------------------------------- */
+
+.skip-link {
+  position: fixed;
+  transform: translateY(-200%);
+  background: var(--surface);
+  padding: var(--space-4);
+  z-index: var(--z-skip);
+}
+.skip-link:focus {
+  transform: none;
+}
+/* --- Page scaffolding ----------------------------------------------------- */
+
+.shell .page {
+  width: 100%;
+  max-width: var(--workspace-width);
+  margin: 0 auto;
+  padding-bottom: var(--space-6);
+}
+.shell .page > * {
+  flex-shrink: 0;
+}
+/* --- Shared components, flattened for the workspace ----------------------- */
+/* Scoped to .shell so sign-in and the public wish-list page keep the
+   original card/tab styling. */
+
+.shell .seg-tabs {
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+.shell .seg-tab {
+  border-radius: var(--radius-sm);
+  min-height: var(--tap);
+  font-size: var(--text-sm);
+}
+.shell .seg-tab[data-active='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: none;
+}
+.shell .card {
+  box-shadow: none;
+}
+.shell .bottomnav-link {
+  color: var(--text-mid);
+}
+.shell .bottomnav-link.active {
+  color: var(--accent);
+}
+.shell .page-head {
+  margin-bottom: var(--space-5);
+}
+.shell .page-head .page-title {
+  font-size: var(--text-2xl);
+  letter-spacing: -0.04em;
+}
+@media (max-width: 800px) {
+  .shell .shell-main {
+    margin: 0 0 calc(var(--dock-height) + var(--dock-inset));
+  }
+  .shell .page {
+    padding-bottom: var(--space-3);
   }
 }

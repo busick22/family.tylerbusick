@@ -39,7 +39,9 @@ export default function TimerCard({ kid, onAskMore }) {
         </span>
       </div>
       <div className={`timer-display ${expired ? 'expired' : ''}`}>{formatMs(remaining)}</div>
-      <div className="timer-sub">{usedMin} of {budgetMin} min used today</div>
+      <div className="timer-sub">
+        {usedMin} of {budgetMin} min used today
+      </div>
       <div className="timer-actions">
         <button
           type="button"
